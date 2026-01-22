@@ -4,12 +4,18 @@ export interface DictionaryWord {
   id: number;
   aramaic: string;
   hebrew: string;
-  type: 'פועל' | 'שם עצם' | 'תואר' | 'מילת יחס';
+  type: 'פועל' | 'שם עצם' | 'תואר' | 'מילת יחס' | 'מושג' | 'ביטוי';
   culturalContext: string;
   learned: boolean;
 }
 
+// Utility function to remove niqqud (vowel marks) for search
+const removeNiqqud = (text: string): string => {
+  return text.normalize("NFD").replace(/[\u0591-\u05C7]/g, "");
+};
+
 const initialDictionary: DictionaryWord[] = [
+  // Original words
   { id: 1, aramaic: 'אֲזַל', hebrew: 'הָלַךְ', type: 'פועל', culturalContext: 'מילת יסוד בתלמוד המתארת תנועה פיזית או התקדמות בסוגיה', learned: false },
   { id: 2, aramaic: 'אֲתָא', hebrew: 'בָּא', type: 'פועל', culturalContext: 'משמשת גם במשמעות של הגעה רוחנית או הבנה', learned: false },
   { id: 3, aramaic: 'בָּעָא', hebrew: 'שָׁאַל / רָצָה', type: 'פועל', culturalContext: 'מציינת שאלה הלכתית או בקשה בתפילה', learned: false },
@@ -30,6 +36,118 @@ const initialDictionary: DictionaryWord[] = [
   { id: 18, aramaic: 'מִילְּתָא', hebrew: 'דָּבָר / עִנְיָן', type: 'שם עצם', culturalContext: 'יחידת תוכן או טענה בדיון', learned: false },
   { id: 19, aramaic: 'שַׁפִּיר', hebrew: 'יָפֶה / טוֹב', type: 'תואר', culturalContext: 'ביטוי הסכמה או שבח לטיעון', learned: false },
   { id: 20, aramaic: 'קַשְׁיָא', hebrew: 'קָשֶׁה / קוּשְׁיָה', type: 'שם עצם', culturalContext: 'מציין סתירה או בעיה לוגית בסוגיה', learned: false },
+
+  // מושגי יסוד ודמויות
+  { id: 21, aramaic: 'תַּנָּא', hebrew: 'חכם מתקופת המשנה', type: 'מושג', culturalContext: 'התנאים היו חכמי ישראל שפעלו בתקופת המשנה, עד לחתימתה בידי רבי יהודה הנשיא', learned: false },
+  { id: 22, aramaic: 'אָמוֹרָא', hebrew: 'חכם מתקופת הגמרא', type: 'מושג', culturalContext: 'האמוראים פירשו את דברי התנאים והרחיבו את ההלכה', learned: false },
+  { id: 23, aramaic: 'בָּרַיְיתָא', hebrew: 'מקור תנאי שלא הוכנס למשנה', type: 'מושג', culturalContext: 'ברייתות משמשות כמקור משלים ללימוד המשנה', learned: false },
+  { id: 24, aramaic: 'סוּגְיָא', hebrew: 'נושא או יחידת לימוד בגמרא', type: 'מושג', culturalContext: 'כל סוגיא עוסקת בנושא הלכתי מסוים ומנתחת אותו לעומק', learned: false },
+  { id: 25, aramaic: 'שְׁמַע מִינַּהּ', hebrew: 'למד ממנה (מסקנה)', type: 'ביטוי', culturalContext: 'ביטוי המסכם מסקנה הלכתית מתוך דיון', learned: false },
+  { id: 26, aramaic: 'תֵּיקוּ', hebrew: 'תעמוד (ספק ללא הכרעה)', type: 'מושג', culturalContext: 'ראשי תיבות: תשבי יתרץ קושיות ואבעיות - אליהו הנביא יפתור', learned: false },
+  { id: 27, aramaic: 'הִלְכְתָא', hebrew: 'הלכה', type: 'מושג', culturalContext: 'ההכרעה המעשית בדין הלכתי', learned: false },
+  { id: 28, aramaic: 'קוּשְׁיָא', hebrew: 'שאלה המצביעה על סתירה', type: 'מושג', culturalContext: 'קושיא חזקה יכולה להפוך דין או לחדד הבנה', learned: false },
+  { id: 29, aramaic: 'תֵּירוּץ', hebrew: 'תשובה לקושיא', type: 'מושג', culturalContext: 'התירוץ מיישב את הסתירה ומשלים את הדיון', learned: false },
+  { id: 30, aramaic: 'מֵימְרָא', hebrew: 'מאמר או דעה של אמורא', type: 'מושג', culturalContext: 'מימרות הן אמירות קצרות המביעות עמדה הלכתית או רעיונית', learned: false },
+
+  // מילות קישור ומבנה הדיון
+  { id: 31, aramaic: 'אִיכָּא', hebrew: 'יש', type: 'מילת יחס', culturalContext: 'מילה בסיסית לציון קיום או נוכחות', learned: false },
+  { id: 32, aramaic: 'לֵיכָּא', hebrew: 'אין', type: 'מילת יחס', culturalContext: 'מילה לציון העדר או חוסר', learned: false },
+  { id: 33, aramaic: 'אִיכָּא דְאָמְרִי', hebrew: 'יש אומרים', type: 'ביטוי', culturalContext: 'מציין דעה חולקת או גרסה אחרת', learned: false },
+  { id: 34, aramaic: 'אֲנָא', hebrew: 'אני', type: 'מילת יחס', culturalContext: 'כינוי גוף ראשון יחיד', learned: false },
+  { id: 35, aramaic: 'אִיהוּ', hebrew: 'הוא', type: 'מילת יחס', culturalContext: 'כינוי גוף שלישי יחיד זכר', learned: false },
+  { id: 36, aramaic: 'אִיהִי', hebrew: 'היא', type: 'מילת יחס', culturalContext: 'כינוי גוף שלישי יחיד נקבה', learned: false },
+  { id: 37, aramaic: 'אִינּוּן', hebrew: 'הם', type: 'מילת יחס', culturalContext: 'כינוי גוף שלישי רבים', learned: false },
+  { id: 38, aramaic: 'הָכִי', hebrew: 'כך', type: 'מילת יחס', culturalContext: 'מציין אופן או דרך מסוימת', learned: false },
+  { id: 39, aramaic: 'הֵיכִי', hebrew: 'איך', type: 'מילת יחס', culturalContext: 'מילת שאלה על אופן הפעולה', learned: false },
+  { id: 40, aramaic: 'הָכָא', hebrew: 'כאן', type: 'מילת יחס', culturalContext: 'מציין מקום בטקסט הנלמד', learned: false },
+  { id: 41, aramaic: 'הָתָם', hebrew: 'שם', type: 'מילת יחס', culturalContext: 'מפנה למקור אחר בתלמוד', learned: false },
+  { id: 42, aramaic: 'מְנָא הָנֵי מִילֵּי', hebrew: 'מניין דברים אלו (מה המקור)', type: 'ביטוי', culturalContext: 'שאלה המבקשת מקור מהתורה להלכה', learned: false },
+  { id: 43, aramaic: 'בִּשְׁלָמָא', hebrew: 'מובן הדבר', type: 'ביטוי', culturalContext: 'פתיחה להשוואה בין שיטות - מובן לפי שיטה אחת, אך קשה לפי אחרת', learned: false },
+  { id: 44, aramaic: 'מַאי', hebrew: 'מה', type: 'מילת יחס', culturalContext: 'מילת שאלה בסיסית', learned: false },
+  { id: 45, aramaic: 'מַאי שְׁנָא', hebrew: 'מה שונה', type: 'ביטוי', culturalContext: 'שאלה המבקשת להבין מדוע יש הבדל בין מקרים', learned: false },
+  { id: 46, aramaic: 'אַמַּאי', hebrew: 'למה', type: 'מילת יחס', culturalContext: 'שאלה על הסיבה או הטעם', learned: false },
+  { id: 47, aramaic: 'אַדְּרַבָּה', hebrew: 'להפך', type: 'ביטוי', culturalContext: 'טענה שהמסקנה צריכה להיות הפוכה', learned: false },
+  { id: 48, aramaic: 'אִינִי', hebrew: 'האם כך הוא?', type: 'ביטוי', culturalContext: 'ביטוי תמיהה ופליאה', learned: false },
+  { id: 49, aramaic: 'אִי הָכִי', hebrew: 'אם כך', type: 'ביטוי', culturalContext: 'פתיחה להסקת מסקנות מתוך הנחה', learned: false },
+
+  // פעלים ופעולות
+  { id: 50, aramaic: 'אָזֵיל', hebrew: 'הולך', type: 'פועל', culturalContext: 'צורה נוספת של הליכה בארמית', learned: false },
+  { id: 51, aramaic: 'אָתֵי', hebrew: 'בא', type: 'פועל', culturalContext: 'צורה נוספת של ביאה', learned: false },
+  { id: 52, aramaic: 'בָּעֵי', hebrew: 'שואל, מבקש או צריך', type: 'פועל', culturalContext: 'משמש בהקשרים שונים של שאילה ובקשה', learned: false },
+  { id: 53, aramaic: 'חָזֵי', hebrew: 'רואה', type: 'פועל', culturalContext: 'ראייה או הבנה', learned: false },
+  { id: 54, aramaic: 'יָהֵיב', hebrew: 'נתן', type: 'פועל', culturalContext: 'נתינה פיזית או מופשטת', learned: false },
+  { id: 55, aramaic: 'יָתֵיב', hebrew: 'ישב', type: 'פועל', culturalContext: 'ישיבה ללימוד או למנוחה', learned: false },
+  { id: 56, aramaic: 'מֵימַר', hebrew: 'לומר', type: 'פועל', culturalContext: 'שם הפועל של אמירה', learned: false },
+  { id: 57, aramaic: 'נָפֵיק', hebrew: 'יצא', type: 'פועל', culturalContext: 'יציאה או הוצאה של מסקנה', learned: false },
+  { id: 58, aramaic: 'עָבֵיד', hebrew: 'עשה', type: 'פועל', culturalContext: 'עשייה של מעשה או פעולה', learned: false },
+  { id: 59, aramaic: 'צַלּוֹיֵי', hebrew: 'להתפלל', type: 'פועל', culturalContext: 'שם הפועל של תפילה', learned: false },
+  { id: 60, aramaic: 'קָאֵי', hebrew: 'עומד', type: 'פועל', culturalContext: 'עמידה או מצב קיים', learned: false },
+  { id: 61, aramaic: 'קַמַ"ל', hebrew: 'קא משמע לן (משמיע לנו)', type: 'ביטוי', culturalContext: 'ראשי תיבות המציינים חידוש הלכתי', learned: false },
+  { id: 62, aramaic: 'רָמֵי', hebrew: 'הטיל (הצביע על סתירה)', type: 'פועל', culturalContext: 'הבאת שני מקורות סותרים לדיון', learned: false },
+  { id: 63, aramaic: 'שָׁדַר', hebrew: 'שלח', type: 'פועל', culturalContext: 'שליחה של שליח או מכתב', learned: false },
+  { id: 64, aramaic: 'תְּנֵי', hebrew: 'שנה/למד', type: 'פועל', culturalContext: 'לימוד משנה או ברייתא', learned: false },
+
+  // מושגי זמן וכמות
+  { id: 65, aramaic: 'הַשְׁתָּא', hebrew: 'עכשיו', type: 'מילת יחס', culturalContext: 'ציון הזמן הנוכחי', learned: false },
+  { id: 66, aramaic: 'מֵעִיקָּרָא', hebrew: 'מהתחלה', type: 'מילת יחס', culturalContext: 'חזרה לנקודת ההתחלה של הדיון', learned: false },
+  { id: 67, aramaic: 'לִמְחַר', hebrew: 'לעתיד לבוא או למחרת', type: 'מילת יחס', culturalContext: 'ציון זמן עתידי', learned: false },
+  { id: 68, aramaic: 'אוֹרְתָא', hebrew: 'לילה', type: 'שם עצם', culturalContext: 'זמן הלילה', learned: false },
+  { id: 69, aramaic: 'צַפְרָא', hebrew: 'בוקר', type: 'שם עצם', culturalContext: 'זמן הבוקר', learned: false },
+  { id: 70, aramaic: 'יוֹמָא', hebrew: 'יום', type: 'שם עצם', culturalContext: 'יחידת זמן בסיסית, גם שם מסכת', learned: false },
+  { id: 71, aramaic: 'שַׁתָּא', hebrew: 'שנה', type: 'שם עצם', culturalContext: 'יחידת זמן של שנה', learned: false },
+  { id: 72, aramaic: 'תְּלָתִין', hebrew: 'שלושים', type: 'שם עצם', culturalContext: 'מספר שלושים', learned: false },
+  { id: 73, aramaic: 'מְאָה', hebrew: 'מאה', type: 'שם עצם', culturalContext: 'מספר מאה', learned: false },
+  { id: 74, aramaic: 'נָפִישׁ', hebrew: 'הרבה/מרובה', type: 'תואר', culturalContext: 'ציון כמות גדולה', learned: false },
+  { id: 75, aramaic: 'זוּטָר', hebrew: 'קטן', type: 'תואר', culturalContext: 'ציון גודל קטן', learned: false },
+  { id: 76, aramaic: 'פּוּרְתָא', hebrew: 'מעט', type: 'תואר', culturalContext: 'כמות מועטה', learned: false },
+  { id: 77, aramaic: 'כּוּלֵּי עָלְמָא', hebrew: 'כל העולם (כולם מסכימים)', type: 'ביטוי', culturalContext: 'ציון הסכמה כללית בין החכמים', learned: false },
+  { id: 78, aramaic: 'פַּלְגָא', hebrew: 'חצי', type: 'שם עצם', culturalContext: 'חלוקה לשניים', learned: false },
+  { id: 79, aramaic: 'תְּרֵי', hebrew: 'שניים', type: 'שם עצם', culturalContext: 'מספר שניים', learned: false },
+
+  // משפט, ממונות ואיסורים
+  { id: 80, aramaic: 'פָּטוּר', hebrew: 'אינו חייב בעונש/תשלום', type: 'מושג', culturalContext: 'פטור מחיוב הלכתי', learned: false },
+  { id: 81, aramaic: 'חַיָּיב', hebrew: 'מחויב בתשלום או עונש', type: 'מושג', culturalContext: 'חיוב הלכתי לשלם או לקבל עונש', learned: false },
+  { id: 82, aramaic: 'מוּתָּר', hebrew: 'דבר שמותר לעשותו', type: 'מושג', culturalContext: 'היתר הלכתי', learned: false },
+  { id: 83, aramaic: 'אָסוּר', hebrew: 'דבר שאין לעשותו', type: 'מושג', culturalContext: 'איסור הלכתי', learned: false },
+  { id: 84, aramaic: 'דִּיעֲבַד', hebrew: 'לאחר מעשה', type: 'מושג', culturalContext: 'מצב שכבר נעשה, לעומת לכתחילה', learned: false },
+  { id: 85, aramaic: 'לְכַתְּחִילָה', hebrew: 'הדרך הראויה מראש', type: 'מושג', culturalContext: 'הדרך הנכונה לפעול מלכתחילה', learned: false },
+  { id: 86, aramaic: 'חֲזָקָה', hebrew: 'הנחה משפטית', type: 'מושג', culturalContext: 'הנחת יסוד שמשמשת בפסיקה', learned: false },
+  { id: 87, aramaic: 'גּוֹזֵל', hebrew: 'לוקח בכוח', type: 'פועל', culturalContext: 'לקיחה בכפייה', learned: false },
+  { id: 88, aramaic: 'גַּנָּב', hebrew: 'לוקח בסתר', type: 'שם עצם', culturalContext: 'גניבה בסתר לעומת גזילה בגלוי', learned: false },
+  { id: 89, aramaic: 'מָמוֹנָא', hebrew: 'כסף/רכוש', type: 'שם עצם', culturalContext: 'דיני ממונות בתלמוד', learned: false },
+  { id: 90, aramaic: 'נְכָסִים', hebrew: 'רכוש', type: 'שם עצם', culturalContext: 'נכסי מקרקעין או מטלטלין', learned: false },
+  { id: 91, aramaic: 'הֶפְקֵר', hebrew: 'רכוש ללא בעלים', type: 'מושג', culturalContext: 'רכוש שניתן לכל אדם לזכות בו', learned: false },
+  { id: 92, aramaic: 'יֵאוּשׁ', hebrew: 'ויתור של הבעלים על חפץ שאבד', type: 'מושג', culturalContext: 'מושג חשוב בדיני השבת אבידה', learned: false },
+  { id: 93, aramaic: 'סָפֵק', hebrew: 'חוסר ודאות', type: 'מושג', culturalContext: 'מצב של אי-ודאות הלכתית', learned: false },
+  { id: 94, aramaic: 'וַדַּאי', hebrew: 'מצב בטוח', type: 'מושג', culturalContext: 'מצב של ודאות מוחלטת', learned: false },
+
+  // חיי יומיום וחפצים
+  { id: 95, aramaic: 'בֵּיתָא', hebrew: 'בית', type: 'שם עצם', culturalContext: 'מקום המגורים', learned: false },
+  { id: 96, aramaic: 'בַּר', hebrew: 'בן', type: 'שם עצם', culturalContext: 'בן או יליד של', learned: false },
+  { id: 97, aramaic: 'בַּרְתָּא', hebrew: 'בת', type: 'שם עצם', culturalContext: 'בת', learned: false },
+  { id: 98, aramaic: 'אִיתְּתָא', hebrew: 'אישה', type: 'שם עצם', culturalContext: 'אישה נשואה', learned: false },
+  { id: 99, aramaic: 'גַּבְרָא', hebrew: 'איש/אדם', type: 'שם עצם', culturalContext: 'גבר או אדם באופן כללי', learned: false },
+  { id: 100, aramaic: 'חַמְרָא', hebrew: 'יין או חמור', type: 'שם עצם', culturalContext: 'משמעות כפולה לפי הקשר', learned: false },
+  { id: 101, aramaic: 'נַהֲמָא', hebrew: 'לחם', type: 'שם עצם', culturalContext: 'מזון בסיסי', learned: false },
+  { id: 102, aramaic: 'מַיָּא', hebrew: 'מים', type: 'שם עצם', culturalContext: 'מים לשתייה או לטהרה', learned: false },
+  { id: 103, aramaic: 'רִיפְתָּא', hebrew: 'פת לחם', type: 'שם עצם', culturalContext: 'פרוסת לחם', learned: false },
+  { id: 104, aramaic: 'מָנָא', hebrew: 'כלי', type: 'שם עצם', culturalContext: 'כלי לשימושים שונים', learned: false },
+  { id: 105, aramaic: 'מָאנֵי', hebrew: 'בגדים', type: 'שם עצם', culturalContext: 'בגדים או כלים', learned: false },
+  { id: 106, aramaic: 'קַיְיטָא', hebrew: 'קיץ', type: 'שם עצם', culturalContext: 'עונת הקיץ', learned: false },
+  { id: 107, aramaic: 'סִיתְוָא', hebrew: 'חורף', type: 'שם עצם', culturalContext: 'עונת החורף', learned: false },
+  { id: 108, aramaic: 'אַרְעָא', hebrew: 'ארץ/קרקע', type: 'שם עצם', culturalContext: 'קרקע או אדמה', learned: false },
+  { id: 109, aramaic: 'שׁוּקָא', hebrew: 'שוק', type: 'שם עצם', culturalContext: 'מקום מסחר ציבורי', learned: false },
+
+  // ביטויים לוגיים נפוצים
+  { id: 110, aramaic: 'דִּילְמָא', hebrew: 'שמא/אולי', type: 'ביטוי', culturalContext: 'הצגת אפשרות או חשש', learned: false },
+  { id: 111, aramaic: 'כָּל שֶׁכֵּן', hebrew: 'קל וחומר', type: 'ביטוי', culturalContext: 'טיעון לוגי מהקל אל הכבד', learned: false },
+  { id: 112, aramaic: 'תָּא שְׁמַע', hebrew: 'בוא ושמע (הבאת מקור)', type: 'ביטוי', culturalContext: 'פתיחה להבאת ראיה מטקסט', learned: false },
+  { id: 113, aramaic: 'אֵיתִיבֵיהּ', hebrew: 'השיב לו (הקשה עליו)', type: 'ביטוי', culturalContext: 'הקשאה מתוך ברייתא או משנה', learned: false },
+  { id: 114, aramaic: 'מַתְקֵיף', hebrew: 'מקשה קושיה הגיונית', type: 'פועל', culturalContext: 'הקשאה מסברא ולא מטקסט', learned: false },
+  { id: 115, aramaic: 'גּוּפָא', hebrew: 'חוזרים לטקסט שהוזכר קודם', type: 'ביטוי', culturalContext: 'חזרה לעיון בטקסט שצוטט', learned: false },
+  { id: 116, aramaic: 'לְעוֹלָם', hebrew: 'תשובה סופית המעמידה את הדברים', type: 'ביטוי', culturalContext: 'פתיחה לתירוץ שמיישב את הקושיא', learned: false },
+  { id: 117, aramaic: 'מִשְּׁמֵיהּ', hebrew: 'משמו של', type: 'ביטוי', culturalContext: 'ציטוט בשם חכם אחר', learned: false },
+  { id: 118, aramaic: 'סָלְקָא דַעְתָּךְ', hebrew: 'עלה על דעתך', type: 'ביטוי', culturalContext: 'מחשבה ראשונית שתידחה', learned: false },
 ];
 
 interface DictionaryContextType {
@@ -52,14 +170,16 @@ export const DictionaryProvider = ({ children }: { children: ReactNode }) => {
   const [quizHistory, setQuizHistory] = useState<{ word: DictionaryWord; correct: boolean }[]>([]);
 
   const searchWord = (query: string, direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew'): DictionaryWord | null => {
-    const normalizedQuery = query.trim();
+    const normalizedQuery = removeNiqqud(query.trim().toLowerCase());
     if (!normalizedQuery) return null;
 
     return dictionary.find(word => {
       if (direction === 'hebrew-to-aramaic') {
-        return word.hebrew.includes(normalizedQuery) || word.hebrew === normalizedQuery;
+        const normalizedHebrew = removeNiqqud(word.hebrew.toLowerCase());
+        return normalizedHebrew.includes(normalizedQuery) || normalizedHebrew === normalizedQuery;
       } else {
-        return word.aramaic.includes(normalizedQuery) || word.aramaic === normalizedQuery;
+        const normalizedAramaic = removeNiqqud(word.aramaic.toLowerCase());
+        return normalizedAramaic.includes(normalizedQuery) || normalizedAramaic === normalizedQuery;
       }
     }) || null;
   };
