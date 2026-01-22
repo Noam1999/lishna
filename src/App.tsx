@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DictionaryProvider } from "@/contexts/DictionaryContext";
 import Navigation from "@/components/Navigation";
 import Home from "./pages/Home";
+import Auth from "./pages/Auth";
 import Translator from "./pages/Translator";
 import Flashcards from "./pages/Flashcards";
 import Quiz from "./pages/Quiz";
@@ -23,6 +24,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/translator" element={<Translator />} />
             <Route path="/flashcards" element={<Flashcards />} />
             <Route path="/quiz" element={<Quiz />} />

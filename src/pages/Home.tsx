@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, User } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary } from '@/contexts/DictionaryContext';
 
@@ -42,6 +42,14 @@ const Home = () => {
         </div>
         
         <div className="relative z-10 pt-12 pb-8 px-6 text-center">
+          {/* User Auth Button */}
+          <Link
+            to="/auth"
+            className="absolute top-4 left-4 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
+          >
+            <User className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          
           <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border rounded-full px-4 py-2 mb-6 shadow-soft">
             <Sparkles className="w-4 h-4 text-primary animate-pulse" />
             <span className="text-sm font-medium text-muted-foreground">למד ארמית בבלית</span>
