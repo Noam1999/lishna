@@ -1,18 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, BookOpen, ScrollText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { z } from 'zod';
 
 type AuthMode = 'login' | 'register';
+
+const emailSchema = z.string().email('כתובת אימייל לא תקינה');
+const passwordSchema = z.string().min(6, 'הסיסמה חייבת להכיל לפחות 6 תווים');
+const nameSchema = z.string().min(2, 'השם חייב להכיל לפחות 2 תווים');
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signIn, signUp } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
   
   const [formData, setFormData] = useState({
     name: '',
@@ -20,20 +27,104 @@ const Auth = () => {
     password: '',
   });
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+
+    try {
+      emailSchema.parse(formData.email);
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        newErrors.email = e.errors[0].message;
+      }
+    }
+
+    try {
+      passwordSchema.parse(formData.password);
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        newErrors.password = e.errors[0].message;
+      }
+    }
+
+    if (mode === 'register') {
+      try {
+        nameSchema.parse(formData.name);
+      } catch (e) {
+        if (e instanceof z.ZodError) {
+          newErrors.name = e.errors[0].message;
+        }
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
     
-    // Simulate authentication
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: mode === 'login' ? 'התחברת בהצלחה!' : 'נרשמת בהצלחה!',
-      description: 'ברוכים הבאים לעולם הארמית הבבלית',
-    });
+    try {
+      if (mode === 'login') {
+        const { error } = await signIn(formData.email, formData.password);
+        if (error) {
+          let message = 'שגיאה בהתחברות';
+          if (error.message.includes('Invalid login credentials')) {
+            message = 'אימייל או סיסמה שגויים';
+          }
+          toast({
+            title: 'שגיאה',
+            description: message,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'התחברת בהצלחה!',
+            description: 'ברוכים הבאים לעולם הארמית הבבלית',
+          });
+          navigate('/');
+        }
+      } else {
+        const { error } = await signUp(formData.email, formData.password, formData.name);
+        if (error) {
+          let message = 'שגיאה בהרשמה';
+          if (error.message.includes('User already registered')) {
+            message = 'משתמש כבר רשום עם אימייל זה';
+          }
+          toast({
+            title: 'שגיאה',
+            description: message,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'נרשמת בהצלחה!',
+            description: 'ברוכים הבאים לעולם הארמית הבבלית',
+          });
+          navigate('/');
+        }
+      }
+    } catch (err) {
+      toast({
+        title: 'שגיאה',
+        description: 'משהו השתבש, נסה שוב',
+        variant: 'destructive',
+      });
+    }
     
     setIsLoading(false);
-    navigate('/');
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -104,51 +195,57 @@ const Auth = () => {
       <div className="flex-1 px-6">
         <form onSubmit={handleSubmit} className="space-y-4" dir="ltr">
           {mode === 'register' && (
-            <div className="flex items-center gap-3 h-12 bg-card border border-border rounded-xl px-3 animate-fade-in focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ring-offset-background">
-              <User className="w-5 h-5 text-muted-foreground shrink-0" />
-              <input
-                type="text"
-                placeholder="שם מלא"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="flex-1 h-full bg-transparent border-0 outline-none text-right text-foreground placeholder:text-muted-foreground"
-                dir="rtl"
-                required
-              />
+            <div className="space-y-1">
+              <div className={`flex items-center gap-3 h-12 bg-card border rounded-xl px-3 animate-fade-in focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ring-offset-background ${errors.name ? 'border-destructive' : 'border-border'}`}>
+                <User className="w-5 h-5 text-muted-foreground shrink-0" />
+                <input
+                  type="text"
+                  placeholder="שם מלא"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="flex-1 h-full bg-transparent border-0 outline-none text-right text-foreground placeholder:text-muted-foreground"
+                  dir="rtl"
+                />
+              </div>
+              {errors.name && <p className="text-xs text-destructive text-right">{errors.name}</p>}
             </div>
           )}
           
-          <div className="flex items-center gap-3 h-12 bg-card border border-border rounded-xl px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ring-offset-background">
-            <Mail className="w-5 h-5 text-muted-foreground shrink-0" />
-            <input
-              type="email"
-              placeholder="דואר אלקטרוני"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="flex-1 h-full bg-transparent border-0 outline-none text-right text-foreground placeholder:text-muted-foreground"
-              dir="rtl"
-              required
-            />
+          <div className="space-y-1">
+            <div className={`flex items-center gap-3 h-12 bg-card border rounded-xl px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ring-offset-background ${errors.email ? 'border-destructive' : 'border-border'}`}>
+              <Mail className="w-5 h-5 text-muted-foreground shrink-0" />
+              <input
+                type="email"
+                placeholder="דואר אלקטרוני"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="flex-1 h-full bg-transparent border-0 outline-none text-right text-foreground placeholder:text-muted-foreground"
+                dir="rtl"
+              />
+            </div>
+            {errors.email && <p className="text-xs text-destructive text-right">{errors.email}</p>}
           </div>
           
-          <div className="flex items-center gap-3 h-12 bg-card border border-border rounded-xl px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ring-offset-background">
-            <Lock className="w-5 h-5 text-muted-foreground shrink-0" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="סיסמה"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="flex-1 h-full bg-transparent border-0 outline-none text-right text-foreground placeholder:text-muted-foreground"
-              dir="rtl"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
+          <div className="space-y-1">
+            <div className={`flex items-center gap-3 h-12 bg-card border rounded-xl px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ring-offset-background ${errors.password ? 'border-destructive' : 'border-border'}`}>
+              <Lock className="w-5 h-5 text-muted-foreground shrink-0" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="סיסמה"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="flex-1 h-full bg-transparent border-0 outline-none text-right text-foreground placeholder:text-muted-foreground"
+                dir="rtl"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+            {errors.password && <p className="text-xs text-destructive text-right">{errors.password}</p>}
           </div>
 
           {mode === 'login' && (

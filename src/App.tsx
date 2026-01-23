@@ -4,9 +4,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DictionaryProvider } from "@/contexts/DictionaryContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
+import Friends from "./pages/Friends";
 import Translator from "./pages/Translator";
 import Flashcards from "./pages/Flashcards";
 import Quiz from "./pages/Quiz";
@@ -17,24 +20,28 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <DictionaryProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/translator" element={<Translator />} />
-            <Route path="/flashcards" element={<Flashcards />} />
-            <Route path="/quiz" element={<Quiz />} />
-            <Route path="/quiz-summary" element={<QuizSummary />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Navigation />
-        </BrowserRouter>
-      </TooltipProvider>
-    </DictionaryProvider>
+    <AuthProvider>
+      <DictionaryProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/friends" element={<Friends />} />
+              <Route path="/translator" element={<Translator />} />
+              <Route path="/flashcards" element={<Flashcards />} />
+              <Route path="/quiz" element={<Quiz />} />
+              <Route path="/quiz-summary" element={<QuizSummary />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Navigation />
+          </BrowserRouter>
+        </TooltipProvider>
+      </DictionaryProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
