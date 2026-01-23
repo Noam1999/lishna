@@ -14,7 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      friendships: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          daily_xp: number
+          display_name: string | null
+          id: string
+          last_quiz_date: string | null
+          last_xp_date: string | null
+          points: number
+          streak: number
+          updated_at: string
+          user_id: string
+          username: string | null
+          words_mastered: number
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          daily_xp?: number
+          display_name?: string | null
+          id?: string
+          last_quiz_date?: string | null
+          last_xp_date?: string | null
+          points?: number
+          streak?: number
+          updated_at?: string
+          user_id: string
+          username?: string | null
+          words_mastered?: number
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          daily_xp?: number
+          display_name?: string | null
+          id?: string
+          last_quiz_date?: string | null
+          last_xp_date?: string | null
+          points?: number
+          streak?: number
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+          words_mastered?: number
+        }
+        Relationships: []
+      }
+      user_activities: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

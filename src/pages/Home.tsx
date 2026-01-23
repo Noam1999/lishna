@@ -1,10 +1,16 @@
-import { Link } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, User } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, User, LogIn } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary } from '@/contexts/DictionaryContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 
 const Home = () => {
+  const navigate = useNavigate();
   const { dictionary, getUnlearnedWords } = useDictionary();
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  
   const learnedCount = dictionary.filter(w => w.learned).length;
   const progress = Math.round((learnedCount / dictionary.length) * 100);
 
@@ -42,13 +48,32 @@ const Home = () => {
         </div>
         
         <div className="relative z-10 pt-12 pb-8 px-6 text-center">
-          {/* User Auth Button */}
-          <Link
-            to="/auth"
-            className="absolute top-4 left-4 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
-          >
-            <User className="w-5 h-5 text-muted-foreground" />
-          </Link>
+          {/* User Auth/Profile Button */}
+          {user ? (
+            <button
+              onClick={() => navigate('/profile')}
+              className="absolute top-4 left-4 w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
+            >
+              {profile?.avatar_url ? (
+                <img 
+                  src={profile.avatar_url} 
+                  alt="Avatar" 
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-sm font-bold text-primary-foreground">
+                  {(profile?.display_name || user.email || 'U')[0].toUpperCase()}
+                </span>
+              )}
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              className="absolute top-4 left-4 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
+            >
+              <LogIn className="w-5 h-5 text-muted-foreground" />
+            </Link>
+          )}
           
           <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border rounded-full px-4 py-2 mb-6 shadow-soft">
             <Sparkles className="w-4 h-4 text-primary animate-pulse" />

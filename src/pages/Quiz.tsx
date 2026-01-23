@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, RotateCcw } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 
 interface QuizQuestion {
   word: DictionaryWord;
@@ -13,8 +15,11 @@ interface QuizQuestion {
 
 const Quiz = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { addPoints, updateQuizStreak } = useProfile();
   const { dictionary, quizScore, setQuizScore, quizHistory, setQuizHistory } = useDictionary();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const hasUpdatedStreak = useRef(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -73,12 +78,20 @@ const Quiz = () => {
     ]);
 
     // Auto advance after delay
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentQuestion < TOTAL_QUESTIONS - 1) {
         setCurrentQuestion((prev) => prev + 1);
         setSelectedAnswer(null);
         setShowResult(false);
       } else {
+        // Quiz finished - update profile stats
+        if (user && !hasUpdatedStreak.current) {
+          hasUpdatedStreak.current = true;
+          const finalScore = correct ? quizScore + 1 : quizScore;
+          const pointsEarned = Math.round((finalScore / TOTAL_QUESTIONS) * 100);
+          await addPoints(pointsEarned);
+          await updateQuizStreak();
+        }
         navigate('/quiz-summary');
       }
     }, 1500);
