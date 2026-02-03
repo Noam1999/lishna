@@ -4,16 +4,31 @@ import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { useUserWords } from '@/hooks/useUserWords';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Flashcards = () => {
-  const { getUnlearnedWords, markAsLearned, resetProgress, dictionary } = useDictionary();
+  const { dictionary, markAsLearned: markAsLearnedLocal, resetProgress } = useDictionary();
+  const { user } = useAuth();
+  const { markWordAsLearned, isWordLearned, loading: wordsLoading } = useUserWords();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [words, setWords] = useState<DictionaryWord[]>([]);
+  const [isMarking, setIsMarking] = useState(false);
 
+  // Filter out words that are already learned (from DB if logged in, or local state)
   useEffect(() => {
-    setWords(getUnlearnedWords());
-  }, [dictionary]);
+    if (wordsLoading) return;
+    
+    const unlearnedWords = dictionary.filter(word => {
+      if (user) {
+        return !isWordLearned(word.id);
+      }
+      return !word.learned;
+    });
+    setWords(unlearnedWords);
+    setCurrentIndex(0);
+  }, [dictionary, user, isWordLearned, wordsLoading]);
 
   const currentWord = words[currentIndex];
   const totalWords = words.length;
@@ -35,18 +50,42 @@ const Flashcards = () => {
     }
   };
 
-  const handleMarkLearned = () => {
-    if (currentWord) {
-      markAsLearned(currentWord.id);
+  const handleMarkLearned = async () => {
+    if (!currentWord || isMarking) return;
+    
+    setIsMarking(true);
+    
+    // Update local state
+    markAsLearnedLocal(currentWord.id);
+    
+    // If user is logged in, save to database
+    if (user) {
+      const success = await markWordAsLearned(currentWord.id);
+      if (success) {
+        toast({
+          title: '🎉 מצוין!',
+          description: 'המילה נשמרה כנלמדה בפרופיל שלך',
+        });
+      } else {
+        toast({
+          title: 'מצוין!',
+          description: 'המילה סומנה כנלמדה',
+        });
+      }
+    } else {
       toast({
         title: 'מצוין!',
-        description: 'המילה סומנה כנלמדה',
+        description: 'התחבר כדי לשמור את ההתקדמות שלך',
       });
-      setIsFlipped(false);
-      // Move to next or reset if done
-      if (currentIndex < words.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      }
+    }
+    
+    setIsMarking(false);
+    setIsFlipped(false);
+    
+    // Remove from current list and move to next
+    setWords(prev => prev.filter(w => w.id !== currentWord.id));
+    if (currentIndex >= words.length - 1) {
+      setCurrentIndex(Math.max(0, currentIndex - 1));
     }
   };
 
@@ -168,9 +207,10 @@ const Flashcards = () => {
           onClick={handleMarkLearned}
           variant="secondary"
           className="w-full h-12"
+          disabled={isMarking}
         >
           <Check className="w-5 h-5 mr-2" />
-          סימנתי כנלמד
+          {isMarking ? 'שומר...' : 'סימנתי כנלמד'}
         </Button>
       </div>
     </div>
