@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Trophy, RotateCcw } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Trophy, RotateCcw, BookOpen } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useUserWords } from '@/hooks/useUserWords';
 
 interface QuizQuestion {
   word: DictionaryWord;
@@ -18,22 +19,40 @@ const Quiz = () => {
   const { user } = useAuth();
   const { addPoints, updateQuizStreak } = useProfile();
   const { dictionary, quizScore, setQuizScore, quizHistory, setQuizHistory } = useDictionary();
+  const { learnedWordIds, loading: wordsLoading } = useUserWords();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const hasUpdatedStreak = useRef(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [notEnoughWords, setNotEnoughWords] = useState(false);
 
   const TOTAL_QUESTIONS = 10;
+  const MIN_WORDS_FOR_QUIZ = 4; // Minimum words needed for a quiz (1 correct + 3 wrong options)
 
   const generateQuestions = useCallback(() => {
-    const shuffled = [...dictionary].sort(() => Math.random() - 0.5);
-    const selected = shuffled.slice(0, TOTAL_QUESTIONS);
+    // Filter dictionary to only include learned words
+    const learnedWords = user 
+      ? dictionary.filter(word => learnedWordIds.has(word.id))
+      : dictionary.filter(word => word.learned);
+
+    // Check if we have enough words for a quiz
+    if (learnedWords.length < MIN_WORDS_FOR_QUIZ) {
+      setNotEnoughWords(true);
+      setQuestions([]);
+      return;
+    }
+
+    setNotEnoughWords(false);
+    
+    const shuffled = [...learnedWords].sort(() => Math.random() - 0.5);
+    const questionsCount = Math.min(TOTAL_QUESTIONS, learnedWords.length);
+    const selected = shuffled.slice(0, questionsCount);
 
     const newQuestions: QuizQuestion[] = selected.map((word) => {
       const correctAnswer = word.hebrew;
-      const otherWords = dictionary
+      const otherWords = learnedWords
         .filter((w) => w.id !== word.id)
         .sort(() => Math.random() - 0.5)
         .slice(0, 3)
@@ -54,11 +73,13 @@ const Quiz = () => {
     setQuizHistory([]);
     setSelectedAnswer(null);
     setShowResult(false);
-  }, [dictionary, setQuizScore, setQuizHistory]);
+  }, [dictionary, setQuizScore, setQuizHistory, user, learnedWordIds]);
 
   useEffect(() => {
-    generateQuestions();
-  }, [generateQuestions]);
+    if (!wordsLoading) {
+      generateQuestions();
+    }
+  }, [generateQuestions, wordsLoading]);
 
   const handleAnswer = (answer: string) => {
     if (showResult) return;
@@ -79,7 +100,7 @@ const Quiz = () => {
 
     // Auto advance after delay
     setTimeout(async () => {
-      if (currentQuestion < TOTAL_QUESTIONS - 1) {
+      if (currentQuestion < questions.length - 1) {
         setCurrentQuestion((prev) => prev + 1);
         setSelectedAnswer(null);
         setShowResult(false);
@@ -88,7 +109,7 @@ const Quiz = () => {
         if (user && !hasUpdatedStreak.current) {
           hasUpdatedStreak.current = true;
           const finalScore = correct ? quizScore + 1 : quizScore;
-          const pointsEarned = Math.round((finalScore / TOTAL_QUESTIONS) * 100);
+          const pointsEarned = Math.round((finalScore / questions.length) * 100);
           await addPoints(pointsEarned);
           await updateQuizStreak();
         }
@@ -98,6 +119,46 @@ const Quiz = () => {
   };
 
   const currentQ = questions[currentQuestion];
+
+  // Loading state
+  if (wordsLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-24 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // Not enough learned words
+  if (notEnoughWords) {
+    const learnedCount = user 
+      ? learnedWordIds.size 
+      : dictionary.filter(w => w.learned).length;
+    
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <Header title="מבחן" subtitle="בחן את הידע שלך" />
+        <div className="px-6 flex flex-col items-center justify-center py-16">
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+            <BookOpen className="w-10 h-10 text-primary" />
+          </div>
+          <h3 className="text-xl font-semibold text-foreground mb-2">אין מספיק מילים</h3>
+          <p className="text-muted-foreground text-center mb-2">
+            כדי להתחיל מבחן, צריך ללמוד לפחות {MIN_WORDS_FOR_QUIZ} מילים בכרטיסיות
+          </p>
+          <p className="text-sm text-muted-foreground mb-6">
+            למדת עד כה: <span className="font-semibold text-primary">{learnedCount}</span> מילים
+          </p>
+          <Button asChild>
+            <Link to="/flashcards">
+              <BookOpen className="w-4 h-4 ml-2" />
+              עבור לכרטיסיות
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!currentQ) {
     return (
@@ -119,7 +180,7 @@ const Quiz = () => {
             <span className="font-semibold text-primary">{quizScore}</span>
           </div>
           <span className="text-sm text-muted-foreground">
-            שאלה {currentQuestion + 1} מתוך {TOTAL_QUESTIONS}
+            שאלה {currentQuestion + 1} מתוך {questions.length}
           </span>
         </div>
       </div>
@@ -129,7 +190,7 @@ const Quiz = () => {
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-l from-primary to-primary/70 rounded-full transition-all duration-500"
-            style={{ width: `${((currentQuestion + 1) / TOTAL_QUESTIONS) * 100}%` }}
+            style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
           />
         </div>
       </div>
