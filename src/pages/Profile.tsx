@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useUserWords } from '@/hooks/useUserWords';
 
 const DAILY_GOAL = 50; // XP goal per day
 
@@ -14,6 +15,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { profile, loading } = useProfile();
+  const { learnedCount, loading: wordsLoading } = useUserWords();
 
   const handleSignOut = async () => {
     await signOut();
@@ -36,6 +38,9 @@ const Profile = () => {
   const memberSince = new Date(profile.created_at).getFullYear();
   const dailyProgress = Math.min((profile.daily_xp / DAILY_GOAL) * 100, 100);
 
+  // Use real-time learned count from user_words table
+  const wordsMasteredDisplay = wordsLoading ? profile.words_mastered : learnedCount;
+
   const stats = [
     { 
       icon: Trophy, 
@@ -54,7 +59,7 @@ const Profile = () => {
     { 
       icon: BookOpen, 
       label: 'מילים נלמדו', 
-      value: profile.words_mastered,
+      value: wordsMasteredDisplay,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
     },

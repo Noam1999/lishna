@@ -110,6 +110,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_words: {
+        Row: {
+          id: string
+          learned_at: string
+          user_id: string
+          word_id: number
+        }
+        Insert: {
+          id?: string
+          learned_at?: string
+          user_id: string
+          word_id: number
+        }
+        Update: {
+          id?: string
+          learned_at?: string
+          user_id?: string
+          word_id?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

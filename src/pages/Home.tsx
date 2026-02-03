@@ -4,14 +4,17 @@ import Header from '@/components/Header';
 import { useDictionary } from '@/contexts/DictionaryContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useUserWords } from '@/hooks/useUserWords';
 
 const Home = () => {
   const navigate = useNavigate();
   const { dictionary, getUnlearnedWords } = useDictionary();
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   
-  const learnedCount = dictionary.filter(w => w.learned).length;
+  // Use DB count if logged in, otherwise use local count
+  const learnedCount = user && !wordsLoading ? dbLearnedCount : dictionary.filter(w => w.learned).length;
   const progress = Math.round((learnedCount / dictionary.length) * 100);
 
   const features = [
@@ -98,7 +101,9 @@ const Home = () => {
         <div className="bg-card rounded-2xl p-5 shadow-elegant border border-border">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-foreground">התקדמות הלימוד</span>
-            <span className="text-sm text-muted-foreground">{learnedCount} מתוך {dictionary.length} מילים</span>
+            <span className="text-sm text-muted-foreground">
+              {wordsLoading && user ? '...' : learnedCount} מתוך {dictionary.length} מילים
+            </span>
           </div>
           <div className="h-3 bg-muted rounded-full overflow-hidden">
             <div 
@@ -107,9 +112,9 @@ const Home = () => {
             />
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            {getUnlearnedWords().length > 0 
-              ? `נותרו ${getUnlearnedWords().length} מילים ללמידה`
-              : 'כל הכבוד! למדת את כל המילים! 🎉'}
+            {learnedCount >= dictionary.length
+              ? 'כל הכבוד! למדת את כל המילים! 🎉'
+              : `נותרו ${dictionary.length - learnedCount} מילים ללמידה`}
           </p>
         </div>
       </div>
