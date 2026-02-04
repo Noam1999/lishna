@@ -14,6 +14,7 @@ import Translator from "./pages/Translator";
 import Flashcards from "./pages/Flashcards";
 import Quiz from "./pages/Quiz";
 import QuizSummary from "./pages/QuizSummary";
+import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/flashcards" element={<Flashcards />} />
               <Route path="/quiz" element={<Quiz />} />
               <Route path="/quiz-summary" element={<QuizSummary />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Navigation />
