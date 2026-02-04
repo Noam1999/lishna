@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          achievement_type: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_type: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_type?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string
@@ -52,6 +73,8 @@ export type Database = {
           updated_at: string
           user_id: string
           username: string | null
+          week_start_date: string | null
+          weekly_points: number
           words_mastered: number
         }
         Insert: {
@@ -67,6 +90,8 @@ export type Database = {
           updated_at?: string
           user_id: string
           username?: string | null
+          week_start_date?: string | null
+          weekly_points?: number
           words_mastered?: number
         }
         Update: {
@@ -82,7 +107,39 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string | null
+          week_start_date?: string | null
+          weekly_points?: number
           words_mastered?: number
+        }
+        Relationships: []
+      }
+      season_history: {
+        Row: {
+          created_at: string
+          final_points: number
+          final_rank: number
+          id: string
+          user_id: string
+          week_number: number
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          final_points?: number
+          final_rank: number
+          id?: string
+          user_id: string
+          week_number: number
+          year: number
+        }
+        Update: {
+          created_at?: string
+          final_points?: number
+          final_rank?: number
+          id?: string
+          user_id?: string
+          week_number?: number
+          year?: number
         }
         Relationships: []
       }

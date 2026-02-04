@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Book, GraduationCap, Brain, Home, Users } from 'lucide-react';
+import { Book, GraduationCap, Brain, Home, Trophy } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
@@ -9,7 +9,7 @@ const Navigation = () => {
     { path: '/translator', label: 'תרגומון', icon: Book },
     { path: '/flashcards', label: 'כרטיסיות', icon: GraduationCap },
     { path: '/quiz', label: 'מבחן', icon: Brain },
-    { path: '/friends', label: 'קהילה', icon: Users },
+    { path: '/leaderboard', label: 'ליגה', icon: Trophy },
   ];
 
   // Hide navigation on auth page

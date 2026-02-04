@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
+import { useAchievements } from '@/hooks/useAchievements';
 
 interface QuizQuestion {
   word: DictionaryWord;
@@ -20,6 +22,8 @@ const Quiz = () => {
   const { addPoints, updateQuizStreak } = useProfile();
   const { dictionary, quizScore, setQuizScore, quizHistory, setQuizHistory } = useDictionary();
   const { learnedWordIds, loading: wordsLoading } = useUserWords();
+  const { addWeeklyPoints } = useLeaderboard();
+  const { checkAndUnlockAchievements } = useAchievements();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const hasUpdatedStreak = useRef(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -111,7 +115,9 @@ const Quiz = () => {
           const finalScore = correct ? quizScore + 1 : quizScore;
           const pointsEarned = Math.round((finalScore / questions.length) * 100);
           await addPoints(pointsEarned);
+          await addWeeklyPoints(pointsEarned);
           await updateQuizStreak();
+          await checkAndUnlockAchievements();
         }
         navigate('/quiz-summary');
       }
