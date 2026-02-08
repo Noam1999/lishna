@@ -1,17 +1,23 @@
-import { useState, useEffect } from 'react';
-import { Search, Copy, Volume2, Plus, ArrowLeftRight, BookOpen } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Copy, Volume2, Plus, ArrowLeftRight, BookOpen, Search } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
+import SearchAutocomplete from '@/components/SearchAutocomplete';
 
 const Translator = () => {
-  const { searchWord, dictionary } = useDictionary();
+  const { searchWord, getSuggestions, dictionary } = useDictionary();
   const [query, setQuery] = useState('');
   const [direction, setDirection] = useState<'hebrew-to-aramaic' | 'aramaic-to-hebrew'>('hebrew-to-aramaic');
   const [result, setResult] = useState<DictionaryWord | null>(null);
   const [recentSearches, setRecentSearches] = useState<DictionaryWord[]>([]);
+
+  // Get suggestions based on current query
+  const suggestions = useMemo(() => {
+    if (!query.trim()) return [];
+    return getSuggestions(query, direction, 5);
+  }, [query, direction, getSuggestions]);
 
   useEffect(() => {
     if (query.trim()) {
@@ -44,6 +50,10 @@ const Translator = () => {
       title: 'נוסף לרשימה!',
       description: 'המילה נשמרה לתרגול',
     });
+  };
+
+  const handleSelectSuggestion = (word: DictionaryWord) => {
+    setResult(word);
   };
 
   const toggleDirection = () => {
@@ -94,19 +104,16 @@ const Translator = () => {
         </div>
       </div>
 
-      {/* Search Input */}
+      {/* Search Input with Autocomplete */}
       <div className="px-6 mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={direction === 'hebrew-to-aramaic' ? 'הקלד מילה בעברית...' : 'הקלד מילה בארמית...'}
-            className="w-full bg-card border border-border rounded-xl py-4 px-5 pr-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-right"
-            dir="rtl"
-          />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        </div>
+        <SearchAutocomplete
+          value={query}
+          onChange={setQuery}
+          onSelect={handleSelectSuggestion}
+          suggestions={suggestions}
+          placeholder={direction === 'hebrew-to-aramaic' ? 'הקלד מילה בעברית...' : 'הקלד מילה בארמית...'}
+          direction={direction}
+        />
       </div>
 
       {/* Result Card */}
