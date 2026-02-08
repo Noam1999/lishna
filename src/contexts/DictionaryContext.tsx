@@ -148,6 +148,70 @@ const initialDictionary: DictionaryWord[] = [
   { id: 116, aramaic: 'לְעוֹלָם', hebrew: 'תשובה סופית המעמידה את הדברים', type: 'ביטוי', culturalContext: 'פתיחה לתירוץ שמיישב את הקושיא', learned: false },
   { id: 117, aramaic: 'מִשְּׁמֵיהּ', hebrew: 'משמו של', type: 'ביטוי', culturalContext: 'ציטוט בשם חכם אחר', learned: false },
   { id: 118, aramaic: 'סָלְקָא דַעְתָּךְ', hebrew: 'עלה על דעתך', type: 'ביטוי', culturalContext: 'מחשבה ראשונית שתידחה', learned: false },
+
+  // פעלים חדשים (Verbs - Action)
+  { id: 119, aramaic: 'שקיל', hebrew: 'לקח / נטל', type: 'פועל', culturalContext: 'לקיחה או נטילה של חפץ או עניין', learned: false },
+  { id: 120, aramaic: 'שדי', hebrew: 'זרק / השליך', type: 'פועל', culturalContext: 'זריקה או השלכה', learned: false },
+  { id: 121, aramaic: 'נפל', hebrew: 'נפל (קרה)', type: 'פועל', culturalContext: 'נפילה פיזית או התרחשות של אירוע', learned: false },
+  { id: 122, aramaic: 'סליק', hebrew: 'עלה (או הוסר)', type: 'פועל', culturalContext: 'עלייה או הסרה מהדיון', learned: false },
+  { id: 123, aramaic: 'נחית', hebrew: 'ירד', type: 'פועל', culturalContext: 'ירידה פיזית או ירידה לעומק הסוגיה', learned: false },
+  { id: 124, aramaic: 'זבן', hebrew: 'מכר', type: 'פועל', culturalContext: 'מכירה בדיני ממונות', learned: false },
+  { id: 125, aramaic: 'זבין', hebrew: 'קנה', type: 'פועל', culturalContext: 'קנייה בדיני ממונות', learned: false },
+  { id: 126, aramaic: 'הדר', hebrew: 'חזר', type: 'פועל', culturalContext: 'חזרה לנקודה קודמת או חזרה בתשובה', learned: false },
+  { id: 127, aramaic: 'קם', hebrew: 'עמד', type: 'פועל', culturalContext: 'קימה או עמידה', learned: false },
+  { id: 128, aramaic: 'אכל', hebrew: 'אכל', type: 'פועל', culturalContext: 'אכילה, משמש גם במובן של ניצול', learned: false },
+  { id: 129, aramaic: 'שתי', hebrew: 'שתה', type: 'פועל', culturalContext: 'שתייה', learned: false },
+  { id: 130, aramaic: 'גני', hebrew: 'ישן / שכב', type: 'פועל', culturalContext: 'שינה או שכיבה', learned: false },
+  { id: 131, aramaic: 'דמי', hebrew: 'דומה', type: 'פועל', culturalContext: 'דמיון בין דברים', learned: false },
+  { id: 132, aramaic: 'סבר', hebrew: 'חשב (סברה)', type: 'פועל', culturalContext: 'חשיבה או סברה הגיונית', learned: false },
+  { id: 133, aramaic: 'ידע', hebrew: 'ידע', type: 'פועל', culturalContext: 'ידיעה או הכרה', learned: false },
+
+  // מילות קישור ויחס (Connectors)
+  { id: 134, aramaic: 'כי', hebrew: 'כאשר / כמו', type: 'מילת יחס', culturalContext: 'מילת קישור לזמן או השוואה', learned: false },
+  { id: 135, aramaic: 'לישנא', hebrew: 'לשון / שפה / נוסח', type: 'שם עצם', culturalContext: 'נוסח או גרסה של הטקסט', learned: false },
+  { id: 136, aramaic: 'תוב', hebrew: 'שוב / עוד', type: 'מילת יחס', culturalContext: 'חזרה או תוספת', learned: false },
+  { id: 137, aramaic: 'נמי', hebrew: 'גם', type: 'מילת יחס', culturalContext: 'תוספת או הכללה', learned: false },
+  { id: 138, aramaic: 'אלא', hebrew: 'אלא / רק', type: 'מילת יחס', culturalContext: 'הגבלה או חריגה', learned: false },
+  { id: 139, aramaic: 'אי', hebrew: 'אם', type: 'מילת יחס', culturalContext: 'תנאי', learned: false },
+  { id: 140, aramaic: 'אי נמי', hebrew: 'או גם (אפשרות נוספת)', type: 'ביטוי', culturalContext: 'הצגת אפשרות חלופית', learned: false },
+  { id: 141, aramaic: 'וכי', hebrew: 'וכי? (שאלת תמיהה)', type: 'ביטוי', culturalContext: 'שאלה רטורית של תמיהה', learned: false },
+  { id: 142, aramaic: 'בתר', hebrew: 'אחרי', type: 'מילת יחס', culturalContext: 'ציון סדר כרונולוגי', learned: false },
+  { id: 143, aramaic: 'קמי', hebrew: 'לפני', type: 'מילת יחס', culturalContext: 'ציון מיקום או זמן קודם', learned: false },
+  { id: 144, aramaic: 'בהדי', hebrew: 'יחד עם / תוך כדי', type: 'מילת יחס', culturalContext: 'ציון פעולה משותפת או מקבילה', learned: false },
+  { id: 145, aramaic: 'לגבי', hebrew: 'אצל / ביחס ל...', type: 'מילת יחס', culturalContext: 'ציון יחס או שייכות', learned: false },
+
+  // משפחה ואנשים (Family & People)
+  { id: 146, aramaic: 'אבא', hebrew: 'אבא', type: 'שם עצם', culturalContext: 'כינוי לאב, משמש גם כתואר לחכמים', learned: false },
+  { id: 147, aramaic: 'אימא', hebrew: 'אמא', type: 'שם עצם', culturalContext: 'כינוי לאם', learned: false },
+  { id: 148, aramaic: 'בריה', hebrew: 'הבן של...', type: 'שם עצם', culturalContext: 'בן, משמש לציון יוחסין', learned: false },
+  { id: 149, aramaic: 'אחוה', hebrew: 'האח של...', type: 'שם עצם', culturalContext: 'אח, משמש לציון קרבת משפחה', learned: false },
+  { id: 150, aramaic: 'סבא', hebrew: 'סב / זקן', type: 'שם עצם', culturalContext: 'סבא או זקן בעל חכמה', learned: false },
+  { id: 151, aramaic: 'ינוקא', hebrew: 'ילד / תינוק', type: 'שם עצם', culturalContext: 'ילד קטן, לפעמים במשמעות של תלמיד צעיר מבריק', learned: false },
+  { id: 152, aramaic: 'אינשי', hebrew: 'אנשים', type: 'שם עצם', culturalContext: 'אנשים באופן כללי', learned: false },
+  { id: 153, aramaic: 'חתנא', hebrew: 'חתן', type: 'שם עצם', culturalContext: 'חתן, בעל הבת', learned: false },
+
+  // טבע, עולם ובעלי חיים (Nature & Animals)
+  { id: 154, aramaic: 'שמיא', hebrew: 'שמים', type: 'שם עצם', culturalContext: 'השמים, משמש גם ככינוי לה׳', learned: false },
+  { id: 155, aramaic: 'ימא', hebrew: 'ים', type: 'שם עצם', culturalContext: 'ים, מקווה מים גדול', learned: false },
+  { id: 156, aramaic: 'נהרא', hebrew: 'נהר', type: 'שם עצם', culturalContext: 'נהר, חשוב בדיני טהרה ומקוואות', learned: false },
+  { id: 157, aramaic: 'נורא', hebrew: 'אש', type: 'שם עצם', culturalContext: 'אש, חשוב בדיני שבת ונזיקין', learned: false },
+  { id: 158, aramaic: 'כלבא', hebrew: 'כלב', type: 'שם עצם', culturalContext: 'כלב, נזכר בדיני נזיקין', learned: false },
+  { id: 159, aramaic: 'שונרא', hebrew: 'חתול', type: 'שם עצם', culturalContext: 'חתול', learned: false },
+  { id: 160, aramaic: 'חיויא', hebrew: 'נחש', type: 'שם עצם', culturalContext: 'נחש, סמל לסכנה', learned: false },
+  { id: 161, aramaic: 'גמלא', hebrew: 'גמל', type: 'שם עצם', culturalContext: 'גמל, בהמת משא נפוצה', learned: false },
+  { id: 162, aramaic: 'סוסיא', hebrew: 'סוס', type: 'שם עצם', culturalContext: 'סוס', learned: false },
+  { id: 163, aramaic: 'פניא', hebrew: 'ערב', type: 'שם עצם', culturalContext: 'זמן הערב, חשוב לזמני תפילה', learned: false },
+  { id: 164, aramaic: 'ליליא', hebrew: 'לילה', type: 'שם עצם', culturalContext: 'זמן הלילה', learned: false },
+  { id: 165, aramaic: 'שימשא', hebrew: 'שמש', type: 'שם עצם', culturalContext: 'השמש, חשוב לחישוב זמנים', learned: false },
+
+  // גוף האדם (Body)
+  { id: 166, aramaic: 'רישא', hebrew: 'ראש', type: 'שם עצם', culturalContext: 'ראש, גם במובן של התחלה או מנהיג', learned: false },
+  { id: 167, aramaic: 'עינא', hebrew: 'עין', type: 'שם עצם', culturalContext: 'עין, גם במובן של מעיין מים', learned: false },
+  { id: 168, aramaic: 'פומא', hebrew: 'פה', type: 'שם עצם', culturalContext: 'פה, חשוב בדיני נדרים ושבועות', learned: false },
+  { id: 169, aramaic: 'ידא', hebrew: 'יד', type: 'שם עצם', culturalContext: 'יד, גם במובן של רשות או שליטה', learned: false },
+  { id: 170, aramaic: 'כרעא', hebrew: 'רגל', type: 'שם עצם', culturalContext: 'רגל', learned: false },
+  { id: 171, aramaic: 'ליבא', hebrew: 'לב', type: 'שם עצם', culturalContext: 'לב, מרכז הרגש והכוונה', learned: false },
+  { id: 172, aramaic: 'דמא', hebrew: 'דם', type: 'שם עצם', culturalContext: 'דם, חשוב בדיני כשרות וטהרה', learned: false },
 ];
 
 interface DictionaryContextType {
