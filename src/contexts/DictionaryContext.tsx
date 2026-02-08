@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 
 export interface DictionaryWord {
   id: number;
@@ -10,7 +10,7 @@ export interface DictionaryWord {
 }
 
 // Utility function to remove niqqud (vowel marks) for search
-const removeNiqqud = (text: string): string => {
+export const removeNiqqud = (text: string): string => {
   return text.normalize("NFD").replace(/[\u0591-\u05C7]/g, "");
 };
 
@@ -217,6 +217,7 @@ const initialDictionary: DictionaryWord[] = [
 interface DictionaryContextType {
   dictionary: DictionaryWord[];
   searchWord: (query: string, direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew') => DictionaryWord | null;
+  getSuggestions: (query: string, direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew', limit?: number) => DictionaryWord[];
   markAsLearned: (id: number) => void;
   resetProgress: () => void;
   getUnlearnedWords: () => DictionaryWord[];
@@ -233,7 +234,7 @@ export const DictionaryProvider = ({ children }: { children: ReactNode }) => {
   const [quizScore, setQuizScore] = useState(0);
   const [quizHistory, setQuizHistory] = useState<{ word: DictionaryWord; correct: boolean }[]>([]);
 
-  const searchWord = (query: string, direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew'): DictionaryWord | null => {
+  const searchWord = useCallback((query: string, direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew'): DictionaryWord | null => {
     const normalizedQuery = removeNiqqud(query.trim().toLowerCase());
     if (!normalizedQuery) return null;
 
@@ -246,7 +247,43 @@ export const DictionaryProvider = ({ children }: { children: ReactNode }) => {
         return normalizedAramaic.includes(normalizedQuery) || normalizedAramaic === normalizedQuery;
       }
     }) || null;
-  };
+  }, [dictionary]);
+
+  const getSuggestions = useCallback((query: string, direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew', limit: number = 5): DictionaryWord[] => {
+    const normalizedQuery = removeNiqqud(query.trim().toLowerCase());
+    if (!normalizedQuery) return [];
+
+    const matches = dictionary.filter(word => {
+      if (direction === 'hebrew-to-aramaic') {
+        const normalizedHebrew = removeNiqqud(word.hebrew.toLowerCase());
+        return normalizedHebrew.includes(normalizedQuery);
+      } else {
+        const normalizedAramaic = removeNiqqud(word.aramaic.toLowerCase());
+        return normalizedAramaic.includes(normalizedQuery);
+      }
+    });
+
+    // Sort by relevance: exact matches first, then starts-with, then includes
+    return matches
+      .sort((a, b) => {
+        const fieldA = direction === 'hebrew-to-aramaic' ? a.hebrew : a.aramaic;
+        const fieldB = direction === 'hebrew-to-aramaic' ? b.hebrew : b.aramaic;
+        const normA = removeNiqqud(fieldA.toLowerCase());
+        const normB = removeNiqqud(fieldB.toLowerCase());
+
+        // Exact match first
+        if (normA === normalizedQuery && normB !== normalizedQuery) return -1;
+        if (normB === normalizedQuery && normA !== normalizedQuery) return 1;
+
+        // Starts with second
+        if (normA.startsWith(normalizedQuery) && !normB.startsWith(normalizedQuery)) return -1;
+        if (normB.startsWith(normalizedQuery) && !normA.startsWith(normalizedQuery)) return 1;
+
+        // Alphabetical
+        return normA.localeCompare(normB);
+      })
+      .slice(0, limit);
+  }, [dictionary]);
 
   const markAsLearned = (id: number) => {
     setDictionary(prev =>
@@ -270,6 +307,7 @@ export const DictionaryProvider = ({ children }: { children: ReactNode }) => {
     <DictionaryContext.Provider value={{
       dictionary,
       searchWord,
+      getSuggestions,
       markAsLearned,
       resetProgress,
       getUnlearnedWords,
