@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Book, GraduationCap, Brain, Home, Trophy } from 'lucide-react';
+import { Book, GraduationCap, Brain, Home, Trophy, Rss } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
@@ -7,7 +7,7 @@ const Navigation = () => {
   const navItems = [
     { path: '/', label: 'בית', icon: Home },
     { path: '/translator', label: 'תרגומון', icon: Book },
-    { path: '/flashcards', label: 'כרטיסיות', icon: GraduationCap },
+    { path: '/feed', label: 'עדכונים', icon: Rss },
     { path: '/quiz', label: 'מבחן', icon: Brain },
     { path: '/leaderboard', label: 'ליגה', icon: Trophy },
   ];
