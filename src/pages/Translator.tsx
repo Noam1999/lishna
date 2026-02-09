@@ -1,17 +1,48 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Copy, Volume2, Plus, ArrowLeftRight, BookOpen, Search } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Copy, Volume2, Plus, ArrowLeftRight, BookOpen, Search, Check } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import SearchAutocomplete from '@/components/SearchAutocomplete';
+import { useUserWords } from '@/hooks/useUserWords';
+
+const RECENT_SEARCHES_KEY = 'translator_recent_searches';
+const MAX_RECENT_SEARCHES = 5;
 
 const Translator = () => {
   const { searchWord, getSuggestions, dictionary } = useDictionary();
+  const { learnedWordIds, isWordLearned } = useUserWords();
   const [query, setQuery] = useState('');
   const [direction, setDirection] = useState<'hebrew-to-aramaic' | 'aramaic-to-hebrew'>('hebrew-to-aramaic');
   const [result, setResult] = useState<DictionaryWord | null>(null);
   const [recentSearches, setRecentSearches] = useState<DictionaryWord[]>([]);
+
+  // Load recent searches from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+    if (saved) {
+      try {
+        const ids = JSON.parse(saved) as number[];
+        const words = ids
+          .map(id => dictionary.find(w => w.id === id))
+          .filter((w): w is DictionaryWord => w !== undefined);
+        setRecentSearches(words);
+      } catch (e) {
+        console.error('Failed to load recent searches:', e);
+      }
+    }
+  }, [dictionary]);
+
+  // Save recent search when a word is selected
+  const addToRecentSearches = useCallback((word: DictionaryWord) => {
+    setRecentSearches(prev => {
+      const filtered = prev.filter(w => w.id !== word.id);
+      const updated = [word, ...filtered].slice(0, MAX_RECENT_SEARCHES);
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated.map(w => w.id)));
+      return updated;
+    });
+  }, []);
 
   // Get suggestions based on current query
   const suggestions = useMemo(() => {
@@ -54,6 +85,7 @@ const Translator = () => {
 
   const handleSelectSuggestion = (word: DictionaryWord) => {
     setResult(word);
+    addToRecentSearches(word);
   };
 
   const toggleDirection = () => {
@@ -113,6 +145,8 @@ const Translator = () => {
           suggestions={suggestions}
           placeholder={direction === 'hebrew-to-aramaic' ? 'הקלד מילה בעברית...' : 'הקלד מילה בארמית...'}
           direction={direction}
+          recentSearches={recentSearches}
+          learnedWordIds={learnedWordIds}
         />
       </div>
 
@@ -121,9 +155,17 @@ const Translator = () => {
         <div className="px-6 mb-6 animate-fade-in">
           <div className="bg-card rounded-2xl p-6 shadow-elegant border border-primary/20">
             <div className="flex items-start justify-between mb-4">
-              <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                {result.type}
-              </span>
+              <div className="flex items-center gap-2">
+                {isWordLearned(result.id) && (
+                  <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-600 text-xs font-medium">
+                    <Check className="w-3 h-3" />
+                    <span>נלמד</span>
+                  </div>
+                )}
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                  {result.type}
+                </span>
+              </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground mb-1">
                   {direction === 'hebrew-to-aramaic' ? result.hebrew : result.aramaic}

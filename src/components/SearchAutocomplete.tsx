@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Clock, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DictionaryWord } from '@/contexts/DictionaryContext';
 
@@ -10,6 +10,8 @@ interface SearchAutocompleteProps {
   suggestions: DictionaryWord[];
   placeholder?: string;
   direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew';
+  recentSearches?: DictionaryWord[];
+  learnedWordIds?: Set<number>;
 }
 
 const SearchAutocomplete = ({
@@ -19,17 +21,24 @@ const SearchAutocomplete = ({
   suggestions,
   placeholder,
   direction,
+  recentSearches = [],
+  learnedWordIds = new Set(),
 }: SearchAutocompleteProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  // Show dropdown when there are suggestions and input has value
+  // Determine what to show in dropdown
+  const showSuggestions = suggestions.length > 0 && value.trim().length > 0;
+  const showRecent = !value.trim() && recentSearches.length > 0;
+  const displayItems = showSuggestions ? suggestions : (showRecent ? recentSearches : []);
+
+  // Show dropdown when there are suggestions or recent searches
   useEffect(() => {
-    setIsOpen(suggestions.length > 0 && value.trim().length > 0);
+    setIsOpen(showSuggestions || showRecent);
     setHighlightedIndex(-1);
-  }, [suggestions, value]);
+  }, [showSuggestions, showRecent]);
 
   // Scroll highlighted item into view
   useEffect(() => {
@@ -48,19 +57,19 @@ const SearchAutocomplete = ({
       case 'ArrowDown':
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev < suggestions.length - 1 ? prev + 1 : 0
+          prev < displayItems.length - 1 ? prev + 1 : 0
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev > 0 ? prev - 1 : suggestions.length - 1
+          prev > 0 ? prev - 1 : displayItems.length - 1
         );
         break;
       case 'Enter':
         e.preventDefault();
-        if (highlightedIndex >= 0 && suggestions[highlightedIndex]) {
-          handleSelect(suggestions[highlightedIndex]);
+        if (highlightedIndex >= 0 && displayItems[highlightedIndex]) {
+          handleSelect(displayItems[highlightedIndex]);
         }
         break;
       case 'Escape':
@@ -113,16 +122,25 @@ const SearchAutocomplete = ({
       </div>
 
       {/* Autocomplete Dropdown */}
-      {isOpen && suggestions.length > 0 && (
+      {isOpen && displayItems.length > 0 && (
         <ul
           ref={listRef}
           role="listbox"
           className="absolute z-50 w-full mt-2 bg-card border border-border rounded-xl shadow-elegant overflow-hidden animate-fade-in"
           style={{ maxHeight: '280px', overflowY: 'auto' }}
         >
-          {suggestions.map((word, index) => {
+          {/* Recent searches header */}
+          {showRecent && (
+            <li className="flex items-center gap-2 px-4 py-2 text-xs text-muted-foreground bg-muted/50 border-b border-border/50">
+              <Clock className="w-3 h-3" />
+              <span>חיפושים אחרונים</span>
+            </li>
+          )}
+          
+          {displayItems.map((word, index) => {
             const { primary, secondary } = getDisplayText(word);
             const isHighlighted = index === highlightedIndex;
+            const isLearned = learnedWordIds.has(word.id);
 
             return (
               <li
@@ -137,9 +155,16 @@ const SearchAutocomplete = ({
                     : 'hover:bg-accent/50'
                 )}
               >
-                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                  {word.type}
-                </span>
+                <div className="flex items-center gap-2">
+                  {isLearned && (
+                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-green-500/20">
+                      <Check className="w-3 h-3 text-green-600" />
+                    </div>
+                  )}
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                    {word.type}
+                  </span>
+                </div>
                 <div className="flex items-center gap-3 text-right">
                   <span className="text-sm text-muted-foreground">
                     → {secondary}
