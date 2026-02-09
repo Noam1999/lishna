@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Book, GraduationCap, Brain, ScrollText, Sparkles, User, LogIn } from 'lucide-react';
 import Header from '@/components/Header';
+import DailyQuests from '@/components/DailyQuests';
 import { useDictionary } from '@/contexts/DictionaryContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -118,6 +119,9 @@ const Home = () => {
           </p>
         </div>
       </div>
+
+      {/* Daily Quests */}
+      <DailyQuests />
 
       {/* Feature Cards */}
       <div className="px-6 space-y-4">

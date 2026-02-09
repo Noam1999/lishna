@@ -35,6 +35,77 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_celebrations: {
+        Row: {
+          activity_id: string
+          celebration_type: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          celebration_type?: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          celebration_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_celebrations_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "user_activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_quests: {
+        Row: {
+          bonus_xp: number
+          claimed: boolean
+          completed: boolean
+          created_at: string
+          current_value: number
+          id: string
+          quest_date: string
+          quest_type: string
+          target_value: number
+          user_id: string
+        }
+        Insert: {
+          bonus_xp?: number
+          claimed?: boolean
+          completed?: boolean
+          created_at?: string
+          current_value?: number
+          id?: string
+          quest_date?: string
+          quest_type: string
+          target_value: number
+          user_id: string
+        }
+        Update: {
+          bonus_xp?: number
+          claimed?: boolean
+          completed?: boolean
+          created_at?: string
+          current_value?: number
+          id?: string
+          quest_date?: string
+          quest_type?: string
+          target_value?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string
