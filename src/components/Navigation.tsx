@@ -1,14 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Book, GraduationCap, Brain, Home, Trophy, Rss } from 'lucide-react';
+import { Home, Search, GraduationCap, Rss, Trophy } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
 
   const navItems = [
     { path: '/', label: 'בית', icon: Home },
-    { path: '/translator', label: 'תרגומון', icon: Book },
+    { path: '/translator', label: 'תרגומון', icon: Search },
+    { path: '/flashcards', label: 'כרטיסיות', icon: GraduationCap },
     { path: '/feed', label: 'עדכונים', icon: Rss },
-    { path: '/quiz', label: 'מבחן', icon: Brain },
     { path: '/leaderboard', label: 'ליגה', icon: Trophy },
   ];
 
@@ -26,14 +26,14 @@ const Navigation = () => {
             <Link
               key={path}
               to={path}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-300 ${
+              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-300 min-w-0 ${
                 isActive 
                   ? 'text-primary bg-primary/10 scale-105' 
                   : 'text-muted-foreground hover:text-primary hover:bg-primary/5'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
-              <span className="text-xs font-medium">{label}</span>
+              <Icon className={`w-4 h-4 ${isActive ? 'stroke-[2.5]' : ''}`} />
+              <span className="text-[10px] font-medium leading-tight">{label}</span>
             </Link>
           );
         })}
