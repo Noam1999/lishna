@@ -1,10 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Trophy, RotateCcw, BookOpen, Check, X } from 'lucide-react';
 import Header from '@/components/Header';
+import GuestLeaderboardOverlay from '@/components/GuestLeaderboardOverlay';
 import { useDictionary } from '@/contexts/DictionaryContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
 const QuizSummary = () => {
+  const { user } = useAuth();
   const { quizScore, quizHistory } = useDictionary();
   const totalQuestions = quizHistory.length;
   const percentage = totalQuestions > 0 ? Math.round((quizScore / totalQuestions) * 100) : 0;
@@ -93,8 +96,11 @@ const QuizSummary = () => {
         </div>
       </div>
 
+      {/* Guest Leaderboard Overlay */}
+      {!user && <GuestLeaderboardOverlay />}
+
       {/* Action Buttons */}
-      <div className="px-6 space-y-3">
+      <div className="px-6 space-y-3 mt-6">
         <Link to="/quiz" className="block">
           <Button className="w-full h-14 text-lg">
             <RotateCcw className="w-5 h-5 ml-2" />

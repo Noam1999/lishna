@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, User, LogIn } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, User, LogIn, Flame } from 'lucide-react';
 import Header from '@/components/Header';
 import DailyQuests from '@/components/DailyQuests';
+import StreakLockDialog from '@/components/StreakLockDialog';
 import { useDictionary } from '@/contexts/DictionaryContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
+import { useGuestWarning } from '@/hooks/useGuestWarning';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -13,6 +16,8 @@ const Home = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
+  const [streakDialogOpen, setStreakDialogOpen] = useState(false);
+  useGuestWarning();
   
   // Use DB count if logged in, otherwise use local count
   const learnedCount = user && !wordsLoading ? dbLearnedCount : dictionary.filter(w => w.learned).length;
@@ -53,6 +58,16 @@ const Home = () => {
         
         <div className="relative z-10 pt-12 pb-8 px-6 text-center">
           {/* User Auth/Profile Button */}
+          {/* Streak flame for guests */}
+          {!user && (
+            <button
+              onClick={() => setStreakDialogOpen(true)}
+              className="absolute top-4 right-4 w-10 h-10 bg-destructive/10 border border-destructive/30 rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
+            >
+              <Flame className="w-5 h-5 text-destructive" />
+            </button>
+          )}
+
           {user ? (
             <button
               onClick={() => navigate('/profile')}
@@ -73,9 +88,9 @@ const Home = () => {
           ) : (
             <Link
               to="/auth"
-              className="absolute top-4 left-4 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
+              className="absolute top-4 left-4 w-10 h-10 bg-primary border-2 border-primary/50 rounded-full flex items-center justify-center shadow-elegant hover:scale-110 transition-all animate-pulse"
             >
-              <LogIn className="w-5 h-5 text-muted-foreground" />
+              <LogIn className="w-5 h-5 text-primary-foreground" />
             </Link>
           )}
           
@@ -160,6 +175,7 @@ const Home = () => {
           </div>
         </div>
       </div>
+      <StreakLockDialog open={streakDialogOpen} onOpenChange={setStreakDialogOpen} />
     </div>
   );
 };
