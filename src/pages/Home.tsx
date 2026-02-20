@@ -18,34 +18,34 @@ const Home = () => {
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
   useGuestWarning();
-  
+
   // Use DB count if logged in, otherwise use local count
-  const learnedCount = user && !wordsLoading ? dbLearnedCount : dictionary.filter(w => w.learned).length;
-  const progress = Math.round((learnedCount / dictionary.length) * 100);
+  const learnedCount = user && !wordsLoading ? dbLearnedCount : dictionary.filter((w) => w.learned).length;
+  const progress = Math.round(learnedCount / dictionary.length * 100);
 
   const features = [
-    {
-      path: '/translator',
-      icon: Book,
-      title: 'תרגומון',
-      description: 'חפש וגלה מילים בארמית בבלית',
-      color: 'bg-primary/10 text-primary',
-    },
-    {
-      path: '/flashcards',
-      icon: GraduationCap,
-      title: 'כרטיסיות',
-      description: 'למד מילים חדשות עם כרטיסיות הפיכות',
-      color: 'bg-secondary text-secondary-foreground',
-    },
-    {
-      path: '/quiz',
-      icon: Brain,
-      title: 'מבחן',
-      description: 'בחן את הידע שלך בחידון אמריקאי',
-      color: 'bg-accent text-accent-foreground',
-    },
-  ];
+  {
+    path: '/translator',
+    icon: Book,
+    title: 'תרגומון',
+    description: 'חפש וגלה מילים בארמית בבלית',
+    color: 'bg-primary/10 text-primary'
+  },
+  {
+    path: '/flashcards',
+    icon: GraduationCap,
+    title: 'כרטיסיות',
+    description: 'למד מילים חדשות עם כרטיסיות הפיכות',
+    color: 'bg-secondary text-secondary-foreground'
+  },
+  {
+    path: '/quiz',
+    icon: Brain,
+    title: 'מבחן',
+    description: 'בחן את הידע שלך בחידון אמריקאי',
+    color: 'bg-accent text-accent-foreground'
+  }];
+
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -58,50 +58,50 @@ const Home = () => {
         
         <div className="relative z-10 pt-12 pb-8 px-6 text-center">
           {/* User Auth/Profile Button */}
-          {user ? (
-            <button
-              onClick={() => navigate('/profile')}
-              className="absolute top-4 left-4 w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
-            >
-              {profile?.avatar_url ? (
-                <img 
-                  src={profile.avatar_url} 
-                  alt="Avatar" 
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-sm font-bold text-primary-foreground">
+          {user ?
+          <button
+            onClick={() => navigate('/profile')}
+            className="absolute top-4 left-4 w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all">
+
+              {profile?.avatar_url ?
+            <img
+              src={profile.avatar_url}
+              alt="Avatar"
+              className="w-full h-full rounded-full object-cover" /> :
+
+
+            <span className="text-sm font-bold text-primary-foreground">
                   {(profile?.display_name || user.email || 'U')[0].toUpperCase()}
                 </span>
-              )}
-            </button>
-          ) : (
-            <Link
-              to="/auth"
-              className="absolute top-4 left-4 w-10 h-10 bg-primary border-2 border-primary/50 rounded-full flex items-center justify-center shadow-elegant hover:scale-110 transition-all animate-pulse"
-            >
+            }
+            </button> :
+
+          <Link
+            to="/auth"
+            className="absolute top-4 left-4 w-10 h-10 bg-primary border-2 border-primary/50 rounded-full flex items-center justify-center shadow-elegant hover:scale-110 transition-all animate-pulse">
+
               <LogIn className="w-5 h-5 text-primary-foreground" />
             </Link>
-          )}
+          }
 
           {/* Top-right: Streak flame + Points */}
           <div className="absolute top-4 right-4 flex items-center gap-2">
-            {profile && user && (
-              <div className="flex items-center gap-1 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft">
+            {profile && user &&
+            <div className="flex items-center gap-1 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft">
                 <Trophy className="w-4 h-4 text-primary" />
                 <span className="text-xs font-bold text-foreground">{profile.points}</span>
               </div>
-            )}
+            }
             <button
               onClick={() => setStreakDialogOpen(true)}
-              className="w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
-            >
+              className="w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all">
+
               <Flame className="w-5 h-5 text-destructive" />
-              {profile && user && (
-                <span className="absolute -bottom-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+              {profile && user &&
+              <span className="absolute -bottom-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {profile.streak}
                 </span>
-              )}
+              }
             </button>
           </div>
           
@@ -119,8 +119,8 @@ const Home = () => {
 
           <p className="text-sm font-medium text-primary mb-1">ארמית. פשוט להבין.</p>
           
-          <p className="text-muted-foreground text-xs max-w-xs mx-auto">
-            המפתח שלך לשפת הגמרא אצלכם בכיס! למדו ארמית בשיטת דואולינגו עם תחרויות ומשימות יומיות.
+          <p className="text-muted-foreground text-xs max-w-xs mx-auto">המפתח שלך לשפת הגמרא אצלכם בכיס! למדו ארמית  עם תחרויות ומשימות יומיות.
+
           </p>
         </div>
       </div>
@@ -135,15 +135,15 @@ const Home = () => {
             </span>
           </div>
           <div className="h-3 bg-muted rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-gradient-to-l from-primary to-primary/70 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
+              style={{ width: `${progress}%` }} />
+
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            {learnedCount >= dictionary.length
-              ? 'כל הכבוד! למדת את כל המילים! 🎉'
-              : `נותרו ${dictionary.length - learnedCount} מילים ללמידה`}
+            {learnedCount >= dictionary.length ?
+            'כל הכבוד! למדת את כל המילים! 🎉' :
+            `נותרו ${dictionary.length - learnedCount} מילים ללמידה`}
           </p>
         </div>
       </div>
@@ -153,12 +153,12 @@ const Home = () => {
 
       {/* Feature Cards */}
       <div className="px-6 space-y-4">
-        {features.map(({ path, icon: Icon, title, description, color }) => (
-          <Link
-            key={path}
-            to={path}
-            className="group block bg-card rounded-2xl p-5 shadow-soft border border-border hover:shadow-elegant hover:border-primary/20 transition-all duration-300"
-          >
+        {features.map(({ path, icon: Icon, title, description, color }) =>
+        <Link
+          key={path}
+          to={path}
+          className="group block bg-card rounded-2xl p-5 shadow-soft border border-border hover:shadow-elegant hover:border-primary/20 transition-all duration-300">
+
             <div className="flex items-center gap-4">
               <div className={`w-14 h-14 rounded-xl ${color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                 <Icon className="w-7 h-7" />
@@ -169,12 +169,12 @@ const Home = () => {
               </div>
             </div>
           </Link>
-        ))}
+        )}
         {/* Updates Link */}
         <Link
           to="/feed"
-          className="group block bg-card rounded-2xl p-5 shadow-soft border border-border hover:shadow-elegant hover:border-primary/20 transition-all duration-300"
-        >
+          className="group block bg-card rounded-2xl p-5 shadow-soft border border-border hover:shadow-elegant hover:border-primary/20 transition-all duration-300">
+
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-xl bg-muted text-muted-foreground flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               <Rss className="w-7 h-7" />
@@ -204,8 +204,8 @@ const Home = () => {
         </div>
       </div>
       <StreakLockDialog open={streakDialogOpen} onOpenChange={setStreakDialogOpen} />
-    </div>
-  );
+    </div>);
+
 };
 
 export default Home;
