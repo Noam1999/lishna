@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Check, RotateCcw, Sparkles } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useAuth } from '@/contexts/AuthContext';
+import QuizTriggerDialog from '@/components/QuizTriggerDialog';
 
 const Flashcards = () => {
   const { dictionary, markAsLearned: markAsLearnedLocal, resetProgress } = useDictionary();
@@ -15,6 +16,8 @@ const Flashcards = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [words, setWords] = useState<DictionaryWord[]>([]);
   const [isMarking, setIsMarking] = useState(false);
+  const [quizTriggerOpen, setQuizTriggerOpen] = useState(false);
+  const learnedThisSession = useRef(0);
 
   // Filter out words that are already learned (from DB if logged in, or local state)
   useEffect(() => {
@@ -81,6 +84,12 @@ const Flashcards = () => {
     
     setIsMarking(false);
     setIsFlipped(false);
+    
+    // Track session learned count for quiz trigger
+    learnedThisSession.current += 1;
+    if (learnedThisSession.current === 4) {
+      setQuizTriggerOpen(true);
+    }
     
     // Remove from current list and move to next
     setWords(prev => prev.filter(w => w.id !== currentWord.id));
@@ -213,6 +222,7 @@ const Flashcards = () => {
           {isMarking ? 'שומר...' : 'סימנתי כנלמד'}
         </Button>
       </div>
+      <QuizTriggerDialog open={quizTriggerOpen} onOpenChange={setQuizTriggerOpen} />
     </div>
   );
 };

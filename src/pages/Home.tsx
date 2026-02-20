@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, User, LogIn, Flame } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, User, LogIn, Flame, Rss, Trophy } from 'lucide-react';
 import Header from '@/components/Header';
 import DailyQuests from '@/components/DailyQuests';
 import StreakLockDialog from '@/components/StreakLockDialog';
@@ -58,16 +58,6 @@ const Home = () => {
         
         <div className="relative z-10 pt-12 pb-8 px-6 text-center">
           {/* User Auth/Profile Button */}
-          {/* Streak flame for guests */}
-          {!user && (
-            <button
-              onClick={() => setStreakDialogOpen(true)}
-              className="absolute top-4 right-4 w-10 h-10 bg-destructive/10 border border-destructive/30 rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
-            >
-              <Flame className="w-5 h-5 text-destructive" />
-            </button>
-          )}
-
           {user ? (
             <button
               onClick={() => navigate('/profile')}
@@ -93,21 +83,44 @@ const Home = () => {
               <LogIn className="w-5 h-5 text-primary-foreground" />
             </Link>
           )}
+
+          {/* Top-right: Streak flame + Points */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            {profile && user && (
+              <div className="flex items-center gap-1 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft">
+                <Trophy className="w-4 h-4 text-primary" />
+                <span className="text-xs font-bold text-foreground">{profile.points}</span>
+              </div>
+            )}
+            <button
+              onClick={() => setStreakDialogOpen(true)}
+              className="w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all"
+            >
+              <Flame className="w-5 h-5 text-destructive" />
+              {profile && user && (
+                <span className="absolute -bottom-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {profile.streak}
+                </span>
+              )}
+            </button>
+          </div>
           
           <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border rounded-full px-4 py-2 mb-6 shadow-soft">
             <Sparkles className="w-4 h-4 text-primary animate-pulse" />
             <span className="text-sm font-medium text-muted-foreground">למד ארמית בבלית</span>
           </div>
           
-          <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex items-center justify-center gap-3 mb-2">
             <ScrollText className="w-10 h-10 text-primary" />
             <h1 className="text-3xl font-display font-bold text-foreground">
-              לִישָׁנָא דְּאוֹרַיְיתָא
+              לִישָׁנָא
             </h1>
           </div>
+
+          <p className="text-sm font-medium text-primary mb-1">ארמית. פשוט להבין.</p>
           
-          <p className="text-muted-foreground max-w-xs mx-auto">
-            שער לשפת התלמוד הבבלי - למד, תרגם והבן את לשון חז"ל
+          <p className="text-muted-foreground text-xs max-w-xs mx-auto">
+            המפתח שלך לשפת הגמרא אצלכם בכיס! למדו ארמית בשיטת דואולינגו עם תחרויות ומשימות יומיות.
           </p>
         </div>
       </div>
@@ -157,6 +170,21 @@ const Home = () => {
             </div>
           </Link>
         ))}
+        {/* Updates Link */}
+        <Link
+          to="/feed"
+          className="group block bg-card rounded-2xl p-5 shadow-soft border border-border hover:shadow-elegant hover:border-primary/20 transition-all duration-300"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-muted text-muted-foreground flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Rss className="w-7 h-7" />
+            </div>
+            <div className="flex-1 text-right">
+              <h3 className="font-semibold text-lg text-foreground mb-1">עדכונים</h3>
+              <p className="text-sm text-muted-foreground">צפה בפעילות החברים שלך</p>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Daily Word */}
