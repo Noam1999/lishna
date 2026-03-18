@@ -161,7 +161,7 @@ const Profile = () => {
       opacity: 1, 
       y: 0,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 200,
         damping: 15,
         mass: 1,
