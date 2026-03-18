@@ -100,10 +100,14 @@ const Home = () => {
               </div>
             }
             <button
-              onClick={() => setStreakDialogOpen(true)}
-              className="w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all">
+              onClick={() => {
+                if (!user) {
+                  setStreakDialogOpen(true);
+                }
+              }}
+              className={`relative w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all ${shouldPulseFlame ? 'animate-pulse' : ''}`}>
 
-              <Flame className="w-5 h-5 text-destructive" />
+              <Flame className={`w-5 h-5 ${hasCompletedToday ? 'text-primary' : 'text-destructive'}`} />
               {profile && user &&
               <span className="absolute -bottom-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {profile.streak}
