@@ -17,6 +17,13 @@ const Home = () => {
   const { profile } = useProfile();
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
+
+  // Check if user has completed today's streak (did a quiz today)
+  const today = new Date().toISOString().split('T')[0];
+  const hasCompletedToday = profile?.last_quiz_date
+    ? new Date(profile.last_quiz_date).toISOString().split('T')[0] === today
+    : false;
+  const shouldPulseFlame = user ? !hasCompletedToday : true;
   useGuestWarning();
 
   // Use DB count if logged in, otherwise use local count
@@ -93,10 +100,14 @@ const Home = () => {
               </div>
             }
             <button
-              onClick={() => setStreakDialogOpen(true)}
-              className="w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all">
+              onClick={() => {
+                if (!user) {
+                  setStreakDialogOpen(true);
+                }
+              }}
+              className={`relative w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all ${shouldPulseFlame ? 'animate-pulse' : ''}`}>
 
-              <Flame className="w-5 h-5 text-destructive" />
+              <Flame className={`w-5 h-5 ${hasCompletedToday ? 'text-primary' : 'text-destructive'}`} />
               {profile && user &&
               <span className="absolute -bottom-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {profile.streak}
