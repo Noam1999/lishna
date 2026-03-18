@@ -17,6 +17,13 @@ const Home = () => {
   const { profile } = useProfile();
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
+
+  // Check if user has completed today's streak (did a quiz today)
+  const today = new Date().toISOString().split('T')[0];
+  const hasCompletedToday = profile?.last_quiz_date
+    ? new Date(profile.last_quiz_date).toISOString().split('T')[0] === today
+    : false;
+  const shouldPulseFlame = user ? !hasCompletedToday : true;
   useGuestWarning();
 
   // Use DB count if logged in, otherwise use local count
