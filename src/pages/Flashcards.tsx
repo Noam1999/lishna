@@ -7,6 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useAuth } from '@/contexts/AuthContext';
 import QuizTriggerDialog from '@/components/QuizTriggerDialog';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 const Flashcards = () => {
   const { dictionary, markAsLearned: markAsLearnedLocal, resetProgress } = useDictionary();
@@ -18,6 +19,7 @@ const Flashcards = () => {
   const [isMarking, setIsMarking] = useState(false);
   const [quizTriggerOpen, setQuizTriggerOpen] = useState(false);
   const learnedThisSession = useRef(0);
+  const { playSuccess, playClick } = useSoundEffects();
 
   // Filter out words that are already learned (from DB if logged in, or local state)
   useEffect(() => {
@@ -38,6 +40,7 @@ const Flashcards = () => {
   const progress = totalWords > 0 ? ((currentIndex) / totalWords) * 100 : 0;
 
   const handleFlip = () => {
+    playClick();
     setIsFlipped(!isFlipped);
   };
 
@@ -59,6 +62,7 @@ const Flashcards = () => {
     setIsMarking(true);
     
     // Update local state
+    playSuccess();
     markAsLearnedLocal(currentWord.id);
     
     // If user is logged in, save to database

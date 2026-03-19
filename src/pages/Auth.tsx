@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
+import { toast as sonnerToast } from 'sonner';
 
 type AuthMode = 'login' | 'register';
 
@@ -250,7 +251,7 @@ const Auth = () => {
 
           {mode === 'login' && (
             <div className="text-left">
-              <button type="button" className="text-sm text-primary hover:underline">
+              <button type="button" onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-sm text-primary hover:underline">
                 שכחת סיסמה?
               </button>
             </div>
@@ -319,9 +320,9 @@ const Auth = () => {
         {/* Terms */}
         <p className="text-center text-xs text-muted-foreground mt-6 mb-8">
           בהתחברות אתה מסכים ל
-          <button className="text-primary hover:underline mx-1">תנאי השימוש</button>
+          <button onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-primary hover:underline mx-1">תנאי השימוש</button>
           ול
-          <button className="text-primary hover:underline mx-1">מדיניות הפרטיות</button>
+          <button onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-primary hover:underline mx-1">מדיניות הפרטיות</button>
         </p>
       </div>
     </div>

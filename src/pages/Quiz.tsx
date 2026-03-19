@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Trophy, RotateCcw, BookOpen } from 'lucide-react';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ const Quiz = () => {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [notEnoughWords, setNotEnoughWords] = useState(false);
+  const { playSuccess, playError, playClick } = useSoundEffects();
 
   const TOTAL_QUESTIONS = 10;
   const MIN_WORDS_FOR_QUIZ = 4; // Minimum words needed for a quiz (1 correct + 3 wrong options)
@@ -94,7 +96,10 @@ const Quiz = () => {
     setIsCorrect(correct);
 
     if (correct) {
+      playSuccess();
       setQuizScore((prev) => prev + 1);
+    } else {
+      playError();
     }
 
     setQuizHistory((prev) => [
