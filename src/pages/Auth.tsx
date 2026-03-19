@@ -251,7 +251,7 @@ const Auth = () => {
 
           {mode === 'login' && (
             <div className="text-left">
-              <button type="button" className="text-sm text-primary hover:underline">
+              <button type="button" onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-sm text-primary hover:underline">
                 שכחת סיסמה?
               </button>
             </div>
