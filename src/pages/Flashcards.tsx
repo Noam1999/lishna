@@ -40,6 +40,7 @@ const Flashcards = () => {
   const progress = totalWords > 0 ? ((currentIndex) / totalWords) * 100 : 0;
 
   const handleFlip = () => {
+    playClick();
     setIsFlipped(!isFlipped);
   };
 
