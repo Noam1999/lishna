@@ -52,6 +52,7 @@ const Profile = () => {
   const { learnedCount, loading: wordsLoading } = useUserWords();
   const { achievements, loading: achievementsLoading } = useAchievements();
   const [progressValue, setProgressValue] = useState(0);
+  const { playClick } = useSoundEffects();
 
   const handleSignOut = async () => {
     await signOut();
