@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
+import { toast as sonnerToast } from 'sonner';
 
 type AuthMode = 'login' | 'register';
 
