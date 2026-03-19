@@ -179,7 +179,7 @@ const Profile = () => {
         <motion.button
           whileTap={{ scale: 0.9 }}
           transition={spring}
-          onClick={() => {}}
+          onClick={() => { playClick(); toast('בקרוב! אנחנו עובדים על זה 🚧'); }}
           className="w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center shadow-soft"
         >
           <Settings className="w-5 h-5 text-muted-foreground" />
