@@ -12,6 +12,8 @@ import { useUserWords } from '@/hooks/useUserWords';
 import { useAchievements } from '@/hooks/useAchievements';
 import { Progress } from '@/components/ui/progress';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 const DAILY_GOAL = 50;
 
