@@ -71,7 +71,7 @@ const Home = () => {
           {/* User Auth/Profile Button */}
           {user ?
           <button
-            onClick={() => navigate('/profile')}
+            onClick={() => { playClick(); navigate('/profile'); }}
             className="absolute top-4 left-4 w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all">
 
               {profile?.avatar_url ?
@@ -89,11 +89,25 @@ const Home = () => {
 
           <Link
             to="/auth"
+            onClick={() => playClick()}
             className="absolute top-4 left-4 w-10 h-10 bg-primary border-2 border-primary/50 rounded-full flex items-center justify-center shadow-elegant hover:scale-110 transition-all animate-pulse">
 
               <LogIn className="w-5 h-5 text-primary-foreground" />
             </Link>
           }
+
+          {/* Theme Toggle */}
+          <button
+            onClick={() => { playClick(); toggleTheme(); }}
+            className="absolute top-4 left-16 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all hover:scale-105"
+            aria-label="Toggle theme"
+          >
+            {theme === 'light' ? (
+              <Moon className="w-5 h-5 text-muted-foreground" />
+            ) : (
+              <Sun className="w-5 h-5 text-yellow-400" />
+            )}
+          </button>
 
           {/* Top-right: Streak flame + Points */}
           <div className="absolute top-4 right-4 flex items-center gap-2">
