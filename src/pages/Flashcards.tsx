@@ -62,6 +62,7 @@ const Flashcards = () => {
     setIsMarking(true);
     
     // Update local state
+    playSuccess();
     markAsLearnedLocal(currentWord.id);
     
     // If user is logged in, save to database
