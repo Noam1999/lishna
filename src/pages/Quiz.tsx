@@ -10,6 +10,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useAchievements } from '@/hooks/useAchievements';
+import { useDailyQuests } from '@/hooks/useDailyQuests';
 
 interface QuizQuestion {
   word: DictionaryWord;
