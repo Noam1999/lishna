@@ -72,6 +72,17 @@ const AdminFeedback = () => {
     );
   }
 
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4" dir="rtl">
+        <ShieldX className="w-16 h-16 text-destructive" />
+        <h2 className="text-xl font-bold text-foreground">אין הרשאה</h2>
+        <p className="text-muted-foreground">דף זה מיועד למנהלים בלבד</p>
+        <button onClick={() => navigate('/')} className="text-primary hover:underline text-sm">חזרה לדף הבית</button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-24" dir="rtl">
       <div className="max-w-2xl mx-auto px-4 py-6">
