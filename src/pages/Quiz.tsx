@@ -122,6 +122,9 @@ const Quiz = () => {
           await addWeeklyPoints(pointsEarned);
           await updateQuizStreak();
           await checkAndUnlockAchievements();
+          // Update daily quest progress
+          await updateQuestProgress('complete_quizzes', 1);
+          await updateQuestProgress('earn_points', pointsEarned);
         }
         navigate('/quiz-summary');
       }

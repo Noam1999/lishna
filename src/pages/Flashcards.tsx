@@ -83,6 +83,9 @@ const Flashcards = () => {
     if (learnedThisSession.current === 4) {
       setQuizTriggerOpen(true);
     }
+
+    // Update daily quest progress
+    await updateQuestProgress('learn_words', 1);
     
     // Remove from current list and move to next
     setWords(prev => prev.filter(w => w.id !== currentWord.id));
