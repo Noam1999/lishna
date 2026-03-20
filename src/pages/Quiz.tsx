@@ -92,9 +92,10 @@ const Quiz = () => {
   const handleAnswer = (answer: string) => {
     if (showResult) return;
 
+    const correct = answer === questions[currentQuestion].correctAnswer;
+    
     setSelectedAnswer(answer);
     setShowResult(true);
-    const correct = answer === questions[currentQuestion].correctAnswer;
     setIsCorrect(correct);
 
     if (correct) {
@@ -109,9 +110,11 @@ const Quiz = () => {
     // Auto advance after delay
     setTimeout(async () => {
       if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion((prev) => prev + 1);
+        // Reset state for next question
         setSelectedAnswer(null);
         setShowResult(false);
+        setIsCorrect(false);
+        setCurrentQuestion((prev) => prev + 1);
       } else {
         // Quiz finished - update profile stats
         if (user && !hasUpdatedStreak.current) {
