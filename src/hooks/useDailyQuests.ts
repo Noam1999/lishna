@@ -106,27 +106,32 @@ export const useDailyQuests = () => {
   const updateQuestProgress = async (questType: string, increment: number) => {
     if (!user) return;
 
-    const quest = quests.find(q => q.quest_type === questType || q.quest_type.startsWith(questType.split('_')[0]));
-    if (!quest || quest.completed) return;
-
-    const newValue = Math.min(quest.current_value + increment, quest.target_value);
-    const nowCompleted = newValue >= quest.target_value;
-
-    await supabase
-      .from('daily_quests')
-      .update({
-        current_value: newValue,
-        completed: nowCompleted,
-      })
-      .eq('id', quest.id);
-
-    setQuests(prev =>
-      prev.map(q =>
-        q.id === quest.id
-          ? { ...q, current_value: newValue, completed: nowCompleted }
-          : q
-      )
+    // Find all matching quests for the given type category
+    const category = questType.split('_').slice(0, 2).join('_'); // e.g. "learn_words", "complete_quizzes", "earn_points"
+    const matchingQuests = quests.filter(q => 
+      q.quest_type.startsWith(category) && !q.completed
     );
+
+    for (const quest of matchingQuests) {
+      const newValue = Math.min(quest.current_value + increment, quest.target_value);
+      const nowCompleted = newValue >= quest.target_value;
+
+      await supabase
+        .from('daily_quests')
+        .update({
+          current_value: newValue,
+          completed: nowCompleted,
+        })
+        .eq('id', quest.id);
+
+      setQuests(prev =>
+        prev.map(q =>
+          q.id === quest.id
+            ? { ...q, current_value: newValue, completed: nowCompleted }
+            : q
+        )
+      );
+    }
   };
 
   const claimReward = async (questId: string) => {
