@@ -43,17 +43,6 @@ const Flashcards = () => {
     setIsFlipped(!isFlipped);
   };
 
-  const handleNext = () => {
-    setIsFlipped(false);
-    if (currentIndex < words.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      toast({
-        title: 'סיימת את הסט!',
-        description: 'כל הכבוד! עברת על כל המילים',
-      });
-    }
-  };
 
   const handleMarkLearned = async () => {
     if (!currentWord || isMarking) return;
