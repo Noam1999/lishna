@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, Check, RotateCcw, Sparkles } from 'lucide-react';
+import { Check, RotateCcw, Sparkles } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
