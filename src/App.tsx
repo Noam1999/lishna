@@ -44,6 +44,7 @@ const App = () => (
               <Route path="/feed" element={<Feed />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <FeedbackButton />
             <Navigation />
           </BrowserRouter>
         </TooltipProvider>
