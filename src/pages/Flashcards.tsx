@@ -1,25 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, Check, RotateCcw, Sparkles } from 'lucide-react';
+import { Check, RotateCcw, Sparkles } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDailyQuests } from '@/hooks/useDailyQuests';
 import QuizTriggerDialog from '@/components/QuizTriggerDialog';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
+
 
 const Flashcards = () => {
   const { dictionary, markAsLearned: markAsLearnedLocal, resetProgress } = useDictionary();
   const { user } = useAuth();
   const { markWordAsLearned, isWordLearned, loading: wordsLoading } = useUserWords();
+  const { updateQuestProgress } = useDailyQuests();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [words, setWords] = useState<DictionaryWord[]>([]);
   const [isMarking, setIsMarking] = useState(false);
   const [quizTriggerOpen, setQuizTriggerOpen] = useState(false);
   const learnedThisSession = useRef(0);
-  const { playSuccess, playClick } = useSoundEffects();
+  
 
   // Filter out words that are already learned (from DB if logged in, or local state)
   useEffect(() => {
@@ -40,21 +42,9 @@ const Flashcards = () => {
   const progress = totalWords > 0 ? ((currentIndex) / totalWords) * 100 : 0;
 
   const handleFlip = () => {
-    playClick();
     setIsFlipped(!isFlipped);
   };
 
-  const handleNext = () => {
-    setIsFlipped(false);
-    if (currentIndex < words.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      toast({
-        title: 'סיימת את הסט!',
-        description: 'כל הכבוד! עברת על כל המילים',
-      });
-    }
-  };
 
   const handleMarkLearned = async () => {
     if (!currentWord || isMarking) return;
@@ -62,7 +52,6 @@ const Flashcards = () => {
     setIsMarking(true);
     
     // Update local state
-    playSuccess();
     markAsLearnedLocal(currentWord.id);
     
     // If user is logged in, save to database
@@ -94,6 +83,9 @@ const Flashcards = () => {
     if (learnedThisSession.current === 4) {
       setQuizTriggerOpen(true);
     }
+
+    // Update daily quest progress
+    await updateQuestProgress('learn_words', 1);
     
     // Remove from current list and move to next
     setWords(prev => prev.filter(w => w.id !== currentWord.id));
@@ -209,17 +201,8 @@ const Flashcards = () => {
       {/* Action Buttons */}
       <div className="px-6 space-y-3">
         <Button 
-          onClick={handleNext}
-          className="w-full h-14 text-lg"
-          disabled={currentIndex >= words.length - 1}
-        >
-          <ChevronLeft className="w-5 h-5 mr-2" />
-          המילה הבאה
-        </Button>
-        <Button 
           onClick={handleMarkLearned}
-          variant="secondary"
-          className="w-full h-12"
+          className="w-full h-14 text-lg"
           disabled={isMarking}
         >
           <Check className="w-5 h-5 mr-2" />

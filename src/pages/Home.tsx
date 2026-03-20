@@ -10,7 +10,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useGuestWarning } from '@/hooks/useGuestWarning';
 import { useTheme } from '@/hooks/useTheme';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
+
 
 const Home = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const Home = () => {
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const { playClick } = useSoundEffects();
+  
 
   // Check if user has completed today's streak (did a quiz today)
   const today = new Date().toISOString().split('T')[0];
@@ -71,7 +71,7 @@ const Home = () => {
           {/* User Auth/Profile Button */}
           {user ?
           <button
-            onClick={() => { playClick(); navigate('/profile'); }}
+            onClick={() => { navigate('/profile'); }}
             className="absolute top-4 left-4 w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all">
 
               {profile?.avatar_url ?
@@ -89,7 +89,6 @@ const Home = () => {
 
           <Link
             to="/auth"
-            onClick={() => playClick()}
             className="absolute top-4 left-4 w-10 h-10 bg-primary border-2 border-primary/50 rounded-full flex items-center justify-center shadow-elegant hover:scale-110 transition-all animate-pulse">
 
               <LogIn className="w-5 h-5 text-primary-foreground" />
@@ -98,7 +97,7 @@ const Home = () => {
 
           {/* Theme Toggle */}
           <button
-            onClick={() => { playClick(); toggleTheme(); }}
+            onClick={() => { toggleTheme(); }}
             className="absolute top-4 left-16 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all hover:scale-105"
             aria-label="Toggle theme"
           >

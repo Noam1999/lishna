@@ -13,7 +13,7 @@ import { useAchievements } from '@/hooks/useAchievements';
 import { Progress } from '@/components/ui/progress';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
+
 
 const DAILY_GOAL = 50;
 
@@ -52,7 +52,7 @@ const Profile = () => {
   const { learnedCount, loading: wordsLoading } = useUserWords();
   const { achievements, loading: achievementsLoading } = useAchievements();
   const [progressValue, setProgressValue] = useState(0);
-  const { playClick } = useSoundEffects();
+  
 
   const handleSignOut = async () => {
     await signOut();
@@ -179,7 +179,7 @@ const Profile = () => {
         <motion.button
           whileTap={{ scale: 0.9 }}
           transition={spring}
-          onClick={() => { playClick(); toast('בקרוב! אנחנו עובדים על זה 🚧'); }}
+          onClick={() => { toast('בקרוב! אנחנו עובדים על זה 🚧'); }}
           className="w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center shadow-soft"
         >
           <Settings className="w-5 h-5 text-muted-foreground" />

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { ArrowRight, Bug, Lightbulb, MessageCircle } from 'lucide-react';
+import { ArrowRight, Bug, Lightbulb, MessageCircle, ShieldX } from 'lucide-react';
 
 interface FeedbackItem {
   id: string;
@@ -28,6 +28,7 @@ const AdminFeedback = () => {
   const navigate = useNavigate();
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -37,7 +38,22 @@ const AdminFeedback = () => {
 
   useEffect(() => {
     if (!user) return;
-    const fetchFeedback = async () => {
+    const checkAdminAndFetch = async () => {
+      // Check admin role
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin');
+
+      if (!roles || roles.length === 0) {
+        setIsAdmin(false);
+        setIsLoading(false);
+        return;
+      }
+      setIsAdmin(true);
+
+      // Fetch feedback (RLS will also enforce admin check)
       const { data, error } = await supabase
         .from('feedback')
         .select('*')
@@ -45,13 +61,24 @@ const AdminFeedback = () => {
       if (!error && data) setFeedbackList(data);
       setIsLoading(false);
     };
-    fetchFeedback();
+    checkAdminAndFetch();
   }, [user]);
 
   if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4" dir="rtl">
+        <ShieldX className="w-16 h-16 text-destructive" />
+        <h2 className="text-xl font-bold text-foreground">אין הרשאה</h2>
+        <p className="text-muted-foreground">דף זה מיועד למנהלים בלבד</p>
+        <button onClick={() => navigate('/')} className="text-primary hover:underline text-sm">חזרה לדף הבית</button>
       </div>
     );
   }

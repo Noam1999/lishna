@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Trophy, RotateCcw, BookOpen } from 'lucide-react';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
+
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useAchievements } from '@/hooks/useAchievements';
+import { useDailyQuests } from '@/hooks/useDailyQuests';
 
 interface QuizQuestion {
   word: DictionaryWord;
@@ -25,6 +26,7 @@ const Quiz = () => {
   const { learnedWordIds, loading: wordsLoading } = useUserWords();
   const { addWeeklyPoints } = useLeaderboard();
   const { checkAndUnlockAchievements } = useAchievements();
+  const { updateQuestProgress } = useDailyQuests();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const hasUpdatedStreak = useRef(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -32,7 +34,7 @@ const Quiz = () => {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [notEnoughWords, setNotEnoughWords] = useState(false);
-  const { playSuccess, playError, playClick } = useSoundEffects();
+  
 
   const TOTAL_QUESTIONS = 10;
   const MIN_WORDS_FOR_QUIZ = 4; // Minimum words needed for a quiz (1 correct + 3 wrong options)
@@ -96,10 +98,7 @@ const Quiz = () => {
     setIsCorrect(correct);
 
     if (correct) {
-      playSuccess();
       setQuizScore((prev) => prev + 1);
-    } else {
-      playError();
     }
 
     setQuizHistory((prev) => [
@@ -123,6 +122,9 @@ const Quiz = () => {
           await addWeeklyPoints(pointsEarned);
           await updateQuizStreak();
           await checkAndUnlockAchievements();
+          // Update daily quest progress
+          await updateQuestProgress('complete_quizzes', 1);
+          await updateQuestProgress('earn_points', pointsEarned);
         }
         navigate('/quiz-summary');
       }
