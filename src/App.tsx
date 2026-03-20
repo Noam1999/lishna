@@ -19,6 +19,7 @@ import QuizSummary from "./pages/QuizSummary";
 import Leaderboard from "./pages/Leaderboard";
 import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
+import AdminFeedback from "./pages/AdminFeedback";
 
 const queryClient = new QueryClient();
 
