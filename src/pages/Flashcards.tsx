@@ -7,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useAuth } from '@/contexts/AuthContext';
 import QuizTriggerDialog from '@/components/QuizTriggerDialog';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
+
 
 const Flashcards = () => {
   const { dictionary, markAsLearned: markAsLearnedLocal, resetProgress } = useDictionary();

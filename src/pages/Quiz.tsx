@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Trophy, RotateCcw, BookOpen } from 'lucide-react';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
+
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { Button } from '@/components/ui/button';
