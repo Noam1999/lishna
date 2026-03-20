@@ -96,10 +96,7 @@ const Quiz = () => {
     setIsCorrect(correct);
 
     if (correct) {
-      playSuccess();
       setQuizScore((prev) => prev + 1);
-    } else {
-      playError();
     }
 
     setQuizHistory((prev) => [

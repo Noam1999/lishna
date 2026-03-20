@@ -98,7 +98,7 @@ const Home = () => {
 
           {/* Theme Toggle */}
           <button
-            onClick={() => { playClick(); toggleTheme(); }}
+            onClick={() => { toggleTheme(); }}
             className="absolute top-4 left-16 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all hover:scale-105"
             aria-label="Toggle theme"
           >
