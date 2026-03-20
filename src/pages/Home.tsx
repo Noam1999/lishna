@@ -89,7 +89,7 @@ const Home = () => {
 
           <Link
             to="/auth"
-            onClick={() => playClick()}
+            onClick={() => {}}
             className="absolute top-4 left-4 w-10 h-10 bg-primary border-2 border-primary/50 rounded-full flex items-center justify-center shadow-elegant hover:scale-110 transition-all animate-pulse">
 
               <LogIn className="w-5 h-5 text-primary-foreground" />
