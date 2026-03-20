@@ -207,17 +207,8 @@ const Flashcards = () => {
       {/* Action Buttons */}
       <div className="px-6 space-y-3">
         <Button 
-          onClick={handleNext}
-          className="w-full h-14 text-lg"
-          disabled={currentIndex >= words.length - 1}
-        >
-          <ChevronLeft className="w-5 h-5 mr-2" />
-          המילה הבאה
-        </Button>
-        <Button 
           onClick={handleMarkLearned}
-          variant="secondary"
-          className="w-full h-12"
+          className="w-full h-14 text-lg"
           disabled={isMarking}
         >
           <Check className="w-5 h-5 mr-2" />
