@@ -19,6 +19,7 @@ import QuizSummary from "./pages/QuizSummary";
 import Leaderboard from "./pages/Leaderboard";
 import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
+import AdminFeedback from "./pages/AdminFeedback";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/quiz-summary" element={<QuizSummary />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/feed" element={<Feed />} />
+              <Route path="/admin/feedback" element={<AdminFeedback />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <FeedbackButton />
