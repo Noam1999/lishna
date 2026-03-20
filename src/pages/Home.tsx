@@ -71,7 +71,7 @@ const Home = () => {
           {/* User Auth/Profile Button */}
           {user ?
           <button
-            onClick={() => { playClick(); navigate('/profile'); }}
+            onClick={() => { navigate('/profile'); }}
             className="absolute top-4 left-4 w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all">
 
               {profile?.avatar_url ?
