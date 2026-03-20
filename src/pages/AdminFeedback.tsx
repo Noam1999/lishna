@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { ArrowRight, Bug, Lightbulb, MessageCircle } from 'lucide-react';
+import { ArrowRight, Bug, Lightbulb, MessageCircle, ShieldX } from 'lucide-react';
 
 interface FeedbackItem {
   id: string;
@@ -28,6 +28,7 @@ const AdminFeedback = () => {
   const navigate = useNavigate();
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -37,7 +38,22 @@ const AdminFeedback = () => {
 
   useEffect(() => {
     if (!user) return;
-    const fetchFeedback = async () => {
+    const checkAdminAndFetch = async () => {
+      // Check admin role
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin');
+
+      if (!roles || roles.length === 0) {
+        setIsAdmin(false);
+        setIsLoading(false);
+        return;
+      }
+      setIsAdmin(true);
+
+      // Fetch feedback (RLS will also enforce admin check)
       const { data, error } = await supabase
         .from('feedback')
         .select('*')
@@ -45,7 +61,7 @@ const AdminFeedback = () => {
       if (!error && data) setFeedbackList(data);
       setIsLoading(false);
     };
-    fetchFeedback();
+    checkAdminAndFetch();
   }, [user]);
 
   if (loading || isLoading) {
