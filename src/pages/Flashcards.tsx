@@ -14,6 +14,7 @@ const Flashcards = () => {
   const { dictionary, markAsLearned: markAsLearnedLocal, resetProgress } = useDictionary();
   const { user } = useAuth();
   const { markWordAsLearned, isWordLearned, loading: wordsLoading } = useUserWords();
+  const { updateQuestProgress } = useDailyQuests();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [words, setWords] = useState<DictionaryWord[]>([]);
