@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDailyQuests } from '@/hooks/useDailyQuests';
 import QuizTriggerDialog from '@/components/QuizTriggerDialog';
 
 
