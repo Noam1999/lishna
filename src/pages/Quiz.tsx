@@ -32,7 +32,7 @@ const Quiz = () => {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [notEnoughWords, setNotEnoughWords] = useState(false);
-  const { playSuccess, playError, playClick } = useSoundEffects();
+  
 
   const TOTAL_QUESTIONS = 10;
   const MIN_WORDS_FOR_QUIZ = 4; // Minimum words needed for a quiz (1 correct + 3 wrong options)

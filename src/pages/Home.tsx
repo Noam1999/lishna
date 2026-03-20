@@ -20,7 +20,7 @@ const Home = () => {
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const { playClick } = useSoundEffects();
+  
 
   // Check if user has completed today's streak (did a quiz today)
   const today = new Date().toISOString().split('T')[0];

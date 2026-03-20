@@ -19,7 +19,7 @@ const Flashcards = () => {
   const [isMarking, setIsMarking] = useState(false);
   const [quizTriggerOpen, setQuizTriggerOpen] = useState(false);
   const learnedThisSession = useRef(0);
-  const { playSuccess, playClick } = useSoundEffects();
+  
 
   // Filter out words that are already learned (from DB if logged in, or local state)
   useEffect(() => {
