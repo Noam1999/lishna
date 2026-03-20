@@ -89,10 +89,18 @@ const Quiz = () => {
     }
   }, [generateQuestions, wordsLoading]);
 
+  // Cleanup timeouts on unmount or question change
+  useEffect(() => {
+    return () => {
+      hasUpdatedStreak.current = false;
+    };
+  }, [currentQuestion]);
+
   const handleAnswer = (answer: string) => {
     if (showResult) return;
 
     const correct = answer === questions[currentQuestion].correctAnswer;
+    const currentQ = questions[currentQuestion];
     
     setSelectedAnswer(answer);
     setShowResult(true);
@@ -104,22 +112,23 @@ const Quiz = () => {
 
     setQuizHistory((prev) => [
       ...prev,
-      { word: questions[currentQuestion].word, correct },
+      { word: currentQ.word, correct },
     ]);
 
     // Auto advance after delay
-    setTimeout(async () => {
+    const timeoutId = setTimeout(async () => {
       if (currentQuestion < questions.length - 1) {
         // Reset state for next question
+        setCurrentQuestion((prev) => prev + 1);
         setSelectedAnswer(null);
         setShowResult(false);
         setIsCorrect(false);
-        setCurrentQuestion((prev) => prev + 1);
       } else {
         // Quiz finished - update profile stats
         if (user && !hasUpdatedStreak.current) {
           hasUpdatedStreak.current = true;
-          const finalScore = correct ? quizScore + 1 : quizScore;
+          // Use correct variable captured in closure, not stale quizScore
+          const finalScore = correct ? (quizScore + 1) : quizScore;
           const pointsEarned = Math.round((finalScore / questions.length) * 100);
           await addPoints(pointsEarned);
           await addWeeklyPoints(pointsEarned);
@@ -132,6 +141,8 @@ const Quiz = () => {
         navigate('/quiz-summary');
       }
     }, 1500);
+
+    return () => clearTimeout(timeoutId);
   };
 
   const currentQ = questions[currentQuestion];
@@ -227,16 +238,18 @@ const Quiz = () => {
           const isSelected = selectedAnswer === option;
           const isCorrectAnswer = option === currentQ.correctAnswer;
           
-          let buttonClass = 'w-full h-14 text-lg justify-start px-6 ';
+          let buttonClass = 'w-full h-14 text-lg justify-start px-6 active:scale-95 transition-all duration-75 ';
           
           if (showResult) {
             if (isCorrectAnswer) {
-              buttonClass += 'bg-green-100 border-green-500 text-green-700 hover:bg-green-100';
+              buttonClass += 'bg-green-100 border-green-500 text-green-700 hover:bg-green-100 active:bg-green-100';
             } else if (isSelected && !isCorrect) {
-              buttonClass += 'bg-red-100 border-red-500 text-red-700 hover:bg-red-100';
+              buttonClass += 'bg-red-100 border-red-500 text-red-700 hover:bg-red-100 active:bg-red-100';
             } else {
               buttonClass += 'opacity-50';
             }
+          } else {
+            buttonClass += 'hover:bg-accent active:scale-95 active:bg-accent';
           }
 
           return (
@@ -246,16 +259,17 @@ const Quiz = () => {
               onClick={() => handleAnswer(option)}
               disabled={showResult}
               className={buttonClass}
+              type="button"
             >
-              <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center ml-4 text-sm font-medium">
+              <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center ml-4 text-sm font-medium flex-shrink-0">
                 {['א', 'ב', 'ג', 'ד'][index]}
               </span>
-              {option}
+              <span className="flex-1 text-right">{option}</span>
               {showResult && isCorrectAnswer && (
-                <span className="mr-auto text-green-600">✓</span>
+                <span className="ml-2 text-green-600 flex-shrink-0">✓</span>
               )}
               {showResult && isSelected && !isCorrect && (
-                <span className="mr-auto text-red-600">✗</span>
+                <span className="ml-2 text-red-600 flex-shrink-0">✗</span>
               )}
             </Button>
           );
