@@ -26,6 +26,7 @@ const Quiz = () => {
   const { learnedWordIds, loading: wordsLoading } = useUserWords();
   const { addWeeklyPoints } = useLeaderboard();
   const { checkAndUnlockAchievements } = useAchievements();
+  const { updateQuestProgress } = useDailyQuests();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const hasUpdatedStreak = useRef(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
