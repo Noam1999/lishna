@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, User, LogIn, Flame, Rss, Trophy, Sun, Moon } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, User, LogIn, Flame, Rss, Trophy, Sun, Moon, Settings } from 'lucide-react';
 import Header from '@/components/Header';
 import DailyQuests from '@/components/DailyQuests';
 import StreakLockDialog from '@/components/StreakLockDialog';

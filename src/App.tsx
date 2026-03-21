@@ -20,6 +20,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
 import AdminFeedback from "./pages/AdminFeedback";
+import SettingsPage from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
