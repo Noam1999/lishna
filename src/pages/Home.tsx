@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useGuestWarning } from '@/hooks/useGuestWarning';
-import { useTheme } from '@/hooks/useTheme';
+
 
 
 const Home = () => {
