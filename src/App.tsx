@@ -20,6 +20,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
 import AdminFeedback from "./pages/AdminFeedback";
+import SettingsPage from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/feed" element={<Feed />} />
               <Route path="/admin/feedback" element={<AdminFeedback />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <FeedbackButton />

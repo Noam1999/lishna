@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, User, LogIn, Flame, Rss, Trophy, Sun, Moon } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings } from 'lucide-react';
 import Header from '@/components/Header';
 import DailyQuests from '@/components/DailyQuests';
 import StreakLockDialog from '@/components/StreakLockDialog';
@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useGuestWarning } from '@/hooks/useGuestWarning';
-import { useTheme } from '@/hooks/useTheme';
+
 
 
 const Home = () => {
@@ -19,7 +19,7 @@ const Home = () => {
   const { profile } = useProfile();
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
+  
   
 
   // Check if user has completed today's streak (did a quiz today)
@@ -95,17 +95,13 @@ const Home = () => {
             </Link>
           }
 
-          {/* Theme Toggle */}
+          {/* Settings Gear */}
           <button
-            onClick={() => { toggleTheme(); }}
+            onClick={() => { navigate('/settings'); }}
             className="absolute top-4 left-16 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all hover:scale-105"
-            aria-label="Toggle theme"
+            aria-label="הגדרות"
           >
-            {theme === 'light' ? (
-              <Moon className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <Sun className="w-5 h-5 text-yellow-400" />
-            )}
+            <Settings className="w-5 h-5 text-muted-foreground" />
           </button>
 
           {/* Top-right: Streak flame + Points */}
