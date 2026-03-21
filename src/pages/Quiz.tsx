@@ -254,7 +254,7 @@ const Quiz = () => {
 
           return (
             <Button
-              key={index}
+              key={`${currentQuestion}-${index}`}
               variant="outline"
               onClick={() => handleAnswer(option)}
               disabled={showResult}
