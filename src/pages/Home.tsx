@@ -19,7 +19,7 @@ const Home = () => {
   const { profile } = useProfile();
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
+  
   
 
   // Check if user has completed today's streak (did a quiz today)
