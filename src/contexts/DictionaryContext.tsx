@@ -267,6 +267,33 @@ export const DictionaryProvider = ({ children }: { children: ReactNode }) => {
   const [quizScore, setQuizScore] = useState(0);
   const [quizHistory, setQuizHistory] = useState<{ word: DictionaryWord; correct: boolean }[]>([]);
 
+  // Fetch custom words from DB and merge
+  useEffect(() => {
+    const fetchCustomWords = async () => {
+      const { data, error } = await supabase
+        .from('custom_words')
+        .select('*');
+      if (!error && data && data.length > 0) {
+        const maxId = Math.max(...initialDictionary.map(w => w.id));
+        const customWords: DictionaryWord[] = data.map((w, i) => ({
+          id: maxId + 1000 + w.id,
+          aramaic: w.aramaic,
+          hebrew: w.hebrew,
+          type: (w.word_type as DictionaryWord['type']) || 'שם עצם',
+          culturalContext: w.cultural_context || '',
+          learned: false,
+        }));
+        setDictionary(prev => {
+          const existingIds = new Set(prev.map(w => w.id));
+          const newWords = customWords.filter(w => !existingIds.has(w.id));
+          return newWords.length > 0 ? [...prev, ...newWords] : prev;
+        });
+      }
+    };
+    fetchCustomWords();
+  }, []);
+  const [quizHistory, setQuizHistory] = useState<{ word: DictionaryWord; correct: boolean }[]>([]);
+
   const searchWord = useCallback((query: string, direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew'): DictionaryWord | null => {
     const normalizedQuery = removeNiqqud(query.trim().toLowerCase());
     if (!normalizedQuery) return null;

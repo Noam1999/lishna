@@ -12,6 +12,8 @@ import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import AdminPanel from '@/components/settings/AdminPanel';
+import QuizTimerSetting from '@/components/settings/QuizTimerSetting';
 
 const feedbackTypes = [
   { value: 'bug', label: 'באג 🐛', icon: Bug },
@@ -52,7 +54,7 @@ const Settings = () => {
     }
     setSending(true);
     try {
-      const { error } = await supabase.from('feedback' as any).insert({
+      const { error } = await supabase.from('feedback').insert({
         user_id: user?.id || null,
         feedback_type: type,
         message: message.trim(),
@@ -81,84 +83,82 @@ const Settings = () => {
         <h1 className="text-xl font-bold text-foreground">הגדרות</h1>
       </div>
 
-      <div className="px-6 py-6 space-y-6">
-        {/* Dark Mode Toggle */}
-        <div className="bg-card rounded-2xl p-5 shadow-soft border border-border">
-          <div className="flex items-center justify-between">
-            <Switch
-              checked={theme === 'dark'}
-              onCheckedChange={toggleTheme}
-            />
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <h3 className="font-semibold text-foreground">מצב כהה</h3>
-                <p className="text-sm text-muted-foreground">
-                  {theme === 'dark' ? 'מצב כהה פעיל' : 'מצב בהיר פעיל'}
-                </p>
+      <div className="px-6 py-6 space-y-6 max-w-2xl mx-auto">
+        {/* Appearance Section */}
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">תצוגה</h2>
+          
+          {/* Dark Mode Toggle */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border">
+            <div className="flex items-center justify-between">
+              <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <h3 className="font-semibold text-foreground">מצב כהה</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {theme === 'dark' ? 'מצב כהה פעיל' : 'מצב בהיר פעיל'}
+                  </p>
+                </div>
+                {theme === 'dark' ? (
+                  <Moon className="w-6 h-6 text-primary" />
+                ) : (
+                  <Sun className="w-6 h-6 text-primary" />
+                )}
               </div>
-              {theme === 'dark' ? (
-                <Moon className="w-6 h-6 text-primary" />
-              ) : (
-                <Sun className="w-6 h-6 text-primary" />
-              )}
             </div>
           </div>
+
+          {/* Quiz Timer */}
+          <QuizTimerSetting />
         </div>
 
-        {/* User Stats */}
-        <div className="bg-card rounded-2xl p-5 shadow-soft border border-border space-y-4">
-          <h3 className="font-semibold text-foreground text-right">הסטטיסטיקות שלי</h3>
+        {/* User Stats Section */}
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">סטטיסטיקות</h2>
           
-          {/* Rank */}
-          <div className="flex items-center gap-4 bg-gradient-to-l from-primary/5 to-accent/5 rounded-xl p-4 border border-primary/10">
-            <div className="flex-1 text-right">
-              <p className="text-sm text-muted-foreground">דרגה נוכחית</p>
-              <p className="text-xl font-bold text-primary">{rank.name}</p>
-              {rank.nextPoints > rank.minPoints && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {rank.nextPoints - (profile?.points || 0)} נקודות לדרגה הבאה
-                </p>
-              )}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border space-y-4">
+            {/* Rank */}
+            <div className="flex items-center gap-4 bg-gradient-to-l from-primary/5 to-accent/5 rounded-xl p-4 border border-primary/10">
+              <div className="flex-1 text-right">
+                <p className="text-sm text-muted-foreground">דרגה נוכחית</p>
+                <p className="text-xl font-bold text-primary">{rank.name}</p>
+                {rank.nextPoints > rank.minPoints && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {rank.nextPoints - (profile?.points || 0)} נקודות לדרגה הבאה
+                  </p>
+                )}
+              </div>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Trophy className="w-6 h-6 text-primary" />
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-primary" />
-            </div>
-          </div>
 
-          {/* Words Mastered */}
-          <div className="flex items-center gap-4 bg-muted/50 rounded-xl p-4">
-            <div className="flex-1 text-right">
-              <p className="text-sm text-muted-foreground">מילים שנלמדו</p>
-              <p className="text-xl font-bold text-foreground">{user ? learnedCount : 0}</p>
-            </div>
-            <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-accent-foreground" />
-            </div>
-          </div>
-
-          {/* Points */}
-          <div className="flex items-center gap-4 bg-muted/50 rounded-xl p-4">
-            <div className="flex-1 text-right">
-              <p className="text-sm text-muted-foreground">סה״כ נקודות</p>
-              <p className="text-xl font-bold text-foreground">{profile?.points || 0}</p>
-            </div>
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-primary" />
+            {/* Words & Points */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-muted/50 rounded-xl p-4 text-center">
+                <BookOpen className="w-5 h-5 mx-auto mb-1 text-accent-foreground" />
+                <p className="text-xl font-bold text-foreground">{user ? learnedCount : 0}</p>
+                <p className="text-xs text-muted-foreground">מילים שנלמדו</p>
+              </div>
+              <div className="bg-muted/50 rounded-xl p-4 text-center">
+                <Trophy className="w-5 h-5 mx-auto mb-1 text-primary" />
+                <p className="text-xl font-bold text-foreground">{profile?.points || 0}</p>
+                <p className="text-xs text-muted-foreground">סה״כ נקודות</p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Contact Us */}
         <div className="bg-card rounded-2xl p-5 shadow-soft border border-border">
-          <Button
-            onClick={() => setFeedbackOpen(true)}
-            className="w-full gap-2"
-            variant="outline"
-          >
+          <Button onClick={() => setFeedbackOpen(true)} className="w-full gap-2" variant="outline">
             <MessageCircle className="w-5 h-5" />
             צור קשר / שלח משוב
           </Button>
         </div>
+
+        {/* Admin Panel */}
+        <AdminPanel />
       </div>
 
       {/* Feedback Dialog */}
