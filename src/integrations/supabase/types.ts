@@ -67,6 +67,33 @@ export type Database = {
           },
         ]
       }
+      custom_words: {
+        Row: {
+          aramaic: string
+          created_at: string
+          cultural_context: string
+          hebrew: string
+          id: number
+          word_type: string
+        }
+        Insert: {
+          aramaic: string
+          created_at?: string
+          cultural_context?: string
+          hebrew: string
+          id?: number
+          word_type?: string
+        }
+        Update: {
+          aramaic?: string
+          created_at?: string
+          cultural_context?: string
+          hebrew?: string
+          id?: number
+          word_type?: string
+        }
+        Relationships: []
+      }
       daily_quests: {
         Row: {
           bonus_xp: number
