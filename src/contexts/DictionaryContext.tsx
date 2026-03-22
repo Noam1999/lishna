@@ -292,7 +292,6 @@ export const DictionaryProvider = ({ children }: { children: ReactNode }) => {
     };
     fetchCustomWords();
   }, []);
-  const [quizHistory, setQuizHistory] = useState<{ word: DictionaryWord; correct: boolean }[]>([]);
 
   const searchWord = useCallback((query: string, direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew'): DictionaryWord | null => {
     const normalizedQuery = removeNiqqud(query.trim().toLowerCase());
