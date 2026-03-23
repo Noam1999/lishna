@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import GuestBanner from "@/components/GuestBanner";
 import FeedbackButton from "@/components/FeedbackButton";
+import BetaWelcomePopup from "@/components/BetaWelcomePopup";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -32,6 +33,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <BetaWelcomePopup />
             <GuestBanner />
             <Routes>
               <Route path="/" element={<Home />} />

@@ -44,7 +44,7 @@ export const useLeaderboard = () => {
       .from('profiles')
       .select('id, user_id, username, display_name, avatar_url, weekly_points, points')
       .order('weekly_points', { ascending: false })
-      .limit(100);
+      .limit(10);
 
     if (globalError) {
       console.error('Error fetching global leaderboard:', globalError);

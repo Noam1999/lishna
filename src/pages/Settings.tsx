@@ -10,7 +10,9 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
+import { useDictionary } from '@/contexts/DictionaryContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import AdminPanel from '@/components/settings/AdminPanel';
 import QuizTimerSetting from '@/components/settings/QuizTimerSetting';
@@ -21,15 +23,15 @@ const feedbackTypes = [
   { value: 'general', label: 'משוב כללי 💬', icon: MessageSquare },
 ] as const;
 
-const getRank = (points: number): { name: string; minPoints: number; nextPoints: number } => {
-  if (points >= 5000) return { name: 'גאון', minPoints: 5000, nextPoints: 5000 };
-  if (points >= 3000) return { name: 'ראש ישיבה', minPoints: 3000, nextPoints: 5000 };
-  if (points >= 2000) return { name: 'אריה דאורייתא', minPoints: 2000, nextPoints: 3000 };
-  if (points >= 1000) return { name: 'חברותא', minPoints: 1000, nextPoints: 2000 };
-  if (points >= 500) return { name: 'תלמיד חכם', minPoints: 500, nextPoints: 1000 };
-  if (points >= 200) return { name: 'בר אוריין', minPoints: 200, nextPoints: 500 };
-  if (points >= 50) return { name: 'תלמיד', minPoints: 50, nextPoints: 200 };
-  return { name: 'מתחיל', minPoints: 0, nextPoints: 50 };
+const getRank = (points: number): { name: string; emoji: string; minPoints: number; nextPoints: number } => {
+  if (points >= 5000) return { name: 'גאון', emoji: '👑', minPoints: 5000, nextPoints: 5000 };
+  if (points >= 3000) return { name: 'ראש ישיבה', emoji: '🏛️', minPoints: 3000, nextPoints: 5000 };
+  if (points >= 2000) return { name: 'אריה דאורייתא', emoji: '🦁', minPoints: 2000, nextPoints: 3000 };
+  if (points >= 1000) return { name: 'חברותא', emoji: '🤝', minPoints: 1000, nextPoints: 2000 };
+  if (points >= 500) return { name: 'תלמיד חכם', emoji: '📖', minPoints: 500, nextPoints: 1000 };
+  if (points >= 200) return { name: 'בר אוריין', emoji: '📜', minPoints: 200, nextPoints: 500 };
+  if (points >= 50) return { name: 'תלמיד', emoji: '✏️', minPoints: 50, nextPoints: 200 };
+  return { name: 'מתחיל', emoji: '🌱', minPoints: 0, nextPoints: 50 };
 };
 
 const Settings = () => {
@@ -38,6 +40,9 @@ const Settings = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { learnedCount } = useUserWords();
+  const { dictionary } = useDictionary();
+  const totalWords = dictionary.length;
+  const masteryPercent = totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0;
 
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [type, setType] = useState<string>('general');
@@ -121,16 +126,41 @@ const Settings = () => {
             <div className="flex items-center gap-4 bg-gradient-to-l from-primary/5 to-accent/5 rounded-xl p-4 border border-primary/10">
               <div className="flex-1 text-right">
                 <p className="text-sm text-muted-foreground">דרגה נוכחית</p>
-                <p className="text-xl font-bold text-primary">{rank.name}</p>
+                <p className="text-xl font-bold text-primary">
+                  <span className="ml-1">{rank.emoji}</span>
+                  {rank.name}
+                </p>
                 {rank.nextPoints > rank.minPoints && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {rank.nextPoints - (profile?.points || 0)} נקודות לדרגה הבאה
-                  </p>
+                  <div className="mt-2">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                      <span>{rank.nextPoints} נק׳</span>
+                      <span>{profile?.points || 0} נק׳</span>
+                    </div>
+                    <Progress 
+                      value={((profile?.points || 0) - rank.minPoints) / (rank.nextPoints - rank.minPoints) * 100} 
+                      className="h-2" 
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {rank.nextPoints - (profile?.points || 0)} נקודות לדרגה הבאה
+                    </p>
+                  </div>
                 )}
               </div>
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-primary" />
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
+                {rank.emoji}
               </div>
+            </div>
+
+            {/* Words Mastery Progress */}
+            <div className="bg-muted/50 rounded-xl p-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-muted-foreground">{masteryPercent}%</span>
+                <span className="text-sm font-medium text-foreground">שליטה במילים</span>
+              </div>
+              <Progress value={masteryPercent} className="h-3 mb-2" />
+              <p className="text-xs text-muted-foreground text-right">
+                {user ? learnedCount : 0} מתוך {totalWords} מילים נלמדו
+              </p>
             </div>
 
             {/* Words & Points */}
