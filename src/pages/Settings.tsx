@@ -23,15 +23,15 @@ const feedbackTypes = [
   { value: 'general', label: 'משוב כללי 💬', icon: MessageSquare },
 ] as const;
 
-const getRank = (points: number): { name: string; minPoints: number; nextPoints: number } => {
-  if (points >= 5000) return { name: 'גאון', minPoints: 5000, nextPoints: 5000 };
-  if (points >= 3000) return { name: 'ראש ישיבה', minPoints: 3000, nextPoints: 5000 };
-  if (points >= 2000) return { name: 'אריה דאורייתא', minPoints: 2000, nextPoints: 3000 };
-  if (points >= 1000) return { name: 'חברותא', minPoints: 1000, nextPoints: 2000 };
-  if (points >= 500) return { name: 'תלמיד חכם', minPoints: 500, nextPoints: 1000 };
-  if (points >= 200) return { name: 'בר אוריין', minPoints: 200, nextPoints: 500 };
-  if (points >= 50) return { name: 'תלמיד', minPoints: 50, nextPoints: 200 };
-  return { name: 'מתחיל', minPoints: 0, nextPoints: 50 };
+const getRank = (points: number): { name: string; emoji: string; minPoints: number; nextPoints: number } => {
+  if (points >= 5000) return { name: 'גאון', emoji: '👑', minPoints: 5000, nextPoints: 5000 };
+  if (points >= 3000) return { name: 'ראש ישיבה', emoji: '🏛️', minPoints: 3000, nextPoints: 5000 };
+  if (points >= 2000) return { name: 'אריה דאורייתא', emoji: '🦁', minPoints: 2000, nextPoints: 3000 };
+  if (points >= 1000) return { name: 'חברותא', emoji: '🤝', minPoints: 1000, nextPoints: 2000 };
+  if (points >= 500) return { name: 'תלמיד חכם', emoji: '📖', minPoints: 500, nextPoints: 1000 };
+  if (points >= 200) return { name: 'בר אוריין', emoji: '📜', minPoints: 200, nextPoints: 500 };
+  if (points >= 50) return { name: 'תלמיד', emoji: '✏️', minPoints: 50, nextPoints: 200 };
+  return { name: 'מתחיל', emoji: '🌱', minPoints: 0, nextPoints: 50 };
 };
 
 const Settings = () => {
