@@ -126,16 +126,41 @@ const Settings = () => {
             <div className="flex items-center gap-4 bg-gradient-to-l from-primary/5 to-accent/5 rounded-xl p-4 border border-primary/10">
               <div className="flex-1 text-right">
                 <p className="text-sm text-muted-foreground">דרגה נוכחית</p>
-                <p className="text-xl font-bold text-primary">{rank.name}</p>
+                <p className="text-xl font-bold text-primary">
+                  <span className="ml-1">{rank.emoji}</span>
+                  {rank.name}
+                </p>
                 {rank.nextPoints > rank.minPoints && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {rank.nextPoints - (profile?.points || 0)} נקודות לדרגה הבאה
-                  </p>
+                  <div className="mt-2">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                      <span>{rank.nextPoints} נק׳</span>
+                      <span>{profile?.points || 0} נק׳</span>
+                    </div>
+                    <Progress 
+                      value={((profile?.points || 0) - rank.minPoints) / (rank.nextPoints - rank.minPoints) * 100} 
+                      className="h-2" 
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {rank.nextPoints - (profile?.points || 0)} נקודות לדרגה הבאה
+                    </p>
+                  </div>
                 )}
               </div>
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-primary" />
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
+                {rank.emoji}
               </div>
+            </div>
+
+            {/* Words Mastery Progress */}
+            <div className="bg-muted/50 rounded-xl p-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-muted-foreground">{masteryPercent}%</span>
+                <span className="text-sm font-medium text-foreground">שליטה במילים</span>
+              </div>
+              <Progress value={masteryPercent} className="h-3 mb-2" />
+              <p className="text-xs text-muted-foreground text-right">
+                {user ? learnedCount : 0} מתוך {totalWords} מילים נלמדו
+              </p>
             </div>
 
             {/* Words & Points */}
