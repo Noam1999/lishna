@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Trophy, RotateCcw, BookOpen } from 'lucide-react';
+import { Trophy, RotateCcw, BookOpen, CheckCircle, XCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
