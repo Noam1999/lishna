@@ -40,6 +40,9 @@ const Settings = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { learnedCount } = useUserWords();
+  const { dictionary } = useDictionary();
+  const totalWords = dictionary.length;
+  const masteryPercent = totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0;
 
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [type, setType] = useState<string>('general');
