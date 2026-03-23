@@ -239,43 +239,82 @@ const Quiz = () => {
           const isSelected = selectedAnswer === option;
           const isCorrectAnswer = option === currentQ.correctAnswer;
           
-          let buttonClass = 'w-full h-14 text-lg justify-start px-6 active:scale-95 transition-all duration-75 ';
+          let buttonClass = 'w-full h-14 text-lg justify-start px-6 transition-all duration-200 ';
           
           if (showResult) {
             if (isCorrectAnswer) {
-              buttonClass += 'bg-green-100 border-green-500 text-green-700 hover:bg-green-100 active:bg-green-100';
+              buttonClass += 'bg-green-100 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 ring-2 ring-green-400/50';
             } else if (isSelected && !isCorrect) {
-              buttonClass += 'bg-red-100 border-red-500 text-red-700 hover:bg-red-100 active:bg-red-100';
+              buttonClass += 'bg-red-100 dark:bg-red-900/30 border-red-500 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 ring-2 ring-red-400/50';
             } else {
-              buttonClass += 'opacity-50';
+              buttonClass += 'opacity-40';
             }
           } else {
-            buttonClass += 'hover:bg-accent active:scale-95 active:bg-accent';
+            buttonClass += 'hover:bg-accent active:scale-[0.97]';
           }
 
           return (
-            <Button
+            <motion.div
               key={`${currentQuestion}-${index}`}
-              variant="outline"
-              onClick={() => handleAnswer(option)}
-              disabled={showResult}
-              className={buttonClass}
-              type="button"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
             >
-              <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center ml-4 text-sm font-medium flex-shrink-0">
-                {['א', 'ב', 'ג', 'ד'][index]}
-              </span>
-              <span className="flex-1 text-right">{option}</span>
-              {showResult && isCorrectAnswer && (
-                <span className="ml-2 text-green-600 flex-shrink-0">✓</span>
-              )}
-              {showResult && isSelected && !isCorrect && (
-                <span className="ml-2 text-red-600 flex-shrink-0">✗</span>
-              )}
-            </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleAnswer(option)}
+                disabled={showResult}
+                className={buttonClass}
+                type="button"
+              >
+                <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center ml-4 text-sm font-medium flex-shrink-0">
+                  {['א', 'ב', 'ג', 'ד'][index]}
+                </span>
+                <span className="flex-1 text-right">{option}</span>
+                {showResult && isCorrectAnswer && (
+                  <CheckCircle className="ml-2 w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                )}
+                {showResult && isSelected && !isCorrect && (
+                  <XCircle className="ml-2 w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                )}
+              </Button>
+            </motion.div>
           );
         })}
       </div>
+
+      {/* Answer Feedback Banner */}
+      <AnimatePresence>
+        {showResult && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`mx-6 mt-4 p-4 rounded-xl text-center font-medium ${
+              isCorrect
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
+                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700'
+            }`}
+          >
+            {isCorrect ? (
+              <span className="flex items-center justify-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                נכון מאוד! 🎉
+              </span>
+            ) : (
+              <span className="flex flex-col items-center gap-1">
+                <span className="flex items-center gap-2">
+                  <XCircle className="w-5 h-5" />
+                  לא נכון 😕
+                </span>
+                <span className="text-sm">
+                  התשובה הנכונה: <strong>{currentQ.correctAnswer}</strong>
+                </span>
+              </span>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Restart Button */}
       <div className="px-6 mt-8">
