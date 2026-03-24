@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import DailyQuests from '@/components/DailyQuests';
 import StreakLockDialog from '@/components/StreakLockDialog';
 import { useDictionary } from '@/contexts/DictionaryContext';
+import HomeLeaderboard from '@/components/HomeLeaderboard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
@@ -210,6 +211,9 @@ const Home = () => {
           </div>
         </Link>
       </div>
+
+      {/* Leaderboard Preview */}
+      <HomeLeaderboard />
 
       {/* Daily Word */}
       <div className="px-6 mt-8">
