@@ -211,6 +211,9 @@ const Home = () => {
         </Link>
       </div>
 
+      {/* Leaderboard Preview */}
+      <HomeLeaderboard />
+
       {/* Daily Word */}
       <div className="px-6 mt-8">
         <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-5 border border-primary/10">
