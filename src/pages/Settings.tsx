@@ -16,6 +16,8 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import AdminPanel from '@/components/settings/AdminPanel';
 import QuizTimerSetting from '@/components/settings/QuizTimerSetting';
+import Footer from '@/components/Footer';
+import PageTransition from '@/components/PageTransition';
 
 const feedbackTypes = [
   { value: 'bug', label: 'באג 🐛', icon: Bug },
@@ -79,6 +81,7 @@ const Settings = () => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background pb-24" dir="rtl">
       {/* Header */}
       <div className="bg-card border-b border-border px-6 py-4 flex items-center gap-3">
