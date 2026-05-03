@@ -246,7 +246,9 @@ const Settings = () => {
           </div>
         </DialogContent>
       </Dialog>
+      <Footer />
     </div>
+    </PageTransition>
   );
 };
 
