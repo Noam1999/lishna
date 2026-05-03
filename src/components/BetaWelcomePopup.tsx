@@ -46,7 +46,7 @@ const BetaWelcomePopup = () => {
             </a>
           </p>
 
-          <p className="text-xs text-muted-foreground">בתודה: צוות לישנא 💙</p>
+          <p className="text-xs text-muted-foreground">בתודה: צוות לישנא 💙 (נועם כהן ודניאל תורתי)</p>
 
           <button
             onClick={handleClose}
