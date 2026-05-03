@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from 'framer-motion';
 import { DictionaryProvider } from "@/contexts/DictionaryContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
@@ -23,8 +24,37 @@ import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
 import AdminFeedback from "./pages/AdminFeedback";
 import SettingsPage from "./pages/Settings";
+import Classes from "./pages/Classes";
+import ClassDetail from "./pages/ClassDetail";
+import TakeAssignment from "./pages/TakeAssignment";
 
 const queryClient = new QueryClient();
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Home />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/friends" element={<Friends />} />
+        <Route path="/translator" element={<Translator />} />
+        <Route path="/flashcards" element={<Flashcards />} />
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/quiz-summary" element={<QuizSummary />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/feed" element={<Feed />} />
+        <Route path="/admin/feedback" element={<AdminFeedback />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/classes" element={<Classes />} />
+        <Route path="/classes/:id" element={<ClassDetail />} />
+        <Route path="/assignment/:id" element={<TakeAssignment />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -37,21 +67,7 @@ const App = () => (
           <BrowserRouter>
             <BetaWelcomePopup />
             <GuestBanner />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/friends" element={<Friends />} />
-              <Route path="/translator" element={<Translator />} />
-              <Route path="/flashcards" element={<Flashcards />} />
-              <Route path="/quiz" element={<Quiz />} />
-              <Route path="/quiz-summary" element={<QuizSummary />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/feed" element={<Feed />} />
-              <Route path="/admin/feedback" element={<AdminFeedback />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AnimatedRoutes />
             <FeedbackButton />
             <Navigation />
           </BrowserRouter>
