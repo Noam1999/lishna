@@ -67,6 +67,138 @@ export type Database = {
           },
         ]
       }
+      assignment_submissions: {
+        Row: {
+          assignment_id: string
+          details: Json | null
+          id: string
+          score: number
+          student_id: string
+          submitted_at: string
+          total: number
+        }
+        Insert: {
+          assignment_id: string
+          details?: Json | null
+          id?: string
+          score?: number
+          student_id: string
+          submitted_at?: string
+          total?: number
+        }
+        Update: {
+          assignment_id?: string
+          details?: Json | null
+          id?: string
+          score?: number
+          student_id?: string
+          submitted_at?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignments: {
+        Row: {
+          class_id: string
+          created_at: string
+          due_at: string | null
+          id: string
+          teacher_id: string
+          title: string
+          type: string
+          word_ids: number[]
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          teacher_id: string
+          title: string
+          type?: string
+          word_ids?: number[]
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          teacher_id?: string
+          title?: string
+          type?: string
+          word_ids?: number[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_members: {
+        Row: {
+          class_id: string
+          id: string
+          joined_at: string
+          student_id: string
+        }
+        Insert: {
+          class_id: string
+          id?: string
+          joined_at?: string
+          student_id: string
+        }
+        Update: {
+          class_id?: string
+          id?: string
+          joined_at?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_members_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          class_code: string
+          created_at: string
+          id: string
+          name: string
+          teacher_id: string
+        }
+        Insert: {
+          class_code: string
+          created_at?: string
+          id?: string
+          name: string
+          teacher_id: string
+        }
+        Update: {
+          class_code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          teacher_id?: string
+        }
+        Relationships: []
+      }
       custom_words: {
         Row: {
           aramaic: string
@@ -343,9 +475,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_class_member: {
+        Args: { _class_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_class_teacher: {
+        Args: { _class_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "teacher"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -473,7 +613,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "teacher"],
     },
   },
 } as const
