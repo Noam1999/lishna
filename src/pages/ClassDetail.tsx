@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowRight, Plus, Copy, Users, FileText, ClipboardList, Check } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowRight, Plus, Copy, Users, FileText, ClipboardList, Check, ChevronDown, CheckCircle2, XCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,8 @@ import PageTransition from '@/components/PageTransition';
 interface ClassRow { id: string; name: string; class_code: string; teacher_id: string; }
 interface Assignment { id: string; title: string; type: string; word_ids: number[]; created_at: string; }
 interface Member { id: string; student_id: string; }
-interface Submission { id: string; assignment_id: string; student_id: string; score: number; total: number; }
+interface SubmissionDetail { word_id: number; correct: boolean }
+interface Submission { id: string; assignment_id: string; student_id: string; score: number; total: number; details?: SubmissionDetail[] | null; }
 interface ProfileLite { user_id: string; display_name: string | null; }
 
 const ClassDetail = () => {
