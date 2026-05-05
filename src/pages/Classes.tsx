@@ -17,7 +17,7 @@ interface ClassRow { id: string; name: string; class_code: string; teacher_id: s
 const Classes = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isTeacher, becomeTeacher, loading: roleLoading } = useUserRole();
+  const { isTeacher, becomeTeacherWithCode, loading: roleLoading } = useUserRole();
   const [myClasses, setMyClasses] = useState<ClassRow[]>([]);
   const [joined, setJoined] = useState<ClassRow[]>([]);
   const [loading, setLoading] = useState(true);
