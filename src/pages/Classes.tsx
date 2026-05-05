@@ -125,7 +125,7 @@ const Classes = () => {
           <div className="bg-card rounded-2xl p-5 border border-border">
             <h2 className="font-semibold mb-1">אתה מורה?</h2>
             <p className="text-sm text-muted-foreground mb-3">הפעל מצב מורה כדי ליצור כיתות ומטלות</p>
-            <Button onClick={async () => { const { error } = await becomeTeacher(); if (error) toast.error('שגיאה'); else toast.success('מצב מורה הופעל!'); }}>
+            <Button onClick={() => setTeacherModalOpen(true)}>
               <GraduationCap className="w-4 h-4 ml-2" />הפוך למורה
             </Button>
           </div>
