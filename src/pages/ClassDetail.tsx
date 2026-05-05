@@ -36,6 +36,12 @@ const ClassDetail = () => {
   const [selectedWords, setSelectedWords] = useState<Set<number>>(new Set());
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [expandedSub, setExpandedSub] = useState<string | null>(null);
+  const wordMap = useMemo(() => {
+    const m: Record<number, { aramaic: string; hebrew: string }> = {};
+    dictionary.forEach((w) => { m[w.id] = { aramaic: w.aramaic, hebrew: w.hebrew }; });
+    return m;
+  }, [dictionary]);
 
   const isTeacher = !!user && !!cls && cls.teacher_id === user.id;
 
