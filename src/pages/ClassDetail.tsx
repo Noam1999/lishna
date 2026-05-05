@@ -60,14 +60,14 @@ const ClassDetail = () => {
       const aIds = ((a as Assignment[]) || []).map((x) => x.id);
       if (aIds.length) {
         const { data: subs } = await supabase.from('assignment_submissions').select('*').in('assignment_id', aIds);
-        setSubmissions((subs as Submission[]) || []);
+        setSubmissions((subs as unknown as Submission[]) || []);
       }
     } else if (user) {
       // student: load their own submissions for these assignments
       const aIds = ((a as Assignment[]) || []).map((x) => x.id);
       if (aIds.length) {
         const { data: subs } = await supabase.from('assignment_submissions').select('*').in('assignment_id', aIds).eq('student_id', user.id);
-        setSubmissions((subs as Submission[]) || []);
+        setSubmissions((subs as unknown as Submission[]) || []);
       }
     }
   };
