@@ -245,6 +245,15 @@ const initialDictionary: DictionaryWord[] = [
   { id: 200, aramaic: 'לָאו', hebrew: 'לא', type: 'מילת יחס', culturalContext: 'שלילה', learned: false },
   { id: 201, aramaic: 'לֵיהּ', hebrew: 'לו', type: 'מילת יחס', culturalContext: 'כינוי גוף שלישי יחיד עם מילת יחס', learned: false },
   { id: 202, aramaic: 'נָפְקָא מִינַּהּ', hebrew: 'מה יוצא מזה (ההבדל המעשי)', type: 'ביטוי', culturalContext: 'שאלה על המשמעות המעשית של מחלוקת', learned: false },
+
+  // תוספת ביטויי גמרא נפוצים
+  { id: 203, aramaic: 'בְּמַאי קָמִיפַּלְגִי', hebrew: 'במה הם חלוקים? (על מה הוויכוח?)', type: 'ביטוי', culturalContext: 'שאלה תלמודית קלאסית לבירור שורש המחלוקת בין החכמים', learned: false },
+  { id: 204, aramaic: 'אִיבַּעְיָא לְהוּ', hebrew: 'נשאלה להם שאלה', type: 'ביטוי', culturalContext: 'פתיחה אופיינית להצגת שאלה הלכתית שלא הוכרעה', learned: false },
+  { id: 205, aramaic: 'לָמָּה לִי', hebrew: 'בשביל מה זה נחוץ?', type: 'ביטוי', culturalContext: 'שאלה רטורית על נחיצות פרט מסוים בלשון המשנה או הברייתא', learned: false },
+  { id: 206, aramaic: 'תַּנְיָא', hebrew: 'למדנו בברייתא (מקור חיצוני למשנה)', type: 'ביטוי', culturalContext: 'פתיחה להבאת ברייתא, מקור תנאי שלא נכלל במשנה', learned: false },
+  { id: 207, aramaic: 'קָא מַשְׁמַע לָן', hebrew: 'בא להשמיע לנו (ללמד אותנו חידוש)', type: 'ביטוי', culturalContext: 'מציין את החידוש שהמשנה או הברייתא מבקשת ללמד', learned: false },
+  { id: 208, aramaic: 'אִיתְּמַר', hebrew: 'נאמר (פתיחה לדברי אמוראים)', type: 'ביטוי', culturalContext: 'פתיחה להבאת מימרא של אמורא', learned: false },
+  { id: 209, aramaic: 'סֵיפָא', hebrew: 'החלק האחרון / סוף', type: 'שם עצם', culturalContext: 'החלק האחרון של המשנה או הברייתא, לעומת הרישא', learned: false },
 ];
 
 interface DictionaryContextType {
