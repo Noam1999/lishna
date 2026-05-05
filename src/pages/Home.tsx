@@ -213,6 +213,21 @@ const Home = () => {
           </div>
         </Link>
 
+        {/* League Link */}
+        <Link
+          to="/leaderboard"
+          className="group block bg-card rounded-2xl p-5 shadow-soft border border-border hover:shadow-elegant hover:border-primary/20 transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-accent text-accent-foreground flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Trophy className="w-7 h-7" />
+            </div>
+            <div className="flex-1 text-right">
+              <h3 className="font-semibold text-lg text-foreground mb-1">ליגה</h3>
+              <p className="text-sm text-muted-foreground">צפה בדירוג השבועי והתחרה בחברים</p>
+            </div>
+          </div>
+        </Link>
+
         {/* Updates Link */}
         <Link
           to="/feed"
