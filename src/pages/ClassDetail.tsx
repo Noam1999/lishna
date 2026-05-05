@@ -168,7 +168,9 @@ const ClassDetail = () => {
                       </div>
                       {!isTeacher && (
                         myDone ? (
-                          <span className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-3 py-1.5 rounded-full">הושלם {subs[0].score}/{subs[0].total}</span>
+                          <span className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-3 py-1.5 rounded-full font-semibold">
+                            ציון {Math.round((subs[0].score / subs[0].total) * 100)} · {subs[0].score}/{subs[0].total}
+                          </span>
                         ) : (
                           <Button asChild size="sm">
                             <Link to={`/assignment/${a.id}`}>התחל</Link>
@@ -181,12 +183,45 @@ const ClassDetail = () => {
                         <p className="text-xs font-semibold text-muted-foreground mb-2">תוצאות ({subs.length}/{members.length}):</p>
                         {subs.length === 0 ? <p className="text-xs text-muted-foreground">אף תלמיד לא סיים עדיין</p> :
                           <ul className="space-y-1">
-                            {subs.map((s) => (
-                              <li key={s.id} className="flex justify-between text-sm">
-                                <span>{profiles[s.student_id] || 'תלמיד'}</span>
-                                <span className="font-semibold text-primary">{s.score}/{s.total}</span>
-                              </li>
-                            ))}
+                            {subs.map((s) => {
+                              const grade = s.total ? Math.round((s.score / s.total) * 100) : 0;
+                              const isOpen = expandedSub === s.id;
+                              const details = Array.isArray(s.details) ? s.details : [];
+                              return (
+                                <li key={s.id} className="text-sm">
+                                  <button
+                                    onClick={() => setExpandedSub(isOpen ? null : s.id)}
+                                    className="w-full flex justify-between items-center py-1.5 hover:bg-muted/50 rounded px-2 transition-colors"
+                                  >
+                                    <span className="flex items-center gap-2">
+                                      <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                      {profiles[s.student_id] || 'תלמיד'}
+                                    </span>
+                                    <span className="font-semibold text-primary">ציון {grade} · {s.score}/{s.total}</span>
+                                  </button>
+                                  <AnimatePresence>
+                                    {isOpen && (
+                                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                        <div className="px-2 py-2 space-y-1">
+                                          {details.length === 0 ? <p className="text-xs text-muted-foreground">אין פירוט זמין</p> :
+                                            details.map((d, i) => {
+                                              const w = wordMap[d.word_id];
+                                              return (
+                                                <div key={i} className="flex items-center gap-2 text-xs bg-muted/40 rounded px-2 py-1">
+                                                  {d.correct ? <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" /> : <XCircle className="w-4 h-4 text-red-600 shrink-0" />}
+                                                  <span className="font-display font-semibold">{w?.aramaic || `#${d.word_id}`}</span>
+                                                  <span className="text-muted-foreground">— {w?.hebrew || ''}</span>
+                                                </div>
+                                              );
+                                            })
+                                          }
+                                        </div>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                                </li>
+                              );
+                            })}
                           </ul>
                         }
                       </div>
