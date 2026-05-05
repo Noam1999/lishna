@@ -25,6 +25,21 @@ const Classes = () => {
   const [name, setName] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const [teacherModalOpen, setTeacherModalOpen] = useState(false);
+  const [teacherCode, setTeacherCode] = useState('');
+  const [teacherErr, setTeacherErr] = useState('');
+
+  const handleTeacherSubmit = async () => {
+    setTeacherErr('');
+    const { ok } = await becomeTeacherWithCode(teacherCode);
+    if (!ok) {
+      setTeacherErr('קוד שגוי, אנא פנה לצוות לישנא לקבלת קוד');
+      return;
+    }
+    toast.success('מצב מורה הופעל! 🎓');
+    setTeacherModalOpen(false);
+    setTeacherCode('');
+  };
 
   useEffect(() => { document.title = 'כיתות | לישנא'; }, []);
 
