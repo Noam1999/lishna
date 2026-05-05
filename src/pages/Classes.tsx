@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Plus, Users, Copy, GraduationCap, LogIn } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowRight, Plus, Users, Copy, GraduationCap, LogIn, KeyRound } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ interface ClassRow { id: string; name: string; class_code: string; teacher_id: s
 const Classes = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isTeacher, becomeTeacher, loading: roleLoading } = useUserRole();
+  const { isTeacher, becomeTeacherWithCode, loading: roleLoading } = useUserRole();
   const [myClasses, setMyClasses] = useState<ClassRow[]>([]);
   const [joined, setJoined] = useState<ClassRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +25,21 @@ const Classes = () => {
   const [name, setName] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const [teacherModalOpen, setTeacherModalOpen] = useState(false);
+  const [teacherCode, setTeacherCode] = useState('');
+  const [teacherErr, setTeacherErr] = useState('');
+
+  const handleTeacherSubmit = async () => {
+    setTeacherErr('');
+    const { ok } = await becomeTeacherWithCode(teacherCode);
+    if (!ok) {
+      setTeacherErr('קוד שגוי, אנא פנה לצוות לישנא לקבלת קוד');
+      return;
+    }
+    toast.success('מצב מורה הופעל! 🎓');
+    setTeacherModalOpen(false);
+    setTeacherCode('');
+  };
 
   useEffect(() => { document.title = 'כיתות | לישנא'; }, []);
 
@@ -110,7 +125,7 @@ const Classes = () => {
           <div className="bg-card rounded-2xl p-5 border border-border">
             <h2 className="font-semibold mb-1">אתה מורה?</h2>
             <p className="text-sm text-muted-foreground mb-3">הפעל מצב מורה כדי ליצור כיתות ומטלות</p>
-            <Button onClick={async () => { const { error } = await becomeTeacher(); if (error) toast.error('שגיאה'); else toast.success('מצב מורה הופעל!'); }}>
+            <Button onClick={() => setTeacherModalOpen(true)}>
               <GraduationCap className="w-4 h-4 ml-2" />הפוך למורה
             </Button>
           </div>
@@ -179,6 +194,50 @@ const Classes = () => {
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="שם הכיתה (לדוגמה: כיתה ז-1)" />
             <Button onClick={handleCreate} disabled={busy || !name.trim()} className="w-full">צור כיתה</Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={teacherModalOpen} onOpenChange={(o) => { setTeacherModalOpen(o); if (!o) { setTeacherCode(''); setTeacherErr(''); } }}>
+        <DialogContent dir="rtl" className="max-w-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+          >
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 justify-end">
+                <span>גישת מורה</span>
+                <KeyRound className="w-5 h-5 text-primary" />
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-3">
+              <p className="text-sm text-muted-foreground text-right">
+                הזן את קוד הגישה למורים כדי להפעיל את מצב המורה
+              </p>
+              <Input
+                value={teacherCode}
+                onChange={(e) => { setTeacherCode(e.target.value); setTeacherErr(''); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleTeacherSubmit(); }}
+                placeholder="קוד גישה"
+                type="password"
+                inputMode="numeric"
+                className="text-center font-mono text-lg h-12"
+                autoFocus
+              />
+              {teacherErr && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm text-destructive text-center bg-destructive/10 rounded-lg p-2"
+                >
+                  {teacherErr}
+                </motion.p>
+              )}
+              <Button onClick={handleTeacherSubmit} disabled={!teacherCode.trim()} className="w-full h-12 text-base">
+                אישור
+              </Button>
+            </div>
+          </motion.div>
         </DialogContent>
       </Dialog>
     </div>
