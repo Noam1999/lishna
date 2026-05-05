@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Plus, Users, Copy, GraduationCap, LogIn } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowRight, Plus, Users, Copy, GraduationCap, LogIn, KeyRound } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
