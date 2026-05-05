@@ -196,6 +196,50 @@ const Classes = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={teacherModalOpen} onOpenChange={(o) => { setTeacherModalOpen(o); if (!o) { setTeacherCode(''); setTeacherErr(''); } }}>
+        <DialogContent dir="rtl" className="max-w-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+          >
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 justify-end">
+                <span>גישת מורה</span>
+                <KeyRound className="w-5 h-5 text-primary" />
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-3">
+              <p className="text-sm text-muted-foreground text-right">
+                הזן את קוד הגישה למורים כדי להפעיל את מצב המורה
+              </p>
+              <Input
+                value={teacherCode}
+                onChange={(e) => { setTeacherCode(e.target.value); setTeacherErr(''); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleTeacherSubmit(); }}
+                placeholder="קוד גישה"
+                type="password"
+                inputMode="numeric"
+                className="text-center font-mono text-lg h-12"
+                autoFocus
+              />
+              {teacherErr && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm text-destructive text-center bg-destructive/10 rounded-lg p-2"
+                >
+                  {teacherErr}
+                </motion.p>
+              )}
+              <Button onClick={handleTeacherSubmit} disabled={!teacherCode.trim()} className="w-full h-12 text-base">
+                אישור
+              </Button>
+            </div>
+          </motion.div>
+        </DialogContent>
+      </Dialog>
     </div>
     </PageTransition>
   );
