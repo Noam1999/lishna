@@ -264,17 +264,33 @@ const ClassDetail = () => {
               ))}
             </div>
             <div>
-              <p className="text-sm font-semibold mb-2">בחר מילים ({selectedWords.size} נבחרו, מינימום 4)</p>
+              <p className="text-sm font-semibold mb-2">בחר מילים מתוך {dictionary.length} ({selectedWords.size} נבחרו, מינימום 4)</p>
+              <Input
+                value={wordSearch}
+                onChange={(e) => setWordSearch(e.target.value)}
+                placeholder="חיפוש מילה בארמית או בעברית..."
+                className="mb-2"
+              />
               <div className="border border-border rounded-lg max-h-72 overflow-y-auto divide-y divide-border">
-                {dictionary.map((w) => (
-                  <label key={w.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted/50">
-                    <Checkbox checked={selectedWords.has(w.id)} onCheckedChange={() => toggleWord(w.id)} />
-                    <div className="flex-1 flex justify-between text-sm">
-                      <span className="font-display">{w.aramaic}</span>
-                      <span className="text-muted-foreground">{w.hebrew}</span>
-                    </div>
-                  </label>
-                ))}
+                {(() => {
+                  const q = removeNiqqud(wordSearch.trim().toLowerCase());
+                  const list = q
+                    ? dictionary.filter((w) =>
+                        removeNiqqud(w.aramaic.toLowerCase()).includes(q) ||
+                        removeNiqqud(w.hebrew.toLowerCase()).includes(q)
+                      )
+                    : dictionary;
+                  if (list.length === 0) return <p className="text-xs text-muted-foreground p-3 text-center">לא נמצאו מילים</p>;
+                  return list.map((w) => (
+                    <label key={w.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted/50">
+                      <Checkbox checked={selectedWords.has(w.id)} onCheckedChange={() => toggleWord(w.id)} />
+                      <div className="flex-1 flex justify-between text-sm">
+                        <span className="font-display">{w.aramaic}</span>
+                        <span className="text-muted-foreground">{w.hebrew}</span>
+                      </div>
+                    </label>
+                  ));
+                })()}
               </div>
             </div>
             <Button onClick={createAssignment} disabled={busy || !title.trim() || selectedWords.size < 4} className="w-full">צור מטלה</Button>
