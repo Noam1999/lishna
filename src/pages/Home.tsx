@@ -249,21 +249,29 @@ const Home = () => {
       <HomeLeaderboard />
 
       {/* Daily Word */}
-      <div className="px-6 mt-8">
-        <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-5 border border-primary/10">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">מילת היום</span>
+      {(() => {
+        const start = new Date(new Date().getFullYear(), 0, 0);
+        const dayOfYear = Math.floor((Date.now() - start.getTime()) / 86400000);
+        const wordOfDay = dictionary[dayOfYear % dictionary.length];
+        if (!wordOfDay) return null;
+        return (
+          <div className="px-6 mt-8">
+            <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-5 border border-primary/10">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-primary">מילת היום</span>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-display font-bold text-foreground mb-1">{wordOfDay.aramaic}</p>
+                <p className="text-muted-foreground">{wordOfDay.hebrew}</p>
+                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                  {wordOfDay.culturalContext}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-display font-bold text-foreground mb-1">גְּמָרָא</p>
-            <p className="text-muted-foreground">לִימוּד / מַסְקָנָה</p>
-            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-              שם כולל לתלמוד הבבלי, מלשון גמר - השלמה
-            </p>
-          </div>
-        </div>
-      </div>
+        );
+      })()}
       <StreakLockDialog open={streakDialogOpen} onOpenChange={setStreakDialogOpen} />
       <Footer />
     </div>
