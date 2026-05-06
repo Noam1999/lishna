@@ -101,8 +101,17 @@ const Auth = () => {
         const { error } = await signUp(formData.email, formData.password, formData.name);
         if (error) {
           let message = 'שגיאה בהרשמה';
-          if (error.message.includes('User already registered')) {
+          const m = error.message || '';
+          if (m.includes('User already registered') || m.includes('already been registered')) {
             message = 'משתמש כבר רשום עם אימייל זה';
+          } else if (m.toLowerCase().includes('weak') || m.toLowerCase().includes('pwned')) {
+            message = 'הסיסמה חלשה או דלופה. בחר סיסמה חזקה יותר (אותיות, מספרים וסימנים)';
+          } else if (m.toLowerCase().includes('password')) {
+            message = 'הסיסמה לא עומדת בדרישות. נסה סיסמה ארוכה ומגוונת יותר';
+          } else if (m.toLowerCase().includes('email')) {
+            message = 'כתובת האימייל אינה תקינה';
+          } else if (m.toLowerCase().includes('rate')) {
+            message = 'יותר מדי ניסיונות, נסה שוב בעוד רגע';
           }
           toast({
             title: 'שגיאה',
