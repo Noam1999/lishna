@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDictionary } from '@/contexts/DictionaryContext';
+import { useDictionary, removeNiqqud } from '@/contexts/DictionaryContext';
 import PageTransition from '@/components/PageTransition';
 
 interface ClassRow { id: string; name: string; class_code: string; teacher_id: string; }
