@@ -10,7 +10,7 @@ import { toast as sonnerToast } from 'sonner';
 type AuthMode = 'login' | 'register';
 
 const emailSchema = z.string().email('כתובת אימייל לא תקינה');
-const passwordSchema = z.string().min(6, 'הסיסמה חייבת להכיל לפחות 6 תווים');
+const passwordSchema = z.string().min(8, 'הסיסמה חייבת להכיל לפחות 8 תווים').regex(/[A-Za-z]/, 'הסיסמה חייבת לכלול אות').regex(/[0-9]/, 'הסיסמה חייבת לכלול מספר');
 const nameSchema = z.string().min(2, 'השם חייב להכיל לפחות 2 תווים');
 
 const Auth = () => {
