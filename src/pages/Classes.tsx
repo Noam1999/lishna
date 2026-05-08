@@ -50,18 +50,22 @@ const Classes = () => {
     const [{ data: own }, { data: members }, { data: subs }] = await Promise.all([
       supabase.from('classes').select('*').eq('teacher_id', user.id).order('created_at', { ascending: false }),
       supabase.from('class_members').select('class_id, classes(*)').eq('student_id', user.id),
-      supabase.from('assignment_submissions').select('score, total').eq('student_id', user.id),
+      supabase.from('assignment_submissions').select('score, total, assignments!inner(class_id)').eq('student_id', user.id),
     ]);
     setMyClasses((own as ClassRow[]) || []);
     setJoined(((members as { classes: ClassRow }[]) || []).map((m) => m.classes).filter(Boolean));
-    const list = (subs as { score: number; total: number }[] | null) || [];
-    if (list.length > 0) {
-      const grades = list.filter((s) => s.total > 0).map((s) => (s.score / s.total) * 100);
-      const avg = grades.length ? Math.round(grades.reduce((a, b) => a + b, 0) / grades.length) : 0;
-      setStats({ avg, count: list.length });
-    } else {
-      setStats(null);
-    }
+    const list = (subs as { score: number; total: number; assignments: { class_id: string } | null }[] | null) || [];
+    const acc: Record<string, { sum: number; n: number }> = {};
+    list.forEach((s) => {
+      const cid = s.assignments?.class_id;
+      if (!cid || !s.total) return;
+      (acc[cid] ||= { sum: 0, n: 0 });
+      acc[cid].sum += (s.score / s.total) * 100;
+      acc[cid].n += 1;
+    });
+    const avgMap: Record<string, { avg: number; count: number }> = {};
+    Object.entries(acc).forEach(([cid, v]) => { avgMap[cid] = { avg: Math.round(v.sum / v.n), count: v.n }; });
+    setClassAvg(avgMap);
     setLoading(false);
   };
 
