@@ -188,15 +188,33 @@ const Classes = () => {
           <h2 className="text-lg font-bold mb-3">הכיתות שהצטרפת</h2>
           {joined.length === 0 ? <p className="text-sm text-muted-foreground">לא הצטרפת לאף כיתה עדיין</p> :
             <div className="space-y-3">
-              {joined.map((c) => (
-                <motion.button
-                  key={c.id} whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate(`/classes/${c.id}`)}
-                  className="w-full text-right bg-card rounded-2xl p-4 border border-border hover:border-primary/30 transition-all">
-                  <h3 className="font-semibold">{c.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">קוד: <span className="font-mono">{c.class_code}</span></p>
-                </motion.button>
-              ))}
+              {joined.map((c) => {
+                const s = classAvg[c.id];
+                return (
+                  <motion.button
+                    key={c.id} whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate(`/classes/${c.id}`)}
+                    className="w-full text-right bg-card rounded-2xl p-4 border border-border hover:border-primary/30 transition-all">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold truncate">{c.name}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">קוד: <span className="font-mono">{c.class_code}</span></p>
+                      </div>
+                      {s ? (
+                        <div className="flex items-center gap-2 shrink-0 bg-primary/10 px-3 py-1.5 rounded-full">
+                          <Trophy className={`w-4 h-4 ${s.avg >= 90 ? 'text-yellow-500' : 'text-primary'}`} />
+                          <div className="text-right leading-tight">
+                            <p className="text-sm font-bold text-primary">ממוצע {s.avg}</p>
+                            <p className="text-[10px] text-muted-foreground">{s.count} מטלות</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground shrink-0">אין הגשות</span>
+                      )}
+                    </div>
+                  </motion.button>
+                );
+              })}
             </div>
           }
         </section>
