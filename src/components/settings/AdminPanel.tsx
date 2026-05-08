@@ -67,6 +67,12 @@ const AdminPanel = () => {
         </div>
         <WordManager />
       </div>
+      <Button asChild variant="outline" className="w-full gap-2 h-12">
+        <Link to="/admin/feedback">
+          <Inbox className="w-5 h-5" />
+          פניות משתמשים
+        </Link>
+      </Button>
       <SiteStats />
     </div>
   );
