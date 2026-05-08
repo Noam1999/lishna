@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Plus, Users, Copy, GraduationCap, LogIn, KeyRound } from 'lucide-react';
+import { ArrowRight, Plus, Users, Copy, GraduationCap, LogIn, KeyRound, TrendingUp, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
