@@ -28,6 +28,7 @@ const Classes = () => {
   const [teacherModalOpen, setTeacherModalOpen] = useState(false);
   const [teacherCode, setTeacherCode] = useState('');
   const [teacherErr, setTeacherErr] = useState('');
+  const [stats, setStats] = useState<{ avg: number; count: number } | null>(null);
 
   const handleTeacherSubmit = async () => {
     setTeacherErr('');
