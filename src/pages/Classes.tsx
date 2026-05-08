@@ -130,6 +130,23 @@ const Classes = () => {
       </div>
 
       <div className="px-6 py-6 max-w-2xl mx-auto space-y-6">
+        {/* Student stats */}
+        {stats && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-l from-primary/10 to-accent/10 rounded-2xl p-5 border border-primary/20"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" />ממוצע ציונים</p>
+                <p className="text-3xl font-bold text-primary mt-1">{stats.avg}</p>
+                <p className="text-xs text-muted-foreground mt-1">{stats.count} מטלות שהושלמו</p>
+              </div>
+              <Trophy className={`w-12 h-12 ${stats.avg >= 90 ? 'text-yellow-500' : stats.avg >= 75 ? 'text-primary' : 'text-muted-foreground'}`} />
+            </div>
+          </motion.div>
+        )}
+
         {/* Teacher toggle */}
         {!isTeacher && !roleLoading && (
           <div className="bg-card rounded-2xl p-5 border border-border">
