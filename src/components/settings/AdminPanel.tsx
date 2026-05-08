@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Shield, ShieldCheck, Loader2 } from 'lucide-react';
+import { Shield, ShieldCheck, Loader2, Inbox } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
