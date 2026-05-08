@@ -28,7 +28,7 @@ const Classes = () => {
   const [teacherModalOpen, setTeacherModalOpen] = useState(false);
   const [teacherCode, setTeacherCode] = useState('');
   const [teacherErr, setTeacherErr] = useState('');
-  const [stats, setStats] = useState<{ avg: number; count: number } | null>(null);
+  const [classAvg, setClassAvg] = useState<Record<string, { avg: number; count: number }>>({});
 
   const handleTeacherSubmit = async () => {
     setTeacherErr('');
@@ -50,18 +50,22 @@ const Classes = () => {
     const [{ data: own }, { data: members }, { data: subs }] = await Promise.all([
       supabase.from('classes').select('*').eq('teacher_id', user.id).order('created_at', { ascending: false }),
       supabase.from('class_members').select('class_id, classes(*)').eq('student_id', user.id),
-      supabase.from('assignment_submissions').select('score, total').eq('student_id', user.id),
+      supabase.from('assignment_submissions').select('score, total, assignments!inner(class_id)').eq('student_id', user.id),
     ]);
     setMyClasses((own as ClassRow[]) || []);
     setJoined(((members as { classes: ClassRow }[]) || []).map((m) => m.classes).filter(Boolean));
-    const list = (subs as { score: number; total: number }[] | null) || [];
-    if (list.length > 0) {
-      const grades = list.filter((s) => s.total > 0).map((s) => (s.score / s.total) * 100);
-      const avg = grades.length ? Math.round(grades.reduce((a, b) => a + b, 0) / grades.length) : 0;
-      setStats({ avg, count: list.length });
-    } else {
-      setStats(null);
-    }
+    const list = (subs as { score: number; total: number; assignments: { class_id: string } | null }[] | null) || [];
+    const acc: Record<string, { sum: number; n: number }> = {};
+    list.forEach((s) => {
+      const cid = s.assignments?.class_id;
+      if (!cid || !s.total) return;
+      (acc[cid] ||= { sum: 0, n: 0 });
+      acc[cid].sum += (s.score / s.total) * 100;
+      acc[cid].n += 1;
+    });
+    const avgMap: Record<string, { avg: number; count: number }> = {};
+    Object.entries(acc).forEach(([cid, v]) => { avgMap[cid] = { avg: Math.round(v.sum / v.n), count: v.n }; });
+    setClassAvg(avgMap);
     setLoading(false);
   };
 
@@ -130,22 +134,6 @@ const Classes = () => {
       </div>
 
       <div className="px-6 py-6 max-w-2xl mx-auto space-y-6">
-        {/* Student stats */}
-        {stats && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-l from-primary/10 to-accent/10 rounded-2xl p-5 border border-primary/20"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" />ממוצע ציונים</p>
-                <p className="text-3xl font-bold text-primary mt-1">{stats.avg}</p>
-                <p className="text-xs text-muted-foreground mt-1">{stats.count} מטלות שהושלמו</p>
-              </div>
-              <Trophy className={`w-12 h-12 ${stats.avg >= 90 ? 'text-yellow-500' : stats.avg >= 75 ? 'text-primary' : 'text-muted-foreground'}`} />
-            </div>
-          </motion.div>
-        )}
 
         {/* Teacher toggle */}
         {!isTeacher && !roleLoading && (
@@ -200,15 +188,33 @@ const Classes = () => {
           <h2 className="text-lg font-bold mb-3">הכיתות שהצטרפת</h2>
           {joined.length === 0 ? <p className="text-sm text-muted-foreground">לא הצטרפת לאף כיתה עדיין</p> :
             <div className="space-y-3">
-              {joined.map((c) => (
-                <motion.button
-                  key={c.id} whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate(`/classes/${c.id}`)}
-                  className="w-full text-right bg-card rounded-2xl p-4 border border-border hover:border-primary/30 transition-all">
-                  <h3 className="font-semibold">{c.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">קוד: <span className="font-mono">{c.class_code}</span></p>
-                </motion.button>
-              ))}
+              {joined.map((c) => {
+                const s = classAvg[c.id];
+                return (
+                  <motion.button
+                    key={c.id} whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate(`/classes/${c.id}`)}
+                    className="w-full text-right bg-card rounded-2xl p-4 border border-border hover:border-primary/30 transition-all">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold truncate">{c.name}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">קוד: <span className="font-mono">{c.class_code}</span></p>
+                      </div>
+                      {s ? (
+                        <div className="flex items-center gap-2 shrink-0 bg-primary/10 px-3 py-1.5 rounded-full">
+                          <Trophy className={`w-4 h-4 ${s.avg >= 90 ? 'text-yellow-500' : 'text-primary'}`} />
+                          <div className="text-right leading-tight">
+                            <p className="text-sm font-bold text-primary">ממוצע {s.avg}</p>
+                            <p className="text-[10px] text-muted-foreground">{s.count} מטלות</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground shrink-0">אין הגשות</span>
+                      )}
+                    </div>
+                  </motion.button>
+                );
+              })}
             </div>
           }
         </section>
