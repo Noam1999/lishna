@@ -100,18 +100,20 @@ const Auth = () => {
       } else {
         const { error } = await signUp(formData.email, formData.password, formData.name);
         if (error) {
-          let message = 'שגיאה בהרשמה';
+          let message = error.message || 'שגיאה בהרשמה';
           const m = error.message || '';
-          if (m.includes('User already registered') || m.includes('already been registered')) {
+          if (m.includes('User already registered') || m.includes('already been registered') || m.toLowerCase().includes('already')) {
             message = 'משתמש כבר רשום עם אימייל זה';
-          } else if (m.toLowerCase().includes('weak') || m.toLowerCase().includes('pwned')) {
-            message = 'הסיסמה חלשה או דלופה. בחר סיסמה חזקה יותר (אותיות, מספרים וסימנים)';
+          } else if (m.toLowerCase().includes('weak') || m.toLowerCase().includes('pwned') || m.toLowerCase().includes('leaked')) {
+            message = 'הסיסמה חלשה או דלופה. בחר סיסמה חזקה יותר';
           } else if (m.toLowerCase().includes('password')) {
-            message = 'הסיסמה לא עומדת בדרישות. נסה סיסמה ארוכה ומגוונת יותר';
-          } else if (m.toLowerCase().includes('email')) {
+            message = 'הסיסמה חייבת להכיל לפחות 6 תווים';
+          } else if (m.toLowerCase().includes('email') && m.toLowerCase().includes('invalid')) {
             message = 'כתובת האימייל אינה תקינה';
           } else if (m.toLowerCase().includes('rate')) {
             message = 'יותר מדי ניסיונות, נסה שוב בעוד רגע';
+          } else if (m.toLowerCase().includes('database') || m.toLowerCase().includes('saving new user')) {
+            message = 'שגיאה בשמירת המשתמש, נסה שוב';
           }
           toast({
             title: 'שגיאה',

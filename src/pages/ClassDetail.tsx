@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowRight, Plus, Copy, Users, FileText, ClipboardList, Check, ChevronDown, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowRight, Plus, Copy, Users, FileText, ClipboardList, Check, ChevronDown, CheckCircle2, XCircle, TrendingUp, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -145,6 +145,56 @@ const ClassDetail = () => {
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           </Button>
         </div>
+
+        {/* Teacher analytics */}
+        {isTeacher && submissions.length > 0 && (() => {
+          const grades = submissions.filter((s) => s.total > 0).map((s) => (s.score / s.total) * 100);
+          const classAvg = grades.length ? Math.round(grades.reduce((a, b) => a + b, 0) / grades.length) : 0;
+          const wrongCount: Record<number, number> = {};
+          submissions.forEach((s) => {
+            (s.details || []).forEach((d) => {
+              if (!d.correct) wrongCount[d.word_id] = (wrongCount[d.word_id] || 0) + 1;
+            });
+          });
+          const difficult = Object.entries(wrongCount)
+            .map(([wid, c]) => ({ wid: Number(wid), count: c }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5);
+          const maxWrong = difficult[0]?.count || 1;
+          return (
+            <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+              <div className="bg-gradient-to-l from-primary/10 to-accent/10 rounded-2xl p-5 border border-primary/20 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" />ממוצע כיתתי</p>
+                  <p className="text-3xl font-bold text-primary mt-1">{classAvg}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{submissions.length} הגשות</p>
+                </div>
+              </div>
+              {difficult.length > 0 && (
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <h3 className="font-bold mb-3 flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-amber-500" />מילים מאתגרות</h3>
+                  <div className="space-y-2">
+                    {difficult.map(({ wid, count }) => {
+                      const w = wordMap[wid];
+                      const pct = (count / maxWrong) * 100;
+                      return (
+                        <div key={wid}>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="font-display font-semibold">{w?.aramaic || `#${wid}`}<span className="text-muted-foreground font-sans font-normal mr-2">— {w?.hebrew || ''}</span></span>
+                            <span className="text-xs text-muted-foreground">{count} טעויות</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-muted overflow-hidden">
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, ease: 'easeOut' }} className="h-full bg-gradient-to-l from-amber-500 to-red-500" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </motion.section>
+          );
+        })()}
 
         {/* Assignments */}
         <section>
