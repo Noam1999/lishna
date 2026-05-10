@@ -14,9 +14,20 @@ export interface Profile {
   last_quiz_date: string | null;
   daily_xp: number;
   last_xp_date: string | null;
+  coins: number;
+  xp_multiplier_remaining: number;
+  coin_multiplier_remaining: number;
+  power_up_5050: number;
   created_at: string;
   updated_at: string;
 }
+
+export type ShopItem = 'xp_multiplier' | 'coin_multiplier' | 'power_up_5050';
+export const SHOP_PRICES: Record<ShopItem, number> = {
+  xp_multiplier: 500,
+  coin_multiplier: 500,
+  power_up_5050: 200,
+};
 
 export const useProfile = () => {
   const { user } = useAuth();
