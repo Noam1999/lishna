@@ -27,6 +27,7 @@ import SettingsPage from "./pages/Settings";
 import Classes from "./pages/Classes";
 import ClassDetail from "./pages/ClassDetail";
 import TakeAssignment from "./pages/TakeAssignment";
+import Shop from "./pages/Shop";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const AnimatedRoutes = () => {
         <Route path="/classes" element={<Classes />} />
         <Route path="/classes/:id" element={<ClassDetail />} />
         <Route path="/assignment/:id" element={<TakeAssignment />} />
+        <Route path="/shop" element={<Shop />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
