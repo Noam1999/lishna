@@ -126,6 +126,8 @@ const Quiz = () => {
         setSelectedAnswer(null);
         setShowResult(false);
         setIsCorrect(false);
+        setHiddenOptions([]);
+        setUsedThisQuestion(false);
       } else {
         // Quiz finished - update profile stats
         if (user && !hasUpdatedStreak.current) {
@@ -133,7 +135,8 @@ const Quiz = () => {
           // Use correct variable captured in closure, not stale quizScore
           const finalScore = correct ? (quizScore + 1) : quizScore;
           const pointsEarned = Math.round((finalScore / questions.length) * 100);
-          await addPoints(pointsEarned);
+          // Award coins + XP (with multipliers); replaces addPoints
+          await awardScoreRewards(pointsEarned);
           await addWeeklyPoints(pointsEarned);
           await updateQuizStreak();
           await checkAndUnlockAchievements();
