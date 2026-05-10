@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Trophy, RotateCcw, BookOpen, CheckCircle, XCircle } from 'lucide-react';
+import { Trophy, RotateCcw, BookOpen, CheckCircle, XCircle, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import Header from '@/components/Header';
@@ -22,7 +22,7 @@ interface QuizQuestion {
 const Quiz = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { addPoints, updateQuizStreak } = useProfile();
+  const { addPoints, updateQuizStreak, awardScoreRewards, usePowerUp5050, profile } = useProfile();
   const { dictionary, quizScore, setQuizScore, quizHistory, setQuizHistory } = useDictionary();
   const { learnedWordIds, loading: wordsLoading } = useUserWords();
   const { addWeeklyPoints } = useLeaderboard();
@@ -35,6 +35,8 @@ const Quiz = () => {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [notEnoughWords, setNotEnoughWords] = useState(false);
+  const [hiddenOptions, setHiddenOptions] = useState<string[]>([]);
+  const [usedThisQuestion, setUsedThisQuestion] = useState(false);
   
 
   const TOTAL_QUESTIONS = 10;
