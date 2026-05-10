@@ -207,14 +207,32 @@ const Quiz = () => {
 
       {/* Score Display */}
       <div className="px-6 mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2">
             <Trophy className="w-5 h-5 text-primary" />
             <span className="font-semibold text-primary">{quizScore}</span>
           </div>
-          <span className="text-sm text-muted-foreground">
-            שאלה {currentQuestion + 1} מתוך {questions.length}
-          </span>
+          <div className="flex items-center gap-2">
+            {profile && profile.power_up_5050 > 0 && !usedThisQuestion && !showResult && currentQ.options.length >= 4 && (
+              <button
+                onClick={async () => {
+                  const wrongs = currentQ.options.filter((o) => o !== currentQ.correctAnswer);
+                  const toHide = wrongs.sort(() => Math.random() - 0.5).slice(0, 2);
+                  setHiddenOptions(toHide);
+                  setUsedThisQuestion(true);
+                  await usePowerUp5050();
+                }}
+                className="flex items-center gap-1 bg-sky-500/15 border border-sky-500/40 text-sky-700 dark:text-sky-300 rounded-full px-3 py-1.5 text-xs font-bold hover:bg-sky-500/25 transition-all"
+                title="50:50 - הסר 2 תשובות שגויות"
+              >
+                <Zap className="w-3.5 h-3.5" />
+                50:50 ({profile.power_up_5050})
+              </button>
+            )}
+            <span className="text-sm text-muted-foreground">
+              שאלה {currentQuestion + 1} מתוך {questions.length}
+            </span>
+          </div>
         </div>
       </div>
 
