@@ -136,6 +136,50 @@ export const useProfile = () => {
     });
   };
 
+  // Award coins + XP after a test/assignment based on the score (0-100).
+  // Applies active multipliers and decrements them by 1.
+  const awardScoreRewards = async (score: number) => {
+    if (!user || !profile || score <= 0) return { coinsEarned: 0, xpEarned: 0 };
+
+    const xpMul = profile.xp_multiplier_remaining > 0 ? 2 : 1;
+    const coinMul = profile.coin_multiplier_remaining > 0 ? 2 : 1;
+    const xpEarned = score * xpMul;
+    const coinsEarned = score * coinMul;
+
+    const today = new Date().toISOString().split('T')[0];
+    const isNewDay = profile.last_xp_date !== today;
+    const newDailyXp = isNewDay ? xpEarned : profile.daily_xp + xpEarned;
+
+    await updateProfile({
+      points: profile.points + xpEarned,
+      coins: profile.coins + coinsEarned,
+      daily_xp: newDailyXp,
+      last_xp_date: today,
+      xp_multiplier_remaining: Math.max(0, profile.xp_multiplier_remaining - 1),
+      coin_multiplier_remaining: Math.max(0, profile.coin_multiplier_remaining - 1),
+    });
+
+    return { coinsEarned, xpEarned };
+  };
+
+  const purchaseItem = async (item: ShopItem) => {
+    if (!user || !profile) return { error: new Error('No user') };
+    const price = SHOP_PRICES[item];
+    if (profile.coins < price) return { error: new Error('not_enough_coins') };
+
+    const updates: Partial<Profile> = { coins: profile.coins - price };
+    if (item === 'xp_multiplier') updates.xp_multiplier_remaining = profile.xp_multiplier_remaining + 3;
+    if (item === 'coin_multiplier') updates.coin_multiplier_remaining = profile.coin_multiplier_remaining + 3;
+    if (item === 'power_up_5050') updates.power_up_5050 = profile.power_up_5050 + 1;
+
+    return await updateProfile(updates);
+  };
+
+  const usePowerUp5050 = async () => {
+    if (!user || !profile || profile.power_up_5050 <= 0) return { error: new Error('none') };
+    return await updateProfile({ power_up_5050: profile.power_up_5050 - 1 });
+  };
+
   return {
     profile,
     loading,
@@ -144,5 +188,8 @@ export const useProfile = () => {
     addPoints,
     updateQuizStreak,
     incrementWordsMastered,
+    awardScoreRewards,
+    purchaseItem,
+    usePowerUp5050,
   };
 };
