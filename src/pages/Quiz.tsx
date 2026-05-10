@@ -261,10 +261,13 @@ const Quiz = () => {
         {currentQ.options.map((option, index) => {
           const isSelected = selectedAnswer === option;
           const isCorrectAnswer = option === currentQ.correctAnswer;
-          
+          const isHidden = hiddenOptions.includes(option);
+
           let buttonClass = 'w-full h-14 text-lg justify-start px-6 transition-all duration-200 ';
-          
-          if (showResult) {
+
+          if (isHidden && !showResult) {
+            buttonClass += 'opacity-20 line-through pointer-events-none';
+          } else if (showResult) {
             if (isCorrectAnswer) {
               buttonClass += 'bg-green-100 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 ring-2 ring-green-400/50';
             } else if (isSelected && !isCorrect) {
@@ -286,7 +289,7 @@ const Quiz = () => {
               <Button
                 variant="outline"
                 onClick={() => handleAnswer(option)}
-                disabled={showResult}
+                disabled={showResult || isHidden}
                 className={buttonClass}
                 type="button"
               >
