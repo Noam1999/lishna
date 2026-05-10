@@ -319,6 +319,8 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          coin_multiplier_remaining: number
+          coins: number
           created_at: string
           daily_xp: number
           display_name: string | null
@@ -326,6 +328,7 @@ export type Database = {
           last_quiz_date: string | null
           last_xp_date: string | null
           points: number
+          power_up_5050: number
           streak: number
           updated_at: string
           user_id: string
@@ -333,9 +336,12 @@ export type Database = {
           week_start_date: string | null
           weekly_points: number
           words_mastered: number
+          xp_multiplier_remaining: number
         }
         Insert: {
           avatar_url?: string | null
+          coin_multiplier_remaining?: number
+          coins?: number
           created_at?: string
           daily_xp?: number
           display_name?: string | null
@@ -343,6 +349,7 @@ export type Database = {
           last_quiz_date?: string | null
           last_xp_date?: string | null
           points?: number
+          power_up_5050?: number
           streak?: number
           updated_at?: string
           user_id: string
@@ -350,9 +357,12 @@ export type Database = {
           week_start_date?: string | null
           weekly_points?: number
           words_mastered?: number
+          xp_multiplier_remaining?: number
         }
         Update: {
           avatar_url?: string | null
+          coin_multiplier_remaining?: number
+          coins?: number
           created_at?: string
           daily_xp?: number
           display_name?: string | null
@@ -360,6 +370,7 @@ export type Database = {
           last_quiz_date?: string | null
           last_xp_date?: string | null
           points?: number
+          power_up_5050?: number
           streak?: number
           updated_at?: string
           user_id?: string
@@ -367,6 +378,7 @@ export type Database = {
           week_start_date?: string | null
           weekly_points?: number
           words_mastered?: number
+          xp_multiplier_remaining?: number
         }
         Relationships: []
       }

@@ -1,75 +1,69 @@
-## School Management System Upgrade
+## Economy & Shop System
 
-Transform Lishna into a classroom platform with teacher/student roles, assignments, and grade tracking — while polishing animations and credits.
+Add Lishna Coins, an XP rewards system tied to test/assignment scores, and a Shop where students spend coins on multipliers and power-ups.
 
-### 1. Database (new migration)
+### 1. Database (migration)
 
-Add a `teacher` value to the existing `app_role` enum, then create:
+Extend `profiles` with economy columns:
+- `coins` (integer, default 0)
+- `xp_multiplier_remaining` (integer, default 0) — number of tests remaining with 2× XP
+- `coin_multiplier_remaining` (integer, default 0) — number of tests remaining with 2× coins
+- `power_up_5050` (integer, default 0) — quantity of 50/50 power-ups owned
 
-- **classes** — `id`, `teacher_id` (uuid), `name` (text), `class_code` (text unique, 6-char), `created_at`. RLS: teachers manage their own; anyone authenticated can SELECT by code (for joining).
-- **class_members** — `id`, `class_id`, `student_id`, `joined_at`. Unique on (class_id, student_id). RLS: students insert themselves; teacher of class + member student can read.
-- **assignments** — `id`, `class_id`, `teacher_id`, `title`, `type` ('assignment' | 'test'), `word_ids` (int[]) referencing the 200-word dictionary, `due_at` (nullable), `created_at`. RLS: teacher manages own; class members can read.
-- **assignment_submissions** — `id`, `assignment_id`, `student_id`, `score` (int), `total` (int), `details` (jsonb — per-word correct/wrong), `submitted_at`. Unique on (assignment_id, student_id). RLS: student inserts/views own; teacher of parent class views all.
+Note: `points` already exists and acts as XP.
 
-Helper security-definer function `is_class_teacher(_class_id, _user_id)` to avoid RLS recursion.
+### 2. Reward logic
 
-Class code generation: 6-char uppercase alphanumeric, generated client-side with retry on collision.
+After every quiz/assignment completion:
+- Coins earned = score (× 2 if `coin_multiplier_remaining > 0`)
+- XP earned = score (× 2 if `xp_multiplier_remaining > 0`)
+- Decrement multiplier counters by 1 if active
+- Update via new helper in `useProfile` (e.g. `awardScoreRewards(score)`)
 
-### 2. Roles & access
+Apply in: `Quiz.tsx` (on quiz complete) and `TakeAssignment.tsx` (on submit).
 
-- Reuse existing `user_roles` + `has_role()` pattern. New role: `teacher`.
-- Add a "Become a teacher" toggle in Settings (self-assign teacher role for beta — simple insert into `user_roles`). Note this for later admin-gated upgrade.
-- Students = any authenticated user without teacher role.
+### 3. Shop page (`/shop`)
 
-### 3. New pages & routes
+New `src/pages/Shop.tsx`:
+- Header with coin (💰) and XP (✨) balance
+- 3 item cards:
+  - ✨ מכפיל XP — 500 coins — doubles XP for next 3 tests
+  - 💰 מכפיל מטבעות — 500 coins — doubles coins for next 3 tests
+  - ⚡ כוח 50:50 — 200 coins — removes 2 wrong answers in a quiz
+- "רכישה" button on each card (disabled if not enough coins)
+- Purchase deducts coins and increments the relevant counter (multipliers add 3 uses; power-up adds 1)
+- Success animation: framer-motion scale+confetti-style overlay with toast "רכישה הושלמה!"
+- Show active multiplier badges ("מכפיל XP פעיל: 2 מבחנים נותרו")
 
-- `/classes` — role-aware hub:
-  - Teacher view: list of own classes with codes, "Create class" dialog, click → `/classes/:id` dashboard.
-  - Student view: list of joined classes + "Join with code" input.
-- `/classes/:id` — Teacher dashboard:
-  - Class info + shareable code (copy button).
-  - Members list with their scores per assignment.
-  - Assignments list + "Create assignment/test" dialog (pick title, type, word multi-select from the 200-word dictionary).
-- `/classes/:id/student` — Student class view: list of active assignments, click to start.
-- `/assignment/:id` — Student takes the assignment (reuses Quiz logic, but locked to the assignment's `word_ids`); on finish writes a row to `assignment_submissions` and redirects to a results screen.
+Add route in `App.tsx`. Add a shop button on Home screen and a small balance chip in `Header.tsx` (showing coins + XP) wherever profile is loaded.
 
-Add nav entry (icon: GraduationCap-like) for "כיתות" — replace one less-used item or add as 6th item; recommended: keep current 5 nav items and surface "כיתות" as a card on Home + link in Settings (avoids overcrowding mobile bottom nav).
+### 4. 50/50 power-up in Quiz
 
-### 4. Hooks
+In `Quiz.tsx`:
+- Add ⚡ button (visible only if `profile.power_up_5050 > 0` and current question has 4+ options)
+- On click: pick 2 wrong answers and visually disable/hide them, decrement `power_up_5050` in DB, mark used for the current question (local state — one use per question)
 
-- `useClasses()` — list/create/join.
-- `useClass(id)` — class detail, members, assignments.
-- `useAssignments(classId)` and `useSubmissions(assignmentId)`.
-- `useUserRole()` — wraps `user_roles` query, exposes `isTeacher`.
+### 5. Persistence
 
-### 5. Quiz reuse for assignments
+All economy state lives on `profiles` (already persisted). `useProfile` exposes:
+- `awardScoreRewards(score)` — applies coins/XP with active multipliers and decrements
+- `purchaseItem(item)` — validates coins, deducts, increments item
+- `usePowerUp5050()` — decrements `power_up_5050`
 
-Refactor `Quiz.tsx` minimally to accept an optional `wordIds` prop/route-state. When present: skip random selection, use those words, on completion call submission insert instead of (or in addition to) normal points logic.
+### 6. UI polish
 
-### 6. Animations & polish (Framer Motion)
+- Coin/XP badges in `Header.tsx` (small pills, animated number on change)
+- Shop card hover/tap with framer-motion spring
+- Purchase success: scale-in checkmark with sonner toast
+- Shop entry: floating button on Home + nav-style entry
 
-- Wrap `<Routes>` with `AnimatePresence` + a `PageTransition` component (fade + subtle y-slide, 200ms).
-- Add `whileTap={{ scale: 0.97 }}` to primary action buttons across Home, Classes, Assignment screens.
-- Respect `prefers-reduced-motion`.
+### Files
 
-### 7. Footer credits
-
-Create `<Footer />` component: fixed-position above the bottom nav (so it doesn't overlap), text "כל הזכויות שמורות לנועם כהן ולדניאל תורתי", muted small text. Render on Home and Settings only. Ensure it sits above the bottom nav with proper padding so content isn't clipped.
-
-### 8. Analytics
-
-Vercel `<Analytics />` already mounted in `App.tsx` — it auto-tracks route changes via React Router. New pages are tracked automatically; no extra work needed. Verify by spot-checking after deploy.
-
-### 9. SEO & accessibility
-
-- Each new page: unique `<title>`, meta description, h1, semantic landmarks.
-- All buttons: `aria-label` where icon-only; touch targets ≥44px.
-- Class code: `role="status"` + copy button with aria-label.
-
-### Out of scope / follow-ups
-
-- Bulk teacher invitations, CSV export of grades, assignment deadlines enforcement, push notifications. Can add later.
-
-### Open question
-
-Should the teacher role be **self-serve** (any user toggles it on in Settings — fast for beta) or **admin-granted only** (safer, but you'd need to grant it manually for each teacher)? Default in this plan: self-serve for beta with a clear note to lock down later.
+- migration: add columns to `profiles`
+- new: `src/pages/Shop.tsx`
+- edit: `src/hooks/useProfile.ts` (new helpers)
+- edit: `src/components/Header.tsx` (balance chip — optional prop)
+- edit: `src/pages/Home.tsx` (Shop entry button)
+- edit: `src/pages/Quiz.tsx` (50/50 button + reward call)
+- edit: `src/pages/TakeAssignment.tsx` (reward call)
+- edit: `src/App.tsx` (route)

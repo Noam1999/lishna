@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
+import { useProfile } from '@/hooks/useProfile';
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
 
@@ -17,6 +18,7 @@ const TakeAssignment = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { dictionary } = useDictionary();
+  const { awardScoreRewards } = useProfile();
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [idx, setIdx] = useState(0);
@@ -78,11 +80,16 @@ const TakeAssignment = () => {
       score: finalScore,
       total: questions.length,
       details,
-    }, { onConflict: 'assignment_id,student_id' }).then(({ error }) => {
-      if (error) toast.error('שגיאה בשליחת התוצאה');
-      else toast.success('התוצאה נשלחה למורה!');
+    }, { onConflict: 'assignment_id,student_id' }).then(async ({ error }) => {
+      if (error) {
+        toast.error('שגיאה בשליחת התוצאה');
+      } else {
+        const pct = questions.length ? Math.round((finalScore / questions.length) * 100) : 0;
+        const rewards = await awardScoreRewards(pct);
+        toast.success(`התוצאה נשלחה! +${rewards?.coinsEarned ?? 0} 💰  +${rewards?.xpEarned ?? 0} ✨`);
+      }
     });
-  }, [done, assignment, user, score, questions.length, details, submitting]);
+  }, [done, assignment, user, score, questions.length, details, submitting, awardScoreRewards]);
 
   if (!assignment) return <div className="min-h-screen flex items-center justify-center">טוען...</div>;
 

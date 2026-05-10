@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag } from 'lucide-react';
 import Footer from '@/components/Footer';
 import PageTransition from '@/components/PageTransition';
 import Header from '@/components/Header';
@@ -111,6 +111,12 @@ const Home = () => {
           {/* Top-right: Streak flame + Points */}
           <div className="absolute top-4 right-4 flex items-center gap-2">
             {profile && user &&
+            <Link to="/shop" className="flex items-center gap-1 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft hover:scale-105 transition-all">
+                <span className="text-sm">💰</span>
+                <span className="text-xs font-bold text-foreground">{profile.coins}</span>
+              </Link>
+            }
+            {profile && user &&
             <div className="flex items-center gap-1 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft">
                 <Trophy className="w-4 h-4 text-primary" />
                 <span className="text-xs font-bold text-foreground">{profile.points}</span>
@@ -209,6 +215,21 @@ const Home = () => {
             <div className="flex-1 text-right">
               <h3 className="font-semibold text-lg text-foreground mb-1">כיתות</h3>
               <p className="text-sm text-muted-foreground">הצטרף לכיתה או נהל ככיתה כמורה</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Shop Link */}
+        <Link
+          to="/shop"
+          className="group block bg-gradient-to-br from-yellow-500/10 to-amber-500/10 rounded-2xl p-5 shadow-soft border border-yellow-500/30 hover:shadow-elegant transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 text-2xl">
+              💰
+            </div>
+            <div className="flex-1 text-right">
+              <h3 className="font-semibold text-lg text-foreground mb-1">החנות של לישנא</h3>
+              <p className="text-sm text-muted-foreground">קנה מכפילים וכוחות מיוחדים</p>
             </div>
           </div>
         </Link>
