@@ -39,6 +39,11 @@ const ClassDetail = () => {
   const [copied, setCopied] = useState(false);
   const [wordSearch, setWordSearch] = useState('');
   const [expandedSub, setExpandedSub] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [allowPowerUps, setAllowPowerUps] = useState(true);
+  const [shuffleQuestions, setShuffleQuestions] = useState(false);
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [secondsPerQuestion, setSecondsPerQuestion] = useState(20);
   const wordMap = useMemo(() => {
     const m: Record<number, { aramaic: string; hebrew: string }> = {};
     dictionary.forEach((w) => { m[w.id] = { aramaic: w.aramaic, hebrew: w.hebrew }; });
