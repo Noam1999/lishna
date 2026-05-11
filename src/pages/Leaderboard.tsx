@@ -12,6 +12,7 @@ import { useAchievements } from '@/hooks/useAchievements';
 import LeaderboardEntry from '@/components/LeaderboardEntry';
 import AchievementBadge from '@/components/AchievementBadge';
 import SeasonHistoryItem from '@/components/SeasonHistoryItem';
+import PublicProfileDialog from '@/components/PublicProfileDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Leaderboard = () => {
