@@ -8,6 +8,7 @@ interface LeaderboardEntryProps {
   avatarUrl: string | null;
   points: number;
   isCurrentUser?: boolean;
+  onClick?: () => void;
 }
 
 const LeaderboardEntry = ({
@@ -16,7 +17,8 @@ const LeaderboardEntry = ({
   username,
   avatarUrl,
   points,
-  isCurrentUser = false
+  isCurrentUser = false,
+  onClick,
 }: LeaderboardEntryProps) => {
   const getMedalStyle = (rank: number) => {
     switch (rank) {
