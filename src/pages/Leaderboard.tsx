@@ -218,14 +218,16 @@ const Leaderboard = () => {
 };
 
 // Leaderboard List Component
-const LeaderboardList = ({ 
-  entries, 
-  loading, 
-  currentUserId 
-}: { 
-  entries: any[]; 
+const LeaderboardList = ({
+  entries,
+  loading,
+  currentUserId,
+  onSelect,
+}: {
+  entries: any[];
   loading: boolean;
   currentUserId: string;
+  onSelect?: (userId: string) => void;
 }) => {
   if (loading) {
     return (
@@ -249,6 +251,7 @@ const LeaderboardList = ({
             avatarUrl={entry.avatar_url}
             points={entry.weekly_points}
             isCurrentUser={entry.user_id === currentUserId}
+            onClick={onSelect ? () => onSelect(entry.user_id) : undefined}
           />
         ))}
       </div>
