@@ -45,6 +45,7 @@ const ClassDetail = () => {
   const [shuffleQuestions, setShuffleQuestions] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(false);
   const [secondsPerQuestion, setSecondsPerQuestion] = useState(20);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const wordMap = useMemo(() => {
     const m: Record<number, { aramaic: string; hebrew: string }> = {};
     dictionary.forEach((w) => { m[w.id] = { aramaic: w.aramaic, hebrew: w.hebrew }; });
