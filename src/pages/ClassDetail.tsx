@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDictionary, removeNiqqud } from '@/contexts/DictionaryContext';
 import PageTransition from '@/components/PageTransition';
+import PublicProfileDialog from '@/components/PublicProfileDialog';
 
 interface ClassRow { id: string; name: string; class_code: string; teacher_id: string; }
 interface Assignment { id: string; title: string; type: string; word_ids: number[]; created_at: string; }
