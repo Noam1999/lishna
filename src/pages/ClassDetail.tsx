@@ -109,6 +109,7 @@ const ClassDetail = () => {
     setBusy(true);
     const { error } = await supabase.from('assignments').insert({
       class_id: cls.id, teacher_id: user.id, title: title.trim(), type, word_ids: Array.from(selectedWords),
+      settings: { allowPowerUps, shuffleQuestions, timerEnabled, secondsPerQuestion },
     });
     setBusy(false);
     if (error) { toast.error('שגיאה'); return; }
