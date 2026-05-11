@@ -19,6 +19,7 @@ const Leaderboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'global' | 'friends'>('global');
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const { 
     globalLeaderboard, 
     friendsLeaderboard, 
