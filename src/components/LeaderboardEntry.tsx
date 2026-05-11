@@ -98,7 +98,7 @@ const LeaderboardEntry = ({
         <p className="font-bold text-lg text-primary">{points}</p>
         <p className="text-xs text-muted-foreground">נקודות</p>
       </div>
-    </div>
+    </button>
   );
 };
 
