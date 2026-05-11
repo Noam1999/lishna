@@ -424,6 +424,12 @@ const ClassDetail = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <PublicProfileDialog
+        userId={profileUserId}
+        open={!!profileUserId}
+        onOpenChange={(o) => !o && setProfileUserId(null)}
+      />
     </div>
     </PageTransition>
   );
