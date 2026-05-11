@@ -12,12 +12,14 @@ import { useAchievements } from '@/hooks/useAchievements';
 import LeaderboardEntry from '@/components/LeaderboardEntry';
 import AchievementBadge from '@/components/AchievementBadge';
 import SeasonHistoryItem from '@/components/SeasonHistoryItem';
+import PublicProfileDialog from '@/components/PublicProfileDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Leaderboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'global' | 'friends'>('global');
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const { 
     globalLeaderboard, 
     friendsLeaderboard, 
@@ -85,10 +87,11 @@ const Leaderboard = () => {
           </TabsList>
 
           <TabsContent value="global" className="mt-4">
-            <LeaderboardList 
-              entries={globalLeaderboard} 
+            <LeaderboardList
+              entries={globalLeaderboard}
               loading={leaderboardLoading}
               currentUserId={user.id}
+              onSelect={setProfileUserId}
             />
           </TabsContent>
 
@@ -98,8 +101,8 @@ const Leaderboard = () => {
                 <CardContent>
                   <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                   <p className="text-muted-foreground">אין לך חברים עדיין</p>
-                  <Button 
-                    variant="link" 
+                  <Button
+                    variant="link"
                     onClick={() => navigate('/friends')}
                     className="mt-2"
                   >
@@ -108,15 +111,22 @@ const Leaderboard = () => {
                 </CardContent>
               </Card>
             ) : (
-              <LeaderboardList 
-                entries={friendsLeaderboard} 
+              <LeaderboardList
+                entries={friendsLeaderboard}
                 loading={leaderboardLoading}
                 currentUserId={user.id}
+                onSelect={setProfileUserId}
               />
             )}
           </TabsContent>
         </Tabs>
       </div>
+
+      <PublicProfileDialog
+        userId={profileUserId}
+        open={!!profileUserId}
+        onOpenChange={(o) => !o && setProfileUserId(null)}
+      />
 
       {/* Achievements Section */}
       <div className="px-4 mt-8">
@@ -208,14 +218,16 @@ const Leaderboard = () => {
 };
 
 // Leaderboard List Component
-const LeaderboardList = ({ 
-  entries, 
-  loading, 
-  currentUserId 
-}: { 
-  entries: any[]; 
+const LeaderboardList = ({
+  entries,
+  loading,
+  currentUserId,
+  onSelect,
+}: {
+  entries: any[];
   loading: boolean;
   currentUserId: string;
+  onSelect?: (userId: string) => void;
 }) => {
   if (loading) {
     return (
@@ -239,6 +251,7 @@ const LeaderboardList = ({
             avatarUrl={entry.avatar_url}
             points={entry.weekly_points}
             isCurrentUser={entry.user_id === currentUserId}
+            onClick={onSelect ? () => onSelect(entry.user_id) : undefined}
           />
         ))}
       </div>

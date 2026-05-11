@@ -1,16 +1,18 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowRight, Plus, Copy, Users, FileText, ClipboardList, Check, ChevronDown, CheckCircle2, XCircle, TrendingUp, AlertTriangle } from 'lucide-react';
+import { ArrowRight, Plus, Copy, Users, FileText, ClipboardList, Check, ChevronDown, CheckCircle2, XCircle, TrendingUp, AlertTriangle, Settings as SettingsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDictionary, removeNiqqud } from '@/contexts/DictionaryContext';
 import PageTransition from '@/components/PageTransition';
+import PublicProfileDialog from '@/components/PublicProfileDialog';
 
 interface ClassRow { id: string; name: string; class_code: string; teacher_id: string; }
 interface Assignment { id: string; title: string; type: string; word_ids: number[]; created_at: string; }
@@ -38,6 +40,12 @@ const ClassDetail = () => {
   const [copied, setCopied] = useState(false);
   const [wordSearch, setWordSearch] = useState('');
   const [expandedSub, setExpandedSub] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [allowPowerUps, setAllowPowerUps] = useState(true);
+  const [shuffleQuestions, setShuffleQuestions] = useState(false);
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [secondsPerQuestion, setSecondsPerQuestion] = useState(20);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const wordMap = useMemo(() => {
     const m: Record<number, { aramaic: string; hebrew: string }> = {};
     dictionary.forEach((w) => { m[w.id] = { aramaic: w.aramaic, hebrew: w.hebrew }; });
@@ -103,6 +111,7 @@ const ClassDetail = () => {
     setBusy(true);
     const { error } = await supabase.from('assignments').insert({
       class_id: cls.id, teacher_id: user.id, title: title.trim(), type, word_ids: Array.from(selectedWords),
+      settings: { allowPowerUps, shuffleQuestions, timerEnabled, secondsPerQuestion },
     });
     setBusy(false);
     if (error) { toast.error('שגיאה'); return; }
@@ -246,7 +255,14 @@ const ClassDetail = () => {
                                   >
                                     <span className="flex items-center gap-2">
                                       <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                                      {profiles[s.student_id] || 'תלמיד'}
+                                      <span
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={(e) => { e.stopPropagation(); setProfileUserId(s.student_id); }}
+                                        className="hover:text-primary hover:underline cursor-pointer"
+                                      >
+                                        {profiles[s.student_id] || 'תלמיד'}
+                                      </span>
                                     </span>
                                     <span className="font-semibold text-primary">ציון {grade} · {s.score}/{s.total}</span>
                                   </button>
@@ -291,7 +307,14 @@ const ClassDetail = () => {
             {members.length === 0 ? <p className="text-sm text-muted-foreground">עדיין לא הצטרפו תלמידים</p> :
               <div className="bg-card rounded-2xl border border-border divide-y divide-border">
                 {members.map((m) => (
-                  <div key={m.id} className="px-4 py-3">{profiles[m.student_id] || 'תלמיד'}</div>
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setProfileUserId(m.student_id)}
+                    className="w-full text-right px-4 py-3 hover:bg-muted/40 transition-colors"
+                  >
+                    {profiles[m.student_id] || 'תלמיד'}
+                  </button>
                 ))}
               </div>
             }
@@ -343,10 +366,70 @@ const ClassDetail = () => {
                 })()}
               </div>
             </div>
-            <Button onClick={createAssignment} disabled={busy || !title.trim() || selectedWords.size < 4} className="w-full">צור מטלה</Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setSettingsOpen(true)} type="button" className="flex-shrink-0">
+                <SettingsIcon className="w-4 h-4 ml-1" />הגדרות
+              </Button>
+              <Button onClick={createAssignment} disabled={busy || !title.trim() || selectedWords.size < 4} className="flex-1">צור מטלה</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Assignment settings dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent dir="rtl" className="max-w-md">
+          <DialogHeader><DialogTitle>הגדרות מטלה</DialogTitle></DialogHeader>
+          <div className="space-y-4 mt-2">
+            <label className="flex items-start justify-between gap-3 p-3 rounded-xl bg-muted/40">
+              <div className="text-right">
+                <p className="font-semibold text-foreground">כוחות מיוחדים</p>
+                <p className="text-xs text-muted-foreground">אפשר/חסום שימוש ב-50:50 ובמכפילים במהלך המטלה</p>
+              </div>
+              <Switch checked={allowPowerUps} onCheckedChange={setAllowPowerUps} />
+            </label>
+
+            <label className="flex items-start justify-between gap-3 p-3 rounded-xl bg-muted/40">
+              <div className="text-right">
+                <p className="font-semibold text-foreground">ערבוב שאלות</p>
+                <p className="text-xs text-muted-foreground">סדר השאלות יוגרל לכל תלמיד בנפרד</p>
+              </div>
+              <Switch checked={shuffleQuestions} onCheckedChange={setShuffleQuestions} />
+            </label>
+
+            <div className="p-3 rounded-xl bg-muted/40">
+              <label className="flex items-start justify-between gap-3">
+                <div className="text-right">
+                  <p className="font-semibold text-foreground">טיימר לשאלה</p>
+                  <p className="text-xs text-muted-foreground">ספירה לאחור לכל שאלה</p>
+                </div>
+                <Switch checked={timerEnabled} onCheckedChange={setTimerEnabled} />
+              </label>
+              {timerEnabled && (
+                <div className="mt-3 flex items-center gap-2 justify-end">
+                  <span className="text-sm text-muted-foreground">שניות לשאלה:</span>
+                  <Input
+                    type="number"
+                    min={5}
+                    max={120}
+                    value={secondsPerQuestion}
+                    onChange={(e) => setSecondsPerQuestion(Math.max(5, Math.min(120, Number(e.target.value) || 20)))}
+                    className="w-24"
+                  />
+                </div>
+              )}
+            </div>
+
+            <Button className="w-full" onClick={() => setSettingsOpen(false)}>שמור הגדרות</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <PublicProfileDialog
+        userId={profileUserId}
+        open={!!profileUserId}
+        onOpenChange={(o) => !o && setProfileUserId(null)}
+      />
     </div>
     </PageTransition>
   );

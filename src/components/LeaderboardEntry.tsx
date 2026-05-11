@@ -8,6 +8,7 @@ interface LeaderboardEntryProps {
   avatarUrl: string | null;
   points: number;
   isCurrentUser?: boolean;
+  onClick?: () => void;
 }
 
 const LeaderboardEntry = ({
@@ -16,7 +17,8 @@ const LeaderboardEntry = ({
   username,
   avatarUrl,
   points,
-  isCurrentUser = false
+  isCurrentUser = false,
+  onClick,
 }: LeaderboardEntryProps) => {
   const getMedalStyle = (rank: number) => {
     switch (rank) {
@@ -47,13 +49,16 @@ const LeaderboardEntry = ({
   const name = displayName || username || 'משתמש';
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       className={cn(
-        'flex items-center gap-3 p-3 rounded-xl transition-all duration-200',
-        isCurrentUser 
-          ? 'bg-primary/10 border-2 border-primary' 
+        'w-full text-right flex items-center gap-3 p-3 rounded-xl transition-all duration-200',
+        isCurrentUser
+          ? 'bg-primary/10 border-2 border-primary'
           : 'bg-card hover:bg-accent/50',
-        rank <= 3 && 'shadow-elegant'
+        rank <= 3 && 'shadow-elegant',
+        onClick && 'cursor-pointer hover:scale-[1.01]'
       )}
     >
       {/* Rank */}
@@ -93,7 +98,7 @@ const LeaderboardEntry = ({
         <p className="font-bold text-lg text-primary">{points}</p>
         <p className="text-xs text-muted-foreground">נקודות</p>
       </div>
-    </div>
+    </button>
   );
 };
 

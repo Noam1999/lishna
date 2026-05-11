@@ -7,6 +7,8 @@ import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
 import { useProfile, SHOP_PRICES, ShopItem } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
+import LuckyWheel from '@/components/LuckyWheel';
+import ExchangeHub from '@/components/ExchangeHub';
 
 interface ShopCard {
   id: ShopItem;
@@ -105,6 +107,15 @@ const Shop = () => {
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.05 }}
+                className="flex items-center gap-2 bg-card border border-border rounded-full px-4 py-2 shadow-soft"
+              >
+                <span className="text-lg">💎</span>
+                <span className="font-bold text-foreground">{profile?.diamonds ?? 0}</span>
+              </motion.div>
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
                 className="flex items-center gap-2 bg-card border border-border rounded-full px-4 py-2 shadow-soft"
               >
@@ -113,6 +124,12 @@ const Shop = () => {
               </motion.div>
             </div>
           </div>
+        </div>
+
+        {/* Lucky Wheel + Exchange */}
+        <div className="px-6 mb-6 space-y-4">
+          <LuckyWheel />
+          <ExchangeHub />
         </div>
 
         {/* Active boosts */}

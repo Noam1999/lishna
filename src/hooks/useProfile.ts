@@ -18,9 +18,31 @@ export interface Profile {
   xp_multiplier_remaining: number;
   coin_multiplier_remaining: number;
   power_up_5050: number;
+  diamonds: number;
+  last_wheel_spin_at: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export const COINS_PER_DIAMOND = 100;
+export const WHEEL_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+export type WheelPrize =
+  | { kind: 'coins'; amount: number; label: string }
+  | { kind: 'diamonds'; amount: number; label: string }
+  | { kind: 'none'; label: string };
+
+// Order matches visible wheel slices
+export const WHEEL_SEGMENTS: { prize: WheelPrize; weight: number; color: string }[] = [
+  { prize: { kind: 'coins', amount: 1, label: '1 מטבע' }, weight: 31, color: '#fbbf24' },
+  { prize: { kind: 'none', label: 'אין פרס' }, weight: 9, color: '#6b7280' },
+  { prize: { kind: 'coins', amount: 50, label: '50 מטבעות' }, weight: 15, color: '#f59e0b' },
+  { prize: { kind: 'diamonds', amount: 5, label: '5 יהלומים' }, weight: 5, color: '#22d3ee' },
+  { prize: { kind: 'coins', amount: 1000, label: '1000 מטבעות' }, weight: 0.09, color: '#ef4444' },
+  { prize: { kind: 'none', label: 'אין פרס' }, weight: 9, color: '#6b7280' },
+  { prize: { kind: 'diamonds', amount: 1, label: '1 יהלום' }, weight: 20.91, color: '#06b6d4' },
+  { prize: { kind: 'coins', amount: 100, label: '100 מטבעות' }, weight: 10, color: '#10b981' },
+];
 
 export type ShopItem = 'xp_multiplier' | 'coin_multiplier' | 'power_up_5050';
 export const SHOP_PRICES: Record<ShopItem, number> = {
@@ -180,6 +202,52 @@ export const useProfile = () => {
     return await updateProfile({ power_up_5050: profile.power_up_5050 - 1 });
   };
 
+  // Convert coins -> diamonds (100 coins = 1 diamond)
+  const exchangeCoinsToDiamonds = async (diamondAmount: number) => {
+    if (!user || !profile) return { error: new Error('no_profile') };
+    const coinsCost = diamondAmount * COINS_PER_DIAMOND;
+    if (profile.coins < coinsCost) return { error: new Error('not_enough_coins') };
+    return await updateProfile({
+      coins: profile.coins - coinsCost,
+      diamonds: profile.diamonds + diamondAmount,
+    });
+  };
+
+  // Convert diamonds -> coins (1 diamond = 100 coins)
+  const exchangeDiamondsToCoins = async (diamondAmount: number) => {
+    if (!user || !profile) return { error: new Error('no_profile') };
+    if (profile.diamonds < diamondAmount) return { error: new Error('not_enough_diamonds') };
+    return await updateProfile({
+      diamonds: profile.diamonds - diamondAmount,
+      coins: profile.coins + diamondAmount * COINS_PER_DIAMOND,
+    });
+  };
+
+  const pickWheelSegment = (): number => {
+    const total = WHEEL_SEGMENTS.reduce((s, x) => s + x.weight, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < WHEEL_SEGMENTS.length; i++) {
+      r -= WHEEL_SEGMENTS[i].weight;
+      if (r <= 0) return i;
+    }
+    return WHEEL_SEGMENTS.length - 1;
+  };
+
+  const spinWheel = async (): Promise<{ segmentIndex: number; prize: WheelPrize } | { error: Error }> => {
+    if (!user || !profile) return { error: new Error('no_profile') };
+    if (profile.last_wheel_spin_at) {
+      const last = new Date(profile.last_wheel_spin_at).getTime();
+      if (Date.now() - last < WHEEL_COOLDOWN_MS) return { error: new Error('cooldown') };
+    }
+    const segmentIndex = pickWheelSegment();
+    const prize = WHEEL_SEGMENTS[segmentIndex].prize;
+    const updates: Partial<Profile> = { last_wheel_spin_at: new Date().toISOString() };
+    if (prize.kind === 'coins') updates.coins = profile.coins + prize.amount;
+    if (prize.kind === 'diamonds') updates.diamonds = profile.diamonds + prize.amount;
+    await updateProfile(updates);
+    return { segmentIndex, prize };
+  };
+
   return {
     profile,
     loading,
@@ -191,5 +259,8 @@ export const useProfile = () => {
     awardScoreRewards,
     purchaseItem,
     usePowerUp5050,
+    exchangeCoinsToDiamonds,
+    exchangeDiamondsToCoins,
+    spinWheel,
   };
 };
