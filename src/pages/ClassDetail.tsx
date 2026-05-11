@@ -307,7 +307,14 @@ const ClassDetail = () => {
             {members.length === 0 ? <p className="text-sm text-muted-foreground">עדיין לא הצטרפו תלמידים</p> :
               <div className="bg-card rounded-2xl border border-border divide-y divide-border">
                 {members.map((m) => (
-                  <div key={m.id} className="px-4 py-3">{profiles[m.student_id] || 'תלמיד'}</div>
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setProfileUserId(m.student_id)}
+                    className="w-full text-right px-4 py-3 hover:bg-muted/40 transition-colors"
+                  >
+                    {profiles[m.student_id] || 'תלמיד'}
+                  </button>
                 ))}
               </div>
             }
