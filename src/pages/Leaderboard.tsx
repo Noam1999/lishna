@@ -87,10 +87,11 @@ const Leaderboard = () => {
           </TabsList>
 
           <TabsContent value="global" className="mt-4">
-            <LeaderboardList 
-              entries={globalLeaderboard} 
+            <LeaderboardList
+              entries={globalLeaderboard}
               loading={leaderboardLoading}
               currentUserId={user.id}
+              onSelect={setProfileUserId}
             />
           </TabsContent>
 
