@@ -101,8 +101,8 @@ const Leaderboard = () => {
                 <CardContent>
                   <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                   <p className="text-muted-foreground">אין לך חברים עדיין</p>
-                  <Button 
-                    variant="link" 
+                  <Button
+                    variant="link"
                     onClick={() => navigate('/friends')}
                     className="mt-2"
                   >
@@ -111,15 +111,22 @@ const Leaderboard = () => {
                 </CardContent>
               </Card>
             ) : (
-              <LeaderboardList 
-                entries={friendsLeaderboard} 
+              <LeaderboardList
+                entries={friendsLeaderboard}
                 loading={leaderboardLoading}
                 currentUserId={user.id}
+                onSelect={setProfileUserId}
               />
             )}
           </TabsContent>
         </Tabs>
       </div>
+
+      <PublicProfileDialog
+        userId={profileUserId}
+        open={!!profileUserId}
+        onOpenChange={(o) => !o && setProfileUserId(null)}
+      />
 
       {/* Achievements Section */}
       <div className="px-4 mt-8">
