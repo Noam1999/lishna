@@ -7,6 +7,8 @@ import PageTransition from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
 import { useProfile, SHOP_PRICES, ShopItem } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
+import LuckyWheel from '@/components/LuckyWheel';
+import ExchangeHub from '@/components/ExchangeHub';
 
 interface ShopCard {
   id: ShopItem;
