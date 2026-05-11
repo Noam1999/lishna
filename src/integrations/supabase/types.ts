@@ -111,6 +111,7 @@ export type Database = {
           created_at: string
           due_at: string | null
           id: string
+          settings: Json
           teacher_id: string
           title: string
           type: string
@@ -121,6 +122,7 @@ export type Database = {
           created_at?: string
           due_at?: string | null
           id?: string
+          settings?: Json
           teacher_id: string
           title: string
           type?: string
@@ -131,6 +133,7 @@ export type Database = {
           created_at?: string
           due_at?: string | null
           id?: string
+          settings?: Json
           teacher_id?: string
           title?: string
           type?: string
@@ -323,9 +326,11 @@ export type Database = {
           coins: number
           created_at: string
           daily_xp: number
+          diamonds: number
           display_name: string | null
           id: string
           last_quiz_date: string | null
+          last_wheel_spin_at: string | null
           last_xp_date: string | null
           points: number
           power_up_5050: number
@@ -344,9 +349,11 @@ export type Database = {
           coins?: number
           created_at?: string
           daily_xp?: number
+          diamonds?: number
           display_name?: string | null
           id?: string
           last_quiz_date?: string | null
+          last_wheel_spin_at?: string | null
           last_xp_date?: string | null
           points?: number
           power_up_5050?: number
@@ -365,9 +372,11 @@ export type Database = {
           coins?: number
           created_at?: string
           daily_xp?: number
+          diamonds?: number
           display_name?: string | null
           id?: string
           last_quiz_date?: string | null
+          last_wheel_spin_at?: string | null
           last_xp_date?: string | null
           points?: number
           power_up_5050?: number
