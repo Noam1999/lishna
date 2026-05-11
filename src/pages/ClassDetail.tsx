@@ -255,7 +255,14 @@ const ClassDetail = () => {
                                   >
                                     <span className="flex items-center gap-2">
                                       <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                                      {profiles[s.student_id] || 'תלמיד'}
+                                      <span
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={(e) => { e.stopPropagation(); setProfileUserId(s.student_id); }}
+                                        className="hover:text-primary hover:underline cursor-pointer"
+                                      >
+                                        {profiles[s.student_id] || 'תלמיד'}
+                                      </span>
                                     </span>
                                     <span className="font-semibold text-primary">ציון {grade} · {s.score}/{s.total}</span>
                                   </button>
