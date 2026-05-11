@@ -350,7 +350,61 @@ const ClassDetail = () => {
                 })()}
               </div>
             </div>
-            <Button onClick={createAssignment} disabled={busy || !title.trim() || selectedWords.size < 4} className="w-full">צור מטלה</Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setSettingsOpen(true)} type="button" className="flex-shrink-0">
+                <SettingsIcon className="w-4 h-4 ml-1" />הגדרות
+              </Button>
+              <Button onClick={createAssignment} disabled={busy || !title.trim() || selectedWords.size < 4} className="flex-1">צור מטלה</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assignment settings dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent dir="rtl" className="max-w-md">
+          <DialogHeader><DialogTitle>הגדרות מטלה</DialogTitle></DialogHeader>
+          <div className="space-y-4 mt-2">
+            <label className="flex items-start justify-between gap-3 p-3 rounded-xl bg-muted/40">
+              <div className="text-right">
+                <p className="font-semibold text-foreground">כוחות מיוחדים</p>
+                <p className="text-xs text-muted-foreground">אפשר/חסום שימוש ב-50:50 ובמכפילים במהלך המטלה</p>
+              </div>
+              <Switch checked={allowPowerUps} onCheckedChange={setAllowPowerUps} />
+            </label>
+
+            <label className="flex items-start justify-between gap-3 p-3 rounded-xl bg-muted/40">
+              <div className="text-right">
+                <p className="font-semibold text-foreground">ערבוב שאלות</p>
+                <p className="text-xs text-muted-foreground">סדר השאלות יוגרל לכל תלמיד בנפרד</p>
+              </div>
+              <Switch checked={shuffleQuestions} onCheckedChange={setShuffleQuestions} />
+            </label>
+
+            <div className="p-3 rounded-xl bg-muted/40">
+              <label className="flex items-start justify-between gap-3">
+                <div className="text-right">
+                  <p className="font-semibold text-foreground">טיימר לשאלה</p>
+                  <p className="text-xs text-muted-foreground">ספירה לאחור לכל שאלה</p>
+                </div>
+                <Switch checked={timerEnabled} onCheckedChange={setTimerEnabled} />
+              </label>
+              {timerEnabled && (
+                <div className="mt-3 flex items-center gap-2 justify-end">
+                  <span className="text-sm text-muted-foreground">שניות לשאלה:</span>
+                  <Input
+                    type="number"
+                    min={5}
+                    max={120}
+                    value={secondsPerQuestion}
+                    onChange={(e) => setSecondsPerQuestion(Math.max(5, Math.min(120, Number(e.target.value) || 20)))}
+                    className="w-24"
+                  />
+                </div>
+              )}
+            </div>
+
+            <Button className="w-full" onClick={() => setSettingsOpen(false)}>שמור הגדרות</Button>
           </div>
         </DialogContent>
       </Dialog>
