@@ -49,13 +49,16 @@ const LeaderboardEntry = ({
   const name = displayName || username || 'משתמש';
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       className={cn(
-        'flex items-center gap-3 p-3 rounded-xl transition-all duration-200',
-        isCurrentUser 
-          ? 'bg-primary/10 border-2 border-primary' 
+        'w-full text-right flex items-center gap-3 p-3 rounded-xl transition-all duration-200',
+        isCurrentUser
+          ? 'bg-primary/10 border-2 border-primary'
           : 'bg-card hover:bg-accent/50',
-        rank <= 3 && 'shadow-elegant'
+        rank <= 3 && 'shadow-elegant',
+        onClick && 'cursor-pointer hover:scale-[1.01]'
       )}
     >
       {/* Rank */}
