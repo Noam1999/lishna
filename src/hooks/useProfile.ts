@@ -202,6 +202,52 @@ export const useProfile = () => {
     return await updateProfile({ power_up_5050: profile.power_up_5050 - 1 });
   };
 
+  // Convert coins -> diamonds (100 coins = 1 diamond)
+  const exchangeCoinsToDiamonds = async (diamondAmount: number) => {
+    if (!user || !profile) return { error: new Error('no_profile') };
+    const coinsCost = diamondAmount * COINS_PER_DIAMOND;
+    if (profile.coins < coinsCost) return { error: new Error('not_enough_coins') };
+    return await updateProfile({
+      coins: profile.coins - coinsCost,
+      diamonds: profile.diamonds + diamondAmount,
+    });
+  };
+
+  // Convert diamonds -> coins (1 diamond = 100 coins)
+  const exchangeDiamondsToCoins = async (diamondAmount: number) => {
+    if (!user || !profile) return { error: new Error('no_profile') };
+    if (profile.diamonds < diamondAmount) return { error: new Error('not_enough_diamonds') };
+    return await updateProfile({
+      diamonds: profile.diamonds - diamondAmount,
+      coins: profile.coins + diamondAmount * COINS_PER_DIAMOND,
+    });
+  };
+
+  const pickWheelSegment = (): number => {
+    const total = WHEEL_SEGMENTS.reduce((s, x) => s + x.weight, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < WHEEL_SEGMENTS.length; i++) {
+      r -= WHEEL_SEGMENTS[i].weight;
+      if (r <= 0) return i;
+    }
+    return WHEEL_SEGMENTS.length - 1;
+  };
+
+  const spinWheel = async (): Promise<{ segmentIndex: number; prize: WheelPrize } | { error: Error }> => {
+    if (!user || !profile) return { error: new Error('no_profile') };
+    if (profile.last_wheel_spin_at) {
+      const last = new Date(profile.last_wheel_spin_at).getTime();
+      if (Date.now() - last < WHEEL_COOLDOWN_MS) return { error: new Error('cooldown') };
+    }
+    const segmentIndex = pickWheelSegment();
+    const prize = WHEEL_SEGMENTS[segmentIndex].prize;
+    const updates: Partial<Profile> = { last_wheel_spin_at: new Date().toISOString() };
+    if (prize.kind === 'coins') updates.coins = profile.coins + prize.amount;
+    if (prize.kind === 'diamonds') updates.diamonds = profile.diamonds + prize.amount;
+    await updateProfile(updates);
+    return { segmentIndex, prize };
+  };
+
   return {
     profile,
     loading,
@@ -213,5 +259,8 @@ export const useProfile = () => {
     awardScoreRewards,
     purchaseItem,
     usePowerUp5050,
+    exchangeCoinsToDiamonds,
+    exchangeDiamondsToCoins,
+    spinWheel,
   };
 };
