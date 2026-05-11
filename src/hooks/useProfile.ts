@@ -18,9 +18,31 @@ export interface Profile {
   xp_multiplier_remaining: number;
   coin_multiplier_remaining: number;
   power_up_5050: number;
+  diamonds: number;
+  last_wheel_spin_at: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export const COINS_PER_DIAMOND = 100;
+export const WHEEL_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+export type WheelPrize =
+  | { kind: 'coins'; amount: number; label: string }
+  | { kind: 'diamonds'; amount: number; label: string }
+  | { kind: 'none'; label: string };
+
+// Order matches visible wheel slices
+export const WHEEL_SEGMENTS: { prize: WheelPrize; weight: number; color: string }[] = [
+  { prize: { kind: 'coins', amount: 1, label: '1 מטבע' }, weight: 31, color: '#fbbf24' },
+  { prize: { kind: 'none', label: 'אין פרס' }, weight: 9, color: '#6b7280' },
+  { prize: { kind: 'coins', amount: 50, label: '50 מטבעות' }, weight: 15, color: '#f59e0b' },
+  { prize: { kind: 'diamonds', amount: 5, label: '5 יהלומים' }, weight: 5, color: '#22d3ee' },
+  { prize: { kind: 'coins', amount: 1000, label: '1000 מטבעות' }, weight: 0.09, color: '#ef4444' },
+  { prize: { kind: 'none', label: 'אין פרס' }, weight: 9, color: '#6b7280' },
+  { prize: { kind: 'diamonds', amount: 1, label: '1 יהלום' }, weight: 20.91, color: '#06b6d4' },
+  { prize: { kind: 'coins', amount: 100, label: '100 מטבעות' }, weight: 10, color: '#10b981' },
+];
 
 export type ShopItem = 'xp_multiplier' | 'coin_multiplier' | 'power_up_5050';
 export const SHOP_PRICES: Record<ShopItem, number> = {
