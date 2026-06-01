@@ -362,6 +362,8 @@ const ClassDetail = () => {
               </div>
             }
           </section>
+        )}
+
         {isTeacher && cls && (
           <ClassTeacherTools classId={cls.id} initialForbidden={(cls as ClassRow & { forbidden_words?: string[] }).forbidden_words || []} />
         )}
