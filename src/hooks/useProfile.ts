@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { emitReward } from '@/components/RewardFlight';
 
 export interface Profile {
   id: string;
@@ -92,6 +93,13 @@ export const useProfile = () => {
       .eq('user_id', user.id);
 
     if (!error) {
+      // Trigger flying reward animations on gains
+      if (typeof updates.coins === 'number' && updates.coins > profile.coins) {
+        emitReward('coins', updates.coins - profile.coins);
+      }
+      if (typeof updates.diamonds === 'number' && updates.diamonds > profile.diamonds) {
+        emitReward('diamonds', updates.diamonds - profile.diamonds);
+      }
       setProfile({ ...profile, ...updates });
     }
 
