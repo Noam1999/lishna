@@ -149,6 +149,33 @@ export type Database = {
           },
         ]
       }
+      class_mail: {
+        Row: {
+          body: string
+          class_id: string
+          created_at: string
+          id: string
+          subject: string | null
+          teacher_id: string
+        }
+        Insert: {
+          body: string
+          class_id: string
+          created_at?: string
+          id?: string
+          subject?: string | null
+          teacher_id: string
+        }
+        Update: {
+          body?: string
+          class_id?: string
+          created_at?: string
+          id?: string
+          subject?: string | null
+          teacher_id?: string
+        }
+        Relationships: []
+      }
       class_members: {
         Row: {
           class_id: string
@@ -182,25 +209,39 @@ export type Database = {
         Row: {
           class_code: string
           created_at: string
+          forbidden_words: string[]
           id: string
           name: string
+          school_id: string | null
           teacher_id: string
         }
         Insert: {
           class_code: string
           created_at?: string
+          forbidden_words?: string[]
           id?: string
           name: string
+          school_id?: string | null
           teacher_id: string
         }
         Update: {
           class_code?: string
           created_at?: string
+          forbidden_words?: string[]
           id?: string
           name?: string
+          school_id?: string | null
           teacher_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "classes_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       custom_words: {
         Row: {
@@ -265,6 +306,33 @@ export type Database = {
           quest_type?: string
           target_value?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      direct_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
         }
         Relationships: []
       }
@@ -391,6 +459,56 @@ export type Database = {
         }
         Relationships: []
       }
+      school_members: {
+        Row: {
+          id: string
+          joined_at: string
+          school_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          school_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          school_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_members_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schools: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          school_code: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          school_code: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          school_code?: string
+        }
+        Relationships: []
+      }
       season_history: {
         Row: {
           created_at: string
@@ -418,6 +536,42 @@ export type Database = {
           user_id?: string
           week_number?: number
           year?: number
+        }
+        Relationships: []
+      }
+      system_mail: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          meta: Json | null
+          read_at: string | null
+          recipient_id: string
+          sender_id: string | null
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          kind?: string
+          meta?: Json | null
+          read_at?: string | null
+          recipient_id: string
+          sender_id?: string | null
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          meta?: Json | null
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string | null
+          title?: string
         }
         Relationships: []
       }
@@ -502,6 +656,10 @@ export type Database = {
       }
       is_class_teacher: {
         Args: { _class_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_school_member: {
+        Args: { _school_id: string; _user_id: string }
         Returns: boolean
       }
     }
