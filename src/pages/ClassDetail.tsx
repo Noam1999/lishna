@@ -14,7 +14,50 @@ import { useDictionary, removeNiqqud } from '@/contexts/DictionaryContext';
 import PageTransition from '@/components/PageTransition';
 import PublicProfileDialog from '@/components/PublicProfileDialog';
 
-interface ClassRow { id: string; name: string; class_code: string; teacher_id: string; }
+interface ClassRow { id: string; name: string; class_code: string; teacher_id: string; forbidden_words?: string[]; }
+
+const ClassTeacherTools = ({ classId, initialForbidden }: { classId: string; initialForbidden: string[] }) => {
+  const [words, setWords] = useState(initialForbidden.join(', '));
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const saveWords = async () => {
+    setSaving(true);
+    const list = words.split(',').map((w) => w.trim()).filter(Boolean);
+    const { error } = await supabase.from('classes').update({ forbidden_words: list }).eq('id', classId);
+    setSaving(false);
+    error ? toast.error('שגיאה בשמירה') : toast.success('המילים האסורות נשמרו');
+  };
+
+  const sendMail = async () => {
+    if (!body.trim()) return;
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return;
+    const { error } = await supabase.from('class_mail').insert({
+      class_id: classId, teacher_id: u.user.id, subject: subject.trim() || null, body: body.trim(),
+    });
+    error ? toast.error('שליחה נכשלה') : (toast.success('דואר נשלח לכיתה'), setSubject(''), setBody(''));
+  };
+
+  return (
+    <div className="space-y-4">
+      <section className="bg-card rounded-2xl border border-border p-4 space-y-2">
+        <h3 className="font-bold flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-destructive" />מילים אסורות</h3>
+        <p className="text-xs text-muted-foreground">הפרידו בפסיקים. הודעות עם מילים אלו ייחסמו והמורה יקבל התראה.</p>
+        <Input value={words} onChange={(e) => setWords(e.target.value)} placeholder="לדוגמה: מילה1, מילה2" />
+        <Button size="sm" onClick={saveWords} disabled={saving}>שמור</Button>
+      </section>
+      <section className="bg-card rounded-2xl border border-border p-4 space-y-2">
+        <h3 className="font-bold flex items-center gap-2"><FileText className="w-4 h-4 text-primary" />שליחת דואר לכיתה</h3>
+        <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="כותרת (אופציונלי)" />
+        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} placeholder="גוף ההודעה" className="w-full rounded-xl border border-border bg-background p-2 text-sm" />
+        <Button size="sm" onClick={sendMail} disabled={!body.trim()}>שלח</Button>
+      </section>
+    </div>
+  );
+};
+
 interface Assignment { id: string; title: string; type: string; word_ids: number[]; created_at: string; }
 interface Member { id: string; student_id: string; }
 interface SubmissionDetail { word_id: number; correct: boolean }
@@ -319,8 +362,11 @@ const ClassDetail = () => {
               </div>
             }
           </section>
+        {isTeacher && cls && (
+          <ClassTeacherTools classId={cls.id} initialForbidden={(cls as ClassRow & { forbidden_words?: string[] }).forbidden_words || []} />
         )}
       </div>
+
 
       {/* Create assignment dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
