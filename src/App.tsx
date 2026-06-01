@@ -28,6 +28,10 @@ import Classes from "./pages/Classes";
 import ClassDetail from "./pages/ClassDetail";
 import TakeAssignment from "./pages/TakeAssignment";
 import Shop from "./pages/Shop";
+import School from "./pages/School";
+import Chat from "./pages/Chat";
+import Inbox from "./pages/Inbox";
+import RewardFlight from "./components/RewardFlight";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +56,10 @@ const AnimatedRoutes = () => {
         <Route path="/classes/:id" element={<ClassDetail />} />
         <Route path="/assignment/:id" element={<TakeAssignment />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/school" element={<School />} />
+        <Route path="/inbox" element={<Inbox />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/chat/:userId" element={<Chat />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
@@ -70,6 +78,7 @@ const App = () => (
             <BetaWelcomePopup />
             <GuestBanner />
             <AnimatedRoutes />
+            <RewardFlight />
             <FeedbackButton />
             <Navigation />
           </BrowserRouter>
