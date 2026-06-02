@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle } from 'lucide-react';
+import { useUnreadMail } from '@/hooks/useUnreadMail';
 import Footer from '@/components/Footer';
 import PageTransition from '@/components/PageTransition';
 import Header from '@/components/Header';
