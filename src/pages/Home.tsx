@@ -23,6 +23,7 @@ const Home = () => {
   const { profile } = useProfile();
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
+  const { count: unreadCount } = useUnreadMail();
   
   
 
