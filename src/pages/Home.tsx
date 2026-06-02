@@ -110,6 +110,33 @@ const Home = () => {
             <Settings className="w-5 h-5 text-muted-foreground" />
           </button>
 
+          {/* Inbox */}
+          {user && (
+            <Link
+              to="/inbox"
+              className="absolute top-4 left-28 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all hover:scale-105"
+              aria-label="תיבת דואר"
+            >
+              <Inbox className="w-5 h-5 text-primary" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
+
+          {/* Chat */}
+          {user && (
+            <Link
+              to="/chat"
+              className="absolute top-4 left-40 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all hover:scale-105"
+              aria-label="צ'אט"
+            >
+              <MessageCircle className="w-5 h-5 text-primary" />
+            </Link>
+          )}
+
           {/* Top-right: Streak flame + Points */}
           <div className="absolute top-4 right-4 flex items-center gap-2">
             {profile && user &&
