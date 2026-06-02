@@ -18,6 +18,8 @@ const Chat = () => {
   const { userId } = useParams();
   const { user } = useAuth();
   const [threads, setThreads] = useState<Thread[]>([]);
+  const [allUsers, setAllUsers] = useState<Profile[]>([]);
+  const [search, setSearch] = useState('');
   const [messages, setMessages] = useState<Msg[]>([]);
   const [other, setOther] = useState<Profile | null>(null);
   const [body, setBody] = useState('');
