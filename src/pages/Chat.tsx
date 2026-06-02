@@ -85,6 +85,10 @@ const Chat = () => {
   const send = async () => {
     if (!user || !userId || !body.trim()) return;
     const text = body.trim();
+    // Normalize: strip niqqud, lowercase
+    const stripNiqqud = (s: string) => s.replace(/[\u0591-\u05C7]/g, '');
+    const norm = (s: string) => stripNiqqud(s).toLowerCase().trim();
+    const normText = norm(text);
     // Forbidden-word check against shared classes
     const { data: myCls } = await supabase.from('class_members').select('class_id').eq('student_id', user.id);
     const { data: oCls } = await supabase.from('class_members').select('class_id').eq('student_id', userId);
@@ -92,7 +96,7 @@ const Chat = () => {
     if (shared.length) {
       const { data: cls } = await supabase.from('classes').select('id, teacher_id, forbidden_words').in('id', shared);
       for (const c of (cls as { id: string; teacher_id: string; forbidden_words: string[] }[] | null) || []) {
-        const hit = (c.forbidden_words || []).find((w) => w && text.includes(w));
+        const hit = (c.forbidden_words || []).map(norm).filter(Boolean).find((w) => normText.includes(w));
         if (hit) {
           await supabase.from('system_mail').insert({
             recipient_id: c.teacher_id, sender_id: user.id, kind: 'teacher_alert',
