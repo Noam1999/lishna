@@ -170,23 +170,18 @@ const Home = () => {
 
 
           
-          <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border rounded-full px-4 py-2 mb-6 shadow-soft">
-            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-            <span className="text-sm font-medium text-muted-foreground">למד ארמית בבלית</span>
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border rounded-full px-4 py-2 mb-6 shadow-soft">
+              <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+              <span className="text-sm font-medium text-muted-foreground">למד ארמית בבלית</span>
+            </div>
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <ScrollText className="w-10 h-10 text-primary" />
+              <h1 className="text-3xl font-display font-bold text-foreground">לִישָׁנָא</h1>
+            </div>
+            <p className="text-sm font-medium text-primary mb-1">ארמית. פשוט להבין.</p>
+            <p className="text-muted-foreground text-xs max-w-xs mx-auto">המפתח שלך לשפת הגמרא אצלכם בכיס! למדו ארמית עם תחרויות ומשימות יומיות.</p>
           </div>
-          
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <ScrollText className="w-10 h-10 text-primary" />
-            <h1 className="text-3xl font-display font-bold text-foreground">
-              לִישָׁנָא
-            </h1>
-          </div>
-
-          <p className="text-sm font-medium text-primary mb-1">ארמית. פשוט להבין.</p>
-          
-          <p className="text-muted-foreground text-xs max-w-xs mx-auto">המפתח שלך לשפת הגמרא אצלכם בכיס! למדו ארמית  עם תחרויות ומשימות יומיות.
-
-          </p>
         </div>
       </div>
 
