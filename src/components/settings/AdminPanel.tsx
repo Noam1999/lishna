@@ -1,14 +1,19 @@
-import { useState } from 'react';
-import { Shield, ShieldCheck, Loader2, Inbox, Send, Coins, Gem } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Shield, ShieldCheck, Loader2, Inbox, Send, Coins, Gem, Check, ChevronsUpDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import WordManager from './WordManager';
 import SiteStats from './SiteStats';
+
+type UserOption = { user_id: string; display_name: string | null; username: string | null };
 
 const AdminPanel = () => {
   const { user } = useAuth();
@@ -17,9 +22,11 @@ const AdminPanel = () => {
   const [checking, setChecking] = useState(false);
 
   // Grant tool state
-  const [targetEmail, setTargetEmail] = useState('');
-  const [coins, setCoins] = useState(0);
-  const [diamonds, setDiamonds] = useState(0);
+  const [users, setUsers] = useState<UserOption[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [targetUserId, setTargetUserId] = useState<string>('');
+  const [coins, setCoins] = useState<string>('');
+  const [diamonds, setDiamonds] = useState<string>('');
   const [mailTitle, setMailTitle] = useState('');
   const [mailBody, setMailBody] = useState('');
   const [granting, setGranting] = useState(false);
@@ -35,31 +42,35 @@ const AdminPanel = () => {
     } catch { setIsAdmin(false); } finally { setChecking(false); }
   };
 
-  const resolveUserId = async (q: string): Promise<string | null> => {
-    const trimmed = q.trim();
-    if (!trimmed) return null;
-    // try display_name or user_id
-    const { data } = await supabase.from('profiles').select('user_id, display_name').or(`display_name.eq.${trimmed},user_id.eq.${trimmed}`).maybeSingle();
-    return (data as { user_id: string } | null)?.user_id || null;
-  };
+  useEffect(() => {
+    if (!showPanel) return;
+    (async () => {
+      const { data } = await supabase.from('profiles').select('user_id, display_name, username').order('display_name', { ascending: true }).limit(1000);
+      setUsers((data as UserOption[]) || []);
+    })();
+  }, [showPanel]);
+
+  const selectedUser = users.find((u) => u.user_id === targetUserId);
 
   const grant = async () => {
     if (!user) return;
+    if (!targetUserId) { toast.error('בחר משתמש'); return; }
+    const coinsNum = parseInt(coins, 10) || 0;
+    const diamondsNum = parseInt(diamonds, 10) || 0;
     setGranting(true);
     try {
-      const uid = await resolveUserId(targetEmail);
-      if (!uid) { toast.error('משתמש לא נמצא'); return; }
+      const uid = targetUserId;
       const { data: p } = await supabase.from('profiles').select('coins, diamonds').eq('user_id', uid).maybeSingle();
       if (!p) { toast.error('פרופיל לא נמצא'); return; }
-      const newCoins = (p as { coins: number; diamonds: number }).coins + (coins || 0);
-      const newDiamonds = (p as { coins: number; diamonds: number }).diamonds + (diamonds || 0);
-      await supabase.from('profiles').update({ coins: newCoins, diamonds: newDiamonds }).eq('user_id', uid);
-      if (coins || diamonds) {
+      const newCoins = (p as { coins: number; diamonds: number }).coins + coinsNum;
+      const newDiamonds = (p as { coins: number; diamonds: number }).diamonds + diamondsNum;
+      if (coinsNum || diamondsNum) {
+        await supabase.from('profiles').update({ coins: newCoins, diamonds: newDiamonds }).eq('user_id', uid);
         await supabase.from('system_mail').insert({
           recipient_id: uid, sender_id: user.id, kind: 'reward',
           title: 'מתנה מהמערכת 🎁',
-          body: `קיבלת ${coins ? `${coins} מטבעות` : ''}${coins && diamonds ? ' ו-' : ''}${diamonds ? `${diamonds} יהלומים` : ''}`,
-          meta: { coins, diamonds },
+          body: `קיבלת ${coinsNum ? `${coinsNum} מטבעות` : ''}${coinsNum && diamondsNum ? ' ו-' : ''}${diamondsNum ? `${diamondsNum} יהלומים` : ''}`,
+          meta: { coins: coinsNum, diamonds: diamondsNum },
         });
       }
       if (mailTitle.trim() && mailBody.trim()) {
@@ -69,7 +80,7 @@ const AdminPanel = () => {
         });
       }
       toast.success('בוצע בהצלחה');
-      setTargetEmail(''); setCoins(0); setDiamonds(0); setMailTitle(''); setMailBody('');
+      setTargetUserId(''); setCoins(''); setDiamonds(''); setMailTitle(''); setMailBody('');
     } catch (e) { toast.error('שגיאה בביצוע'); } finally { setGranting(false); }
   };
 
@@ -99,14 +110,54 @@ const AdminPanel = () => {
 
       <div className="bg-card rounded-2xl p-5 shadow-soft border border-border space-y-3">
         <h3 className="font-bold text-foreground">הענקה ודיוור</h3>
-        <Input placeholder="שם תצוגה או מזהה משתמש" value={targetEmail} onChange={(e) => setTargetEmail(e.target.value)} />
+
+        <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" role="combobox" className="w-full justify-between">
+              {selectedUser ? (selectedUser.display_name || selectedUser.username || 'משתמש') : 'בחר משתמש...'}
+              <ChevronsUpDown className="w-4 h-4 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+            <Command filter={(value, search) => {
+              const u = users.find((x) => x.user_id === value);
+              const hay = `${u?.display_name || ''} ${u?.username || ''}`.toLowerCase();
+              return hay.includes(search.toLowerCase()) ? 1 : 0;
+            }}>
+              <CommandInput placeholder="חפש משתמש..." />
+              <CommandList>
+                <CommandEmpty>לא נמצאו משתמשים</CommandEmpty>
+                <CommandGroup>
+                  {users.map((u) => (
+                    <CommandItem
+                      key={u.user_id}
+                      value={u.user_id}
+                      onSelect={() => { setTargetUserId(u.user_id); setPickerOpen(false); }}
+                    >
+                      <Check className={cn('ml-2 w-4 h-4', targetUserId === u.user_id ? 'opacity-100' : 'opacity-0')} />
+                      <span className="flex-1">{u.display_name || u.username || 'משתמש ללא שם'}</span>
+                      {u.username && <span className="text-xs text-muted-foreground">@{u.username}</span>}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
         <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-2 bg-muted rounded-xl px-3"><Coins className="w-4 h-4 text-primary" /><Input type="number" value={coins} onChange={(e) => setCoins(Number(e.target.value))} className="border-0 bg-transparent" /></div>
-          <div className="flex items-center gap-2 bg-muted rounded-xl px-3"><Gem className="w-4 h-4 text-primary" /><Input type="number" value={diamonds} onChange={(e) => setDiamonds(Number(e.target.value))} className="border-0 bg-transparent" /></div>
+          <div className="flex items-center gap-2 bg-muted rounded-xl px-3">
+            <Coins className="w-4 h-4 text-primary" />
+            <Input type="number" inputMode="numeric" placeholder="מטבעות" value={coins} onChange={(e) => setCoins(e.target.value)} className="border-0 bg-transparent" />
+          </div>
+          <div className="flex items-center gap-2 bg-muted rounded-xl px-3">
+            <Gem className="w-4 h-4 text-primary" />
+            <Input type="number" inputMode="numeric" placeholder="יהלומים" value={diamonds} onChange={(e) => setDiamonds(e.target.value)} className="border-0 bg-transparent" />
+          </div>
         </div>
         <Input placeholder="כותרת הודעה (אופציונלי)" value={mailTitle} onChange={(e) => setMailTitle(e.target.value)} />
         <Textarea placeholder="תוכן הודעת מערכת (אופציונלי)" value={mailBody} onChange={(e) => setMailBody(e.target.value)} rows={3} />
-        <Button onClick={grant} disabled={granting || !targetEmail.trim()} className="w-full gap-2">
+        <Button onClick={grant} disabled={granting || !targetUserId} className="w-full gap-2">
           <Send className="w-4 h-4" /> שלח / הענק
         </Button>
       </div>
