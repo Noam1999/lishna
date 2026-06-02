@@ -73,100 +73,102 @@ const Home = () => {
           <div className="absolute top-20 right-10 w-24 h-24 bg-accent/10 rounded-full blur-2xl" />
         </div>
         
-        <div className="relative z-10 pt-12 pb-8 px-6 text-center">
-          {/* User Auth/Profile Button */}
-          {user ?
-          <button
-            onClick={() => { navigate('/profile'); }}
-            className="absolute top-4 left-4 w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all">
-
-              {profile?.avatar_url ?
-            <img
-              src={profile.avatar_url}
-              alt="Avatar"
-              className="w-full h-full rounded-full object-cover" /> :
-
-
-            <span className="text-sm font-bold text-primary-foreground">
-                  {(profile?.display_name || user.email || 'U')[0].toUpperCase()}
-                </span>
-            }
-            </button> :
-
-          <Link
-            to="/auth"
-            className="absolute top-4 left-4 w-10 h-10 bg-primary border-2 border-primary/50 rounded-full flex items-center justify-center shadow-elegant hover:scale-110 transition-all animate-pulse">
-
-              <LogIn className="w-5 h-5 text-primary-foreground" />
-            </Link>
-          }
-
-          {/* Settings Gear */}
-          <button
-            onClick={() => { navigate('/settings'); }}
-            className="absolute top-4 left-16 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all hover:scale-105"
-            aria-label="הגדרות"
-          >
-            <Settings className="w-5 h-5 text-muted-foreground" />
-          </button>
-
-          {/* Inbox */}
-          {user && (
-            <Link
-              to="/inbox"
-              className="absolute top-4 left-28 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all hover:scale-105"
-              aria-label="תיבת דואר"
-            >
-              <Inbox className="w-5 h-5 text-primary" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
+        <div className="relative z-10 pt-6 pb-8 px-4">
+          {/* Top toolbar — two clean rows of equally-sized chips for mobile */}
+          <div className="flex items-center justify-between gap-2 mb-6">
+            {/* Right group: profile + settings */}
+            <div className="flex items-center gap-2">
+              {user ? (
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform"
+                  aria-label="פרופיל"
+                >
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <span className="text-sm font-bold text-primary-foreground">
+                      {(profile?.display_name || user.email || 'U')[0].toUpperCase()}
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-elegant animate-pulse"
+                  aria-label="התחבר"
+                >
+                  <LogIn className="w-5 h-5 text-primary-foreground" />
+                </Link>
               )}
-            </Link>
-          )}
+              <button
+                onClick={() => navigate('/settings')}
+                className="w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform"
+                aria-label="הגדרות"
+              >
+                <Settings className="w-5 h-5 text-muted-foreground" />
+              </button>
+              {user && (
+                <Link
+                  to="/inbox"
+                  className="relative w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform"
+                  aria-label="תיבת דואר"
+                >
+                  <Inbox className="w-5 h-5 text-primary" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              )}
+              {user && (
+                <Link
+                  to="/chat"
+                  className="w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform"
+                  aria-label="צ'אט"
+                >
+                  <MessageCircle className="w-5 h-5 text-primary" />
+                </Link>
+              )}
+            </div>
 
-          {/* Chat */}
-          {user && (
-            <Link
-              to="/chat"
-              className="absolute top-4 left-40 w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all hover:scale-105"
-              aria-label="צ'אט"
-            >
-              <MessageCircle className="w-5 h-5 text-primary" />
-            </Link>
-          )}
+            {/* Left group: streak flame */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { if (!user) setStreakDialogOpen(true); }}
+                className={`relative w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft ${shouldPulseFlame ? 'animate-pulse' : ''}`}
+                aria-label="רצף"
+              >
+                <Flame className={`w-5 h-5 ${hasCompletedToday ? 'text-primary' : 'text-destructive'}`} />
+                {profile && user && (
+                  <span className="absolute -bottom-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                    {profile.streak}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
 
-          {/* Top-right: Streak flame + Points */}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
-            {profile && user &&
-            <Link to="/shop" className="flex items-center gap-1 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft hover:scale-105 transition-all">
+          {/* Balance chips row — easy to read & tap on mobile */}
+          {user && profile && (
+            <div className="flex items-center justify-center gap-2 mb-6 flex-wrap">
+              <Link to="/shop" id="lishna-balance-coins" className="flex items-center gap-1.5 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft active:scale-95 transition-transform">
                 <span className="text-sm">💰</span>
                 <span className="text-xs font-bold text-foreground">{profile.coins}</span>
               </Link>
-            }
-            {profile && user &&
-            <div className="flex items-center gap-1 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft">
+              <Link to="/shop" id="lishna-balance-diamonds" className="flex items-center gap-1.5 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft active:scale-95 transition-transform">
+                <span className="text-sm">💎</span>
+                <span className="text-xs font-bold text-foreground">{profile.diamonds}</span>
+              </Link>
+              <div className="flex items-center gap-1.5 bg-card/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 shadow-soft">
                 <Trophy className="w-4 h-4 text-primary" />
                 <span className="text-xs font-bold text-foreground">{profile.points}</span>
               </div>
-            }
-            <button
-              onClick={() => {
-                if (!user) {
-                  setStreakDialogOpen(true);
-                }
-              }}
-              className={`relative w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft hover:shadow-elegant transition-all ${shouldPulseFlame ? 'animate-pulse' : ''}`}>
+            </div>
+          )}
 
-              <Flame className={`w-5 h-5 ${hasCompletedToday ? 'text-primary' : 'text-destructive'}`} />
-              {profile && user &&
-              <span className="absolute -bottom-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {profile.streak}
-                </span>
-              }
-            </button>
-          </div>
+
           
           <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border rounded-full px-4 py-2 mb-6 shadow-soft">
             <Sparkles className="w-4 h-4 text-primary animate-pulse" />
