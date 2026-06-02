@@ -37,13 +37,15 @@ const Chat = () => {
       if (!byOther.has(o)) byOther.set(o, m);
     });
     const ids = Array.from(byOther.keys());
-    if (!ids.length) { setThreads([]); return; }
-    const { data: profs } = await supabase.from('profiles').select('user_id, display_name').in('user_id', ids);
+    const { data: profs } = await supabase.from('profiles').select('user_id, display_name').in('user_id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000']);
     setThreads(ids.map((id) => {
       const last = byOther.get(id)!;
       const p = (profs as Profile[] | null)?.find((x) => x.user_id === id) || { user_id: id, display_name: null };
       return { other: p, lastBody: last.body, lastAt: last.created_at };
     }));
+    // Load all users for "new chat"
+    const { data: all } = await supabase.from('profiles').select('user_id, display_name').neq('user_id', user.id).order('display_name', { ascending: true }).limit(500);
+    setAllUsers((all as Profile[]) || []);
   };
 
   const loadConv = async (otherId: string) => {
