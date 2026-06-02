@@ -120,14 +120,37 @@ const Chat = () => {
         </div>
         <Header title={userId ? (other?.display_name || 'שיחה') : 'הודעות'} />
         {!userId ? (
-          <div className="px-4 space-y-2">
-            {threads.length === 0 && <p className="text-center text-muted-foreground py-8">אין שיחות עדיין</p>}
-            {threads.map((t) => (
-              <button key={t.other.user_id} onClick={() => navigate(`/chat/${t.other.user_id}`)} className="w-full bg-card border border-border rounded-2xl p-4 shadow-soft text-right hover:bg-muted transition">
-                <p className="font-bold text-foreground">{t.other.display_name || 'משתמש'}</p>
-                <p className="text-sm text-muted-foreground truncate">{t.lastBody}</p>
-              </button>
-            ))}
+          <div className="px-4 space-y-4">
+            <Input placeholder="חפש משתמש להתחיל שיחה..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            {threads.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold text-muted-foreground px-1">שיחות אחרונות</h3>
+                {threads.map((t) => (
+                  <button key={t.other.user_id} onClick={() => navigate(`/chat/${t.other.user_id}`)} className="w-full bg-card border border-border rounded-2xl p-4 shadow-soft text-right hover:bg-muted transition">
+                    <p className="font-bold text-foreground">{t.other.display_name || 'משתמש'}</p>
+                    <p className="text-sm text-muted-foreground truncate">{t.lastBody}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="space-y-2">
+              <h3 className="text-sm font-bold text-muted-foreground px-1">משתמשים</h3>
+              {allUsers
+                .filter((u) => !search.trim() || (u.display_name || '').toLowerCase().includes(search.trim().toLowerCase()))
+                .filter((u) => !threads.some((t) => t.other.user_id === u.user_id))
+                .slice(0, 100)
+                .map((u) => (
+                  <button key={u.user_id} onClick={() => navigate(`/chat/${u.user_id}`)} className="w-full bg-card border border-border rounded-2xl p-3 shadow-soft text-right hover:bg-muted transition flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                      {(u.display_name || 'מ')[0].toUpperCase()}
+                    </div>
+                    <p className="font-medium text-foreground">{u.display_name || 'משתמש'}</p>
+                  </button>
+                ))}
+              {allUsers.length === 0 && threads.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">אין משתמשים זמינים</p>
+              )}
+            </div>
           </div>
         ) : (
           <>
