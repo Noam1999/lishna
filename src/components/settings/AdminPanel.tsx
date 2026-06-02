@@ -60,17 +60,12 @@ const AdminPanel = () => {
     setGranting(true);
     try {
       const uid = targetUserId;
-      const { data: p } = await supabase.from('profiles').select('coins, diamonds').eq('user_id', uid).maybeSingle();
-      if (!p) { toast.error('פרופיל לא נמצא'); return; }
-      const newCoins = (p as { coins: number; diamonds: number }).coins + coinsNum;
-      const newDiamonds = (p as { coins: number; diamonds: number }).diamonds + diamondsNum;
       if (coinsNum || diamondsNum) {
-        await supabase.from('profiles').update({ coins: newCoins, diamonds: newDiamonds }).eq('user_id', uid);
         await supabase.from('system_mail').insert({
           recipient_id: uid, sender_id: user.id, kind: 'reward',
-          title: 'מתנה מהמערכת 🎁',
-          body: `קיבלת ${coinsNum ? `${coinsNum} מטבעות` : ''}${coinsNum && diamondsNum ? ' ו-' : ''}${diamondsNum ? `${diamondsNum} יהלומים` : ''}`,
-          meta: { coins: coinsNum, diamonds: diamondsNum },
+          title: 'מתנה ממתינה לקבלה 🎁',
+          body: `קיבלת מתנה: ${coinsNum ? `${coinsNum} מטבעות` : ''}${coinsNum && diamondsNum ? ' ו-' : ''}${diamondsNum ? `${diamondsNum} יהלומים` : ''}. לחץ על "קבל" כדי להוסיף ליתרה שלך.`,
+          meta: { coins: coinsNum, diamonds: diamondsNum, claimed: false },
         });
       }
       if (mailTitle.trim() && mailBody.trim()) {
@@ -79,7 +74,7 @@ const AdminPanel = () => {
           title: mailTitle.trim(), body: mailBody.trim(),
         });
       }
-      toast.success('בוצע בהצלחה');
+      toast.success('נשלח בהצלחה');
       setTargetUserId(''); setCoins(''); setDiamonds(''); setMailTitle(''); setMailBody('');
     } catch (e) { toast.error('שגיאה בביצוע'); } finally { setGranting(false); }
   };
