@@ -13,6 +13,9 @@ import { useAchievements } from '@/hooks/useAchievements';
 import { Progress } from '@/components/ui/progress';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import UserAvatar from '@/components/UserAvatar';
+import { Link } from 'react-router-dom';
+import { Shirt } from 'lucide-react';
 
 
 const DAILY_GOAL = 50;
@@ -207,20 +210,18 @@ const Profile = () => {
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
           transition={spring}
-          className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-elegant ring-4 ring-primary/20"
+          className="w-28 h-28 mx-auto mb-4"
         >
-          {profile.avatar_url ? (
-            <img 
-              src={profile.avatar_url} 
-              alt="Avatar" 
-              className="w-full h-full rounded-full object-cover"
-            />
-          ) : (
-            <span className="text-3xl font-bold text-primary-foreground">
-              {(profile.display_name || user.email || 'U')[0].toUpperCase()}
-            </span>
-          )}
+          <UserAvatar userId={user.id} size={112} className="shadow-elegant" />
         </motion.div>
+
+        <Link
+          to="/wardrobe"
+          className="inline-flex items-center gap-1.5 mb-3 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-full px-3 py-1 text-xs font-semibold text-primary transition-colors"
+        >
+          <Shirt className="w-3.5 h-3.5" />
+          החלף תלבושת
+        </Link>
 
         {/* Name */}
         <h1 className="text-2xl font-display font-bold text-foreground mb-1">

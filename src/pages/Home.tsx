@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle, Shirt } from 'lucide-react';
 import { useUnreadMail } from '@/hooks/useUnreadMail';
+import UserAvatar from '@/components/UserAvatar';
 import Footer from '@/components/Footer';
 import PageTransition from '@/components/PageTransition';
 import Header from '@/components/Header';
@@ -81,16 +82,10 @@ const Home = () => {
               {user ? (
                 <button
                   onClick={() => navigate('/profile')}
-                  className="w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform"
+                  className="active:scale-95 transition-transform"
                   aria-label="פרופיל"
                 >
-                  {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-bold text-primary-foreground">
-                      {(profile?.display_name || user.email || 'U')[0].toUpperCase()}
-                    </span>
-                  )}
+                  <UserAvatar userId={user.id} size={40} />
                 </button>
               ) : (
                 <Link
