@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle, Shirt } from 'lucide-react';
 import { useUnreadMail } from '@/hooks/useUnreadMail';
+import UserAvatar from '@/components/UserAvatar';
 import Footer from '@/components/Footer';
 import PageTransition from '@/components/PageTransition';
 import Header from '@/components/Header';
@@ -81,16 +82,10 @@ const Home = () => {
               {user ? (
                 <button
                   onClick={() => navigate('/profile')}
-                  className="w-10 h-10 bg-gradient-to-br from-primary to-primary/60 border border-border rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform"
+                  className="active:scale-95 transition-transform"
                   aria-label="פרופיל"
                 >
-                  {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-bold text-primary-foreground">
-                      {(profile?.display_name || user.email || 'U')[0].toUpperCase()}
-                    </span>
-                  )}
+                  <UserAvatar userId={user.id} size={40} />
                 </button>
               ) : (
                 <Link
@@ -241,6 +236,21 @@ const Home = () => {
             <div className="flex-1 text-right">
               <h3 className="font-semibold text-lg text-foreground mb-1">כיתות</h3>
               <p className="text-sm text-muted-foreground">הצטרף לכיתה או נהל ככיתה כמורה</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Wardrobe Link */}
+        <Link
+          to="/wardrobe"
+          className="group block bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-blue-500/10 rounded-2xl p-5 shadow-soft border border-purple-500/30 hover:shadow-elegant transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Shirt className="w-7 h-7" />
+            </div>
+            <div className="flex-1 text-right">
+              <h3 className="font-semibold text-lg text-foreground mb-1">המלתחה שלי 🎒</h3>
+              <p className="text-sm text-muted-foreground">קנה והלבש תלבושות אגדיות לדמות</p>
             </div>
           </div>
         </Link>

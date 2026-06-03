@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import UserAvatar from '@/components/UserAvatar';
 
 interface LeaderboardEntryProps {
   rank: number;
@@ -9,6 +9,7 @@ interface LeaderboardEntryProps {
   points: number;
   isCurrentUser?: boolean;
   onClick?: () => void;
+  userId?: string;
 }
 
 const LeaderboardEntry = ({
@@ -19,6 +20,7 @@ const LeaderboardEntry = ({
   points,
   isCurrentUser = false,
   onClick,
+  userId,
 }: LeaderboardEntryProps) => {
   const getMedalStyle = (rank: number) => {
     switch (rank) {
@@ -72,12 +74,7 @@ const LeaderboardEntry = ({
       </div>
 
       {/* Avatar */}
-      <Avatar className="h-12 w-12 border-2 border-background shadow-soft">
-        <AvatarImage src={avatarUrl || undefined} alt={name} />
-        <AvatarFallback className="bg-primary/20 text-primary font-semibold">
-          {name.charAt(0)}
-        </AvatarFallback>
-      </Avatar>
+      <UserAvatar userId={userId} size={48} />
 
       {/* Name */}
       <div className="flex-1 min-w-0">

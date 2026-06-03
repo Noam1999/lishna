@@ -251,6 +251,7 @@ const LeaderboardList = ({
             avatarUrl={entry.avatar_url}
             points={entry.weekly_points}
             isCurrentUser={entry.user_id === currentUserId}
+            userId={entry.user_id}
             onClick={onSelect ? () => onSelect(entry.user_id) : undefined}
           />
         ))}
