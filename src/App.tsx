@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from 'framer-motion';
 import { DictionaryProvider } from "@/contexts/DictionaryContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AvatarProvider } from "@/contexts/AvatarContext";
 import Navigation from "@/components/Navigation";
 import GuestBanner from "@/components/GuestBanner";
 import FeedbackButton from "@/components/FeedbackButton";
@@ -31,6 +32,7 @@ import Shop from "./pages/Shop";
 import School from "./pages/School";
 import Chat from "./pages/Chat";
 import Inbox from "./pages/Inbox";
+import Wardrobe from "./pages/Wardrobe";
 import RewardFlight from "./components/RewardFlight";
 
 const queryClient = new QueryClient();
@@ -60,6 +62,7 @@ const AnimatedRoutes = () => {
         <Route path="/inbox" element={<Inbox />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/chat/:userId" element={<Chat />} />
+        <Route path="/wardrobe" element={<Wardrobe />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
@@ -69,21 +72,23 @@ const AnimatedRoutes = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <DictionaryProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Analytics />
-          <BrowserRouter>
-            <BetaWelcomePopup />
-            <GuestBanner />
-            <AnimatedRoutes />
-            <RewardFlight />
-            <FeedbackButton />
-            <Navigation />
-          </BrowserRouter>
-        </TooltipProvider>
-      </DictionaryProvider>
+      <AvatarProvider>
+        <DictionaryProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <Analytics />
+            <BrowserRouter>
+              <BetaWelcomePopup />
+              <GuestBanner />
+              <AnimatedRoutes />
+              <RewardFlight />
+              <FeedbackButton />
+              <Navigation />
+            </BrowserRouter>
+          </TooltipProvider>
+        </DictionaryProvider>
+      </AvatarProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
