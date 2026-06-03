@@ -240,6 +240,21 @@ const Home = () => {
           </div>
         </Link>
 
+        {/* Wardrobe Link */}
+        <Link
+          to="/wardrobe"
+          className="group block bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-blue-500/10 rounded-2xl p-5 shadow-soft border border-purple-500/30 hover:shadow-elegant transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Shirt className="w-7 h-7" />
+            </div>
+            <div className="flex-1 text-right">
+              <h3 className="font-semibold text-lg text-foreground mb-1">המלתחה שלי 🎒</h3>
+              <p className="text-sm text-muted-foreground">קנה והלבש תלבושות אגדיות לדמות</p>
+            </div>
+          </div>
+        </Link>
+
         {/* Shop Link */}
         <Link
           to="/shop"
