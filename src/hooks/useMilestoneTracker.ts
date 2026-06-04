@@ -29,8 +29,9 @@ export const useMilestoneTracker = () => {
       if (localStorage.getItem(dedupKey)) { lastFiredRef.current.add(dedupKey); return; }
       lastFiredRef.current.add(dedupKey);
       localStorage.setItem(dedupKey, '1');
-      await supabase.from('user_activities').insert({
+      await supabase.from('user_activities').insert([{
         user_id: user.id, activity_type, activity_data,
+      }]);
       });
     };
 

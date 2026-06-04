@@ -69,7 +69,7 @@ const Duel = () => {
           if (payload.eventType === 'DELETE') {
             toast('המשחק הסתיים'); setMode('menu'); setDuel(null); return;
           }
-          setDuel(payload.new as DuelRow);
+          setDuel(payload.new as unknown as DuelRow);
         })
       .subscribe();
   }, []);
@@ -83,7 +83,7 @@ const Duel = () => {
       .insert({ code, host_id: user.id, status: 'waiting', questions })
       .select().single();
     if (error || !data) { toast.error('יצירת חדר נכשלה'); return; }
-    setDuel(data as DuelRow); setMode('lobby'); subscribe(data.id);
+    setDuel(data as unknown as DuelRow); setMode('lobby'); subscribe(data.id);
   };
 
   const handleJoin = async (codeIn?: string) => {
@@ -94,11 +94,11 @@ const Duel = () => {
     if (!data) { toast.error('חדר לא נמצא'); return; }
     if (data.guest_id && data.guest_id !== user.id) { toast.error('החדר תפוס'); return; }
     if (data.host_id === user.id) {
-      setDuel(data as DuelRow); setMode(data.status === 'playing' ? 'play' : 'lobby'); subscribe(data.id); return;
+      setDuel(data as unknown as DuelRow); setMode(data.status === 'playing' ? 'play' : 'lobby'); subscribe(data.id); return;
     }
     const { data: updated } = await supabase
       .from('duels').update({ guest_id: user.id, status: 'playing' }).eq('id', data.id).select().single();
-    setDuel((updated || data) as DuelRow); setMode('play'); subscribe(data.id);
+    setDuel((updated || data) as unknown as DuelRow); setMode('play'); subscribe(data.id);
   };
 
   // Auto-route lobby → play
