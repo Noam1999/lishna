@@ -29,10 +29,11 @@ export const getQuestLabel = (questType: string): { label: string; icon: string 
 
 export const useDailyQuests = () => {
   const { user } = useAuth();
-  const { addPoints } = useProfile();
+  const { profile, addPoints, updateProfile } = useProfile();
   const [quests, setQuests] = useState<DailyQuest[]>([]);
   const [loading, setLoading] = useState(true);
   const [justClaimed, setJustClaimed] = useState<string | null>(null);
+  const [lastRewardLabel, setLastRewardLabel] = useState<string>('');
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -135,7 +136,7 @@ export const useDailyQuests = () => {
   };
 
   const claimReward = async (questId: string) => {
-    if (!user) return;
+    if (!user || !profile) return;
 
     const quest = quests.find(q => q.id === questId);
     if (!quest || !quest.completed || quest.claimed) return;
@@ -145,22 +146,40 @@ export const useDailyQuests = () => {
       .update({ claimed: true })
       .eq('id', questId);
 
+    // XP reward (always)
     await addPoints(quest.bonus_xp);
 
-    setJustClaimed(questId);
-    setTimeout(() => setJustClaimed(null), 2000);
+    // Bonus rewards — coins / diamonds / a wheel spin (deterministic per quest id)
+    const seed = quest.id.charCodeAt(0) + quest.id.charCodeAt(quest.id.length - 1);
+    const kind = seed % 3; // 0=coins, 1=diamonds, 2=wheel spin
+    const updates: Record<string, number> = {};
+    let label = `+${quest.bonus_xp} XP`;
+    if (kind === 0) {
+      const c = 30 + (seed % 70);
+      updates.coins = profile.coins + c;
+      label += ` · +${c} 💰`;
+    } else if (kind === 1) {
+      const d = 1 + (seed % 3);
+      updates.diamonds = profile.diamonds + d;
+      label += ` · +${d} 💎`;
+    } else {
+      updates.wheel_spins = (profile.wheel_spins || 0) + 1;
+      label += ` · 🎡 סיבוב גלגל`;
+    }
+    if (Object.keys(updates).length) await updateProfile(updates);
 
-    setQuests(prev =>
-      prev.map(q =>
-        q.id === questId ? { ...q, claimed: true } : q
-      )
-    );
+    setJustClaimed(questId);
+    setLastRewardLabel(label);
+    setTimeout(() => setJustClaimed(null), 2200);
+
+    setQuests(prev => prev.map(q => (q.id === questId ? { ...q, claimed: true } : q)));
   };
 
   return {
     quests,
     loading,
     justClaimed,
+    lastRewardLabel,
     fetchQuests,
     updateQuestProgress,
     claimReward,
