@@ -30,7 +30,7 @@ export const useMilestoneTracker = () => {
       lastFiredRef.current.add(dedupKey);
       localStorage.setItem(dedupKey, '1');
       await supabase.from('user_activities').insert([{
-        user_id: user.id, activity_type, activity_data,
+        user_id: user.id, activity_type, activity_data: activity_data as never,
       }]);
     };
 
