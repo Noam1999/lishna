@@ -32,7 +32,6 @@ export const useMilestoneTracker = () => {
       await supabase.from('user_activities').insert([{
         user_id: user.id, activity_type, activity_data,
       }]);
-      });
     };
 
     // Streak milestones
