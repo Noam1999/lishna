@@ -27,7 +27,7 @@ const Wardrobe = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
-  const { owned, equipped, ownsSkin, addSkin, equipSkin } = useAvatar();
+  const { owned, equipped, ownsSkin, equipSkin } = useAvatar();
   const [busy, setBusy] = useState<string | null>(null);
 
   if (!user) {
@@ -46,15 +46,15 @@ const Wardrobe = () => {
     const { error } = await updateProfile({
       coins: profile.coins - skin.coins,
       diamonds: profile.diamonds - skin.diamonds,
+      owned_skins: [...(profile.owned_skins ?? []), skin.id],
     });
     setBusy(null);
     if (error) { toast.error('הרכישה נכשלה'); return; }
-    addSkin(skin.id);
     toast.success(`🎉 רכשת: ${skin.name}`);
   };
 
-  const handleEquip = (skin: Skin) => {
-    equipSkin(skin.id);
+  const handleEquip = async (skin: Skin) => {
+    await equipSkin(skin.id);
     toast.success(`לבשת: ${skin.name}`);
   };
 

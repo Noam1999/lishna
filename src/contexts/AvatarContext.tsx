@@ -1,86 +1,82 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { DEFAULT_SKIN_ID } from '@/lib/skins';
-
-interface AvatarState {
-  owned: string[];
-  equipped: string;
-}
 
 interface AvatarContextValue {
   owned: string[];
   equipped: string;
   ownsSkin: (id: string) => boolean;
-  addSkin: (id: string) => void;
-  equipSkin: (id: string) => void;
+  addSkin: (id: string) => Promise<void>;
+  equipSkin: (id: string) => Promise<void>;
 }
 
 const AvatarContext = createContext<AvatarContextValue | null>(null);
-const STORAGE_PREFIX = 'lishna:avatar:';
+
+// Cache of other users' equipped skins, populated lazily.
+const otherSkinCache = new Map<string, string>();
+const fetchInflight = new Map<string, Promise<string>>();
 const EVENT = 'lishna:avatar:update';
 
-const readState = (userId: string): AvatarState => {
-  try {
-    const raw = localStorage.getItem(STORAGE_PREFIX + userId);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
-        owned: Array.from(new Set([DEFAULT_SKIN_ID, ...(parsed.owned ?? [])])),
-        equipped: parsed.equipped || DEFAULT_SKIN_ID,
-      };
-    }
-  } catch {}
-  return { owned: [DEFAULT_SKIN_ID], equipped: DEFAULT_SKIN_ID };
+export const fetchUserSkin = (userId: string): Promise<string> => {
+  if (otherSkinCache.has(userId)) return Promise.resolve(otherSkinCache.get(userId)!);
+  if (fetchInflight.has(userId)) return fetchInflight.get(userId)!;
+  const p = (async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('equipped_skin')
+      .eq('user_id', userId)
+      .maybeSingle();
+    const skin = ((data?.equipped_skin as string) || DEFAULT_SKIN_ID);
+    otherSkinCache.set(userId, skin);
+    fetchInflight.delete(userId);
+    return skin;
+  })();
+  fetchInflight.set(userId, p);
+  return p;
 };
 
-const writeState = (userId: string, state: AvatarState) => {
-  try {
-    localStorage.setItem(STORAGE_PREFIX + userId, JSON.stringify(state));
-    window.dispatchEvent(new CustomEvent(EVENT));
-  } catch {}
+export const getCachedUserSkin = (userId: string | null | undefined): string => {
+  if (!userId) return DEFAULT_SKIN_ID;
+  if (otherSkinCache.has(userId)) return otherSkinCache.get(userId)!;
+  return DEFAULT_SKIN_ID;
+};
+
+export const primeUserSkin = (userId: string, skin: string) => {
+  otherSkinCache.set(userId, skin || DEFAULT_SKIN_ID);
 };
 
 export const AvatarProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
-  const uid = user?.id ?? 'guest';
-  const [state, setState] = useState<AvatarState>(() => readState(uid));
+  const { profile, updateProfile } = useProfile();
 
-  useEffect(() => {
-    setState(readState(uid));
-    const sync = () => setState(readState(uid));
-    window.addEventListener(EVENT, sync);
-    window.addEventListener('storage', sync);
-    return () => {
-      window.removeEventListener(EVENT, sync);
-      window.removeEventListener('storage', sync);
-    };
-  }, [uid]);
+  const owned = profile?.owned_skins ?? [DEFAULT_SKIN_ID];
+  const equipped = profile?.equipped_skin || DEFAULT_SKIN_ID;
 
-  const addSkin = useCallback((id: string) => {
-    const next: AvatarState = (() => {
-      const cur = readState(uid);
-      if (cur.owned.includes(id)) return cur;
-      return { ...cur, owned: [...cur.owned, id] };
-    })();
-    writeState(uid, next);
-    setState(next);
-  }, [uid]);
+  // Keep current user's skin primed for any UserAvatar instances referencing by id.
+  if (user) primeUserSkin(user.id, equipped);
 
-  const equipSkin = useCallback((id: string) => {
-    const cur = readState(uid);
-    if (!cur.owned.includes(id)) return;
-    const next = { ...cur, equipped: id };
-    writeState(uid, next);
-    setState(next);
-  }, [uid]);
+  const addSkin = useCallback(async (id: string) => {
+    if (!profile) return;
+    if (owned.includes(id)) return;
+    await updateProfile({ owned_skins: [...owned, id] });
+  }, [profile, owned, updateProfile]);
+
+  const equipSkin = useCallback(async (id: string) => {
+    if (!profile || !owned.includes(id)) return;
+    await updateProfile({ equipped_skin: id });
+    if (user) primeUserSkin(user.id, id);
+    window.dispatchEvent(new CustomEvent(EVENT));
+  }, [profile, owned, updateProfile, user]);
 
   const value = useMemo<AvatarContextValue>(() => ({
-    owned: state.owned,
-    equipped: state.equipped,
-    ownsSkin: (id) => state.owned.includes(id),
+    owned,
+    equipped,
+    ownsSkin: (id) => owned.includes(id),
     addSkin,
     equipSkin,
-  }), [state, addSkin, equipSkin]);
+  }), [owned, equipped, addSkin, equipSkin]);
 
   return <AvatarContext.Provider value={value}>{children}</AvatarContext.Provider>;
 };
@@ -91,12 +87,5 @@ export const useAvatar = () => {
   return ctx;
 };
 
-// Lookup helper for arbitrary users (other people's skins are not synced yet → default).
-export const getUserEquippedSkin = (userId: string | null | undefined): string => {
-  if (!userId) return DEFAULT_SKIN_ID;
-  try {
-    const raw = localStorage.getItem(STORAGE_PREFIX + userId);
-    if (raw) return JSON.parse(raw).equipped || DEFAULT_SKIN_ID;
-  } catch {}
-  return DEFAULT_SKIN_ID;
-};
+// Backward-compat helper used in older files.
+export const getUserEquippedSkin = getCachedUserSkin;

@@ -33,6 +33,7 @@ import School from "./pages/School";
 import Chat from "./pages/Chat";
 import Inbox from "./pages/Inbox";
 import Wardrobe from "./pages/Wardrobe";
+import Duel from "./pages/Duel";
 import RewardFlight from "./components/RewardFlight";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,8 @@ const AnimatedRoutes = () => {
         <Route path="/chat" element={<Chat />} />
         <Route path="/chat/:userId" element={<Chat />} />
         <Route path="/wardrobe" element={<Wardrobe />} />
+        <Route path="/duel" element={<Duel />} />
+        <Route path="/duel/:code" element={<Duel />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>

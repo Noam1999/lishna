@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle, Shirt } from 'lucide-react';
+import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle, Shirt, Users, Swords } from 'lucide-react';
+import { useMilestoneTracker } from '@/hooks/useMilestoneTracker';
 import { useUnreadMail } from '@/hooks/useUnreadMail';
 import UserAvatar from '@/components/UserAvatar';
 import Footer from '@/components/Footer';
@@ -25,6 +26,8 @@ const Home = () => {
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
   const { count: unreadCount } = useUnreadMail();
+  useMilestoneTracker();
+
   
   
 
@@ -281,6 +284,28 @@ const Home = () => {
             <div className="flex-1 text-right">
               <h3 className="font-semibold text-lg text-foreground mb-1">ליגה</h3>
               <p className="text-sm text-muted-foreground">צפה בדירוג השבועי והתחרה בחברים</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Friends */}
+        <Link to="/friends" className="group block bg-card rounded-2xl p-5 shadow-soft border border-border hover:shadow-elegant hover:border-primary/20 transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform"><Users className="w-7 h-7" /></div>
+            <div className="flex-1 text-right">
+              <h3 className="font-semibold text-lg text-foreground mb-1">חברים</h3>
+              <p className="text-sm text-muted-foreground">חפש, הוסף ונהל את החברים שלך</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Duel */}
+        <Link to="/duel" className="group block bg-gradient-to-br from-red-500/10 to-orange-500/10 rounded-2xl p-5 shadow-soft border border-red-500/30 hover:shadow-elegant transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform"><Swords className="w-7 h-7" /></div>
+            <div className="flex-1 text-right">
+              <h3 className="font-semibold text-lg text-foreground mb-1">דו קרב ⚔️</h3>
+              <p className="text-sm text-muted-foreground">משחק מהיר בין שני שחקנים — לכיף בלבד</p>
             </div>
           </div>
         </Link>

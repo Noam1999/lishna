@@ -12,6 +12,7 @@ import { useFriends, FriendWithProfile } from '@/hooks/useFriends';
 import { Profile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import FriendProfileDialog from '@/components/FriendProfileDialog';
+import UserAvatar from '@/components/UserAvatar';
 
 const Friends = () => {
   const navigate = useNavigate();
@@ -119,11 +120,7 @@ const Friends = () => {
                 className="bg-card rounded-xl p-4 shadow-soft border border-border flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-sm font-bold text-primary">
-                      {(profile.display_name || 'U')[0].toUpperCase()}
-                    </span>
-                  </div>
+                  <UserAvatar userId={profile.user_id} size={40} />
                   <div>
                     <p className="font-medium text-foreground">{profile.display_name || 'לומד'}</p>
                     <p className="text-xs text-muted-foreground">{profile.points} נקודות</p>
@@ -157,11 +154,7 @@ const Friends = () => {
                 className="bg-card rounded-xl p-4 shadow-soft border border-primary/20 flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-sm font-bold text-primary">
-                      {(request.profile?.display_name || 'U')[0].toUpperCase()}
-                    </span>
-                  </div>
+                  <UserAvatar userId={request.profile?.user_id || null} size={40} />
                   <div>
                     <p className="font-medium text-foreground">{request.profile?.display_name || 'לומד'}</p>
                     <p className="text-xs text-muted-foreground">רוצה להיות חברים</p>
@@ -217,11 +210,7 @@ const Friends = () => {
                 className="w-full bg-card rounded-xl p-4 shadow-soft border border-border flex items-center justify-between hover:shadow-elegant hover:border-primary/20 transition-all text-right"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-                    <span className="text-lg font-bold text-primary-foreground">
-                      {(friend.profile?.display_name || 'U')[0].toUpperCase()}
-                    </span>
-                  </div>
+                  <UserAvatar userId={friend.profile?.user_id || null} size={48} />
                   <div>
                     <p className="font-medium text-foreground">{friend.profile?.display_name || 'לומד'}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">

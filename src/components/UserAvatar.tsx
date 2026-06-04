@@ -1,40 +1,31 @@
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { getSkin } from '@/lib/skins';
+import { getSkin, DEFAULT_SKIN_ID } from '@/lib/skins';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAvatar, getUserEquippedSkin } from '@/contexts/AvatarContext';
+import { useAvatar, fetchUserSkin, getCachedUserSkin } from '@/contexts/AvatarContext';
 
 interface UserAvatarProps {
   userId?: string | null;
-  size?: number;          // px
+  size?: number;
   className?: string;
   ring?: boolean;
-  skinId?: string;        // override
+  skinId?: string;
 }
 
-/**
- * Unified avatar showing the user's currently-equipped skin (stylized character)
- * instead of an initial letter. Reactive to skin changes for the current user.
- */
 const UserAvatar = ({ userId, size = 40, className, ring = true, skinId }: UserAvatarProps) => {
   const { user } = useAuth();
   const { equipped } = useAvatar();
-  const isMe = userId ? userId === user?.id : true;
+  const isMe = userId ? userId === user?.id : !userId;
 
   const [otherSkin, setOtherSkin] = useState<string>(() =>
-    userId && !isMe ? getUserEquippedSkin(userId) : 'default',
+    userId && !isMe ? getCachedUserSkin(userId) : DEFAULT_SKIN_ID,
   );
 
   useEffect(() => {
     if (!userId || isMe) return;
-    const sync = () => setOtherSkin(getUserEquippedSkin(userId));
-    sync();
-    window.addEventListener('lishna:avatar:update', sync);
-    window.addEventListener('storage', sync);
-    return () => {
-      window.removeEventListener('lishna:avatar:update', sync);
-      window.removeEventListener('storage', sync);
-    };
+    let cancelled = false;
+    fetchUserSkin(userId).then((s) => { if (!cancelled) setOtherSkin(s); });
+    return () => { cancelled = true; };
   }, [userId, isMe]);
 
   const effectiveSkinId = skinId ?? (isMe ? equipped : otherSkin);
@@ -45,7 +36,7 @@ const UserAvatar = ({ userId, size = 40, className, ring = true, skinId }: UserA
     <div
       style={{ width: size, height: size, fontSize: emojiSize, lineHeight: 1 }}
       className={cn(
-        'rounded-full bg-gradient-to-br flex items-center justify-center shadow-soft select-none overflow-hidden',
+        'rounded-full bg-gradient-to-br flex items-center justify-center shadow-soft select-none overflow-hidden flex-shrink-0',
         skin.bg,
         ring && `ring-2 ${skin.ring}`,
         className,

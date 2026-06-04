@@ -336,6 +336,54 @@ export type Database = {
         }
         Relationships: []
       }
+      duels: {
+        Row: {
+          code: string
+          created_at: string
+          current_question: number
+          guest_answer: Json | null
+          guest_id: string | null
+          guest_score: number
+          host_answer: Json | null
+          host_id: string
+          host_score: number
+          id: string
+          questions: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_question?: number
+          guest_answer?: Json | null
+          guest_id?: string | null
+          guest_score?: number
+          host_answer?: Json | null
+          host_id: string
+          host_score?: number
+          id?: string
+          questions?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_question?: number
+          guest_answer?: Json | null
+          guest_id?: string | null
+          guest_score?: number
+          host_answer?: Json | null
+          host_id?: string
+          host_score?: number
+          id?: string
+          questions?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           created_at: string
@@ -396,10 +444,12 @@ export type Database = {
           daily_xp: number
           diamonds: number
           display_name: string | null
+          equipped_skin: string
           id: string
           last_quiz_date: string | null
           last_wheel_spin_at: string | null
           last_xp_date: string | null
+          owned_skins: string[]
           points: number
           power_up_5050: number
           streak: number
@@ -408,6 +458,7 @@ export type Database = {
           username: string | null
           week_start_date: string | null
           weekly_points: number
+          wheel_spins: number
           words_mastered: number
           xp_multiplier_remaining: number
         }
@@ -419,10 +470,12 @@ export type Database = {
           daily_xp?: number
           diamonds?: number
           display_name?: string | null
+          equipped_skin?: string
           id?: string
           last_quiz_date?: string | null
           last_wheel_spin_at?: string | null
           last_xp_date?: string | null
+          owned_skins?: string[]
           points?: number
           power_up_5050?: number
           streak?: number
@@ -431,6 +484,7 @@ export type Database = {
           username?: string | null
           week_start_date?: string | null
           weekly_points?: number
+          wheel_spins?: number
           words_mastered?: number
           xp_multiplier_remaining?: number
         }
@@ -442,10 +496,12 @@ export type Database = {
           daily_xp?: number
           diamonds?: number
           display_name?: string | null
+          equipped_skin?: string
           id?: string
           last_quiz_date?: string | null
           last_wheel_spin_at?: string | null
           last_xp_date?: string | null
+          owned_skins?: string[]
           points?: number
           power_up_5050?: number
           streak?: number
@@ -454,6 +510,7 @@ export type Database = {
           username?: string | null
           week_start_date?: string | null
           weekly_points?: number
+          wheel_spins?: number
           words_mastered?: number
           xp_multiplier_remaining?: number
         }
