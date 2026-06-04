@@ -179,6 +179,8 @@ const AdminPanel = () => {
           }}
           className="w-full gap-2"
         ><Send className="w-4 h-4" /> פרסם לכולם</Button>
+      </div>
+
 
       <Button asChild variant="outline" className="w-full gap-2 h-12">
         <Link to="/admin/feedback"><Inbox className="w-5 h-5" />פניות משתמשים</Link>
