@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import UserAvatar from '@/components/UserAvatar';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -51,12 +51,7 @@ const HomeLeaderboard = () => {
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold">
                     {medal || entry.rank}
                   </div>
-                  <Avatar className="h-8 w-8 border border-border">
-                    <AvatarImage src={entry.avatar_url || undefined} alt={name} />
-                    <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                      {name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar userId={entry.user_id} size={32} />
                   <span className="flex-1 text-sm font-medium text-foreground truncate text-right">
                     {name}
                   </span>
