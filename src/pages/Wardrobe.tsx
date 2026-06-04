@@ -27,7 +27,7 @@ const Wardrobe = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
-  const { owned, equipped, ownsSkin, addSkin, equipSkin } = useAvatar();
+  const { owned, equipped, ownsSkin, equipSkin } = useAvatar();
   const [busy, setBusy] = useState<string | null>(null);
 
   if (!user) {
