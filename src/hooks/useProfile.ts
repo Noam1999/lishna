@@ -21,6 +21,9 @@ export interface Profile {
   power_up_5050: number;
   diamonds: number;
   last_wheel_spin_at: string | null;
+  owned_skins: string[];
+  equipped_skin: string;
+  wheel_spins: number;
   created_at: string;
   updated_at: string;
 }
