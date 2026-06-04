@@ -157,6 +157,29 @@ const AdminPanel = () => {
         </Button>
       </div>
 
+      <div className="bg-card rounded-2xl p-5 shadow-soft border border-border space-y-3">
+        <h3 className="font-bold text-foreground">📣 פרסם עדכון מערכת לכל המשתמשים</h3>
+        <Input id="sys-title" placeholder="כותרת קצרה (לדוגמה: פיצ׳ר חדש!)" />
+        <Textarea id="sys-body" rows={2} placeholder="תיאור..." />
+        <Button
+          onClick={async () => {
+            const title = (document.getElementById('sys-title') as HTMLInputElement)?.value?.trim();
+            const body = (document.getElementById('sys-body') as HTMLTextAreaElement)?.value?.trim();
+            if (!title) { toast.error('הזן כותרת'); return; }
+            if (!user) return;
+            const { error } = await supabase.from('user_activities').insert([{
+              user_id: user.id, activity_type: 'system_update',
+              activity_data: { title, body } as never,
+            }]);
+            if (error) toast.error('שליחה נכשלה'); else {
+              toast.success('עדכון פורסם לכולם');
+              (document.getElementById('sys-title') as HTMLInputElement).value = '';
+              (document.getElementById('sys-body') as HTMLTextAreaElement).value = '';
+            }
+          }}
+          className="w-full gap-2"
+        ><Send className="w-4 h-4" /> פרסם לכולם</Button>
+
       <Button asChild variant="outline" className="w-full gap-2 h-12">
         <Link to="/admin/feedback"><Inbox className="w-5 h-5" />פניות משתמשים</Link>
       </Button>
