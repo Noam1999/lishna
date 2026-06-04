@@ -22,17 +22,17 @@ const EVENT = 'lishna:avatar:update';
 export const fetchUserSkin = (userId: string): Promise<string> => {
   if (otherSkinCache.has(userId)) return Promise.resolve(otherSkinCache.get(userId)!);
   if (fetchInflight.has(userId)) return fetchInflight.get(userId)!;
-  const p = supabase
-    .from('profiles')
-    .select('equipped_skin')
-    .eq('user_id', userId)
-    .maybeSingle()
-    .then(({ data }) => {
-      const skin = (data?.equipped_skin as string) || DEFAULT_SKIN_ID;
-      otherSkinCache.set(userId, skin);
-      fetchInflight.delete(userId);
-      return skin;
-    });
+  const p = (async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('equipped_skin')
+      .eq('user_id', userId)
+      .maybeSingle();
+    const skin = ((data?.equipped_skin as string) || DEFAULT_SKIN_ID);
+    otherSkinCache.set(userId, skin);
+    fetchInflight.delete(userId);
+    return skin;
+  })();
   fetchInflight.set(userId, p);
   return p;
 };
