@@ -246,13 +246,16 @@ export const useProfile = () => {
 
   const spinWheel = async (): Promise<{ segmentIndex: number; prize: WheelPrize } | { error: Error }> => {
     if (!user || !profile) return { error: new Error('no_profile') };
-    if (profile.last_wheel_spin_at) {
+    const hasBonusSpin = (profile.wheel_spins || 0) > 0;
+    if (!hasBonusSpin && profile.last_wheel_spin_at) {
       const last = new Date(profile.last_wheel_spin_at).getTime();
       if (Date.now() - last < WHEEL_COOLDOWN_MS) return { error: new Error('cooldown') };
     }
     const segmentIndex = pickWheelSegment();
     const prize = WHEEL_SEGMENTS[segmentIndex].prize;
-    const updates: Partial<Profile> = { last_wheel_spin_at: new Date().toISOString() };
+    const updates: Partial<Profile> = {};
+    if (hasBonusSpin) updates.wheel_spins = profile.wheel_spins - 1;
+    else updates.last_wheel_spin_at = new Date().toISOString();
     if (prize.kind === 'coins') updates.coins = profile.coins + prize.amount;
     if (prize.kind === 'diamonds') updates.diamonds = profile.diamonds + prize.amount;
     await updateProfile(updates);

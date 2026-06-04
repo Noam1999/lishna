@@ -39,11 +39,13 @@ const LuckyWheel = () => {
     return () => clearInterval(t);
   }, []);
 
+  const bonusSpins = profile?.wheel_spins || 0;
   const cooldownRemaining = useMemo(() => {
+    if (bonusSpins > 0) return 0;
     if (!profile?.last_wheel_spin_at) return 0;
     const elapsed = now - new Date(profile.last_wheel_spin_at).getTime();
     return Math.max(0, WHEEL_COOLDOWN_MS - elapsed);
-  }, [profile?.last_wheel_spin_at, now]);
+  }, [profile?.last_wheel_spin_at, now, bonusSpins]);
 
   const ready = cooldownRemaining === 0 && !spinning;
 
@@ -125,7 +127,7 @@ const LuckyWheel = () => {
 
       <div className="mt-4 flex flex-col items-center gap-2">
         <Button onClick={handleSpin} disabled={!ready} size="lg" className="w-full">
-          {spinning ? 'מסתובב…' : ready ? 'סובב את הגלגל' : `זמין בעוד ${formatRemaining(cooldownRemaining)}`}
+          {spinning ? 'מסתובב…' : ready ? (bonusSpins > 0 ? `סובב את הגלגל (${bonusSpins} בונוס)` : 'סובב את הגלגל') : `זמין בעוד ${formatRemaining(cooldownRemaining)}`}
         </Button>
         <AnimatePresence>
           {reveal && !spinning && (
