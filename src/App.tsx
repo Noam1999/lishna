@@ -34,7 +34,9 @@ import Chat from "./pages/Chat";
 import Inbox from "./pages/Inbox";
 import Wardrobe from "./pages/Wardrobe";
 import Duel from "./pages/Duel";
+import Pass from "./pages/Pass";
 import RewardFlight from "./components/RewardFlight";
+import NotificationPrompt from "./components/NotificationPrompt";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +68,7 @@ const AnimatedRoutes = () => {
         <Route path="/wardrobe" element={<Wardrobe />} />
         <Route path="/duel" element={<Duel />} />
         <Route path="/duel/:code" element={<Duel />} />
+        <Route path="/pass" element={<Pass />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
@@ -86,6 +89,7 @@ const App = () => (
               <GuestBanner />
               <AnimatedRoutes />
               <RewardFlight />
+              <NotificationPrompt />
               <FeedbackButton />
               <Navigation />
             </BrowserRouter>
