@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle, Shirt, Users, Swords } from 'lucide-react';
 import { useMilestoneTracker } from '@/hooks/useMilestoneTracker';
+import { useNotifications } from '@/hooks/useNotifications';
+import { WHEEL_COOLDOWN_MS } from '@/hooks/useProfile';
 import { useUnreadMail } from '@/hooks/useUnreadMail';
 import UserAvatar from '@/components/UserAvatar';
 import Footer from '@/components/Footer';
@@ -27,6 +29,31 @@ const Home = () => {
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
   const { count: unreadCount } = useUnreadMail();
   useMilestoneTracker();
+  const { notify, permission } = useNotifications();
+
+  // Native device reminders (wheel ready / streak missed)
+  useEffect(() => {
+    if (!profile || permission !== 'granted') return;
+    const today = new Date().toISOString().split('T')[0];
+    const todayQuiz = profile.last_quiz_date
+      ? new Date(profile.last_quiz_date).toISOString().split('T')[0] === today
+      : false;
+    const wheelReady = !profile.last_wheel_spin_at ||
+      (Date.now() - new Date(profile.last_wheel_spin_at).getTime() >= WHEEL_COOLDOWN_MS) ||
+      (profile.wheel_spins || 0) > 0;
+    const key = `lishna:notif:${today}`;
+    const sent = JSON.parse(localStorage.getItem(key) || '{}');
+    if (wheelReady && !sent.wheel) {
+      notify('הגלגל היומי התחדש! 🎡', 'יש לך סיבוב חדש בגלגל המזל — נסה את מזלך!', 'wheel');
+      sent.wheel = 1;
+    }
+    if (!todayQuiz && new Date().getHours() >= 18 && !sent.streak) {
+      notify('אל תשכח את הרצף היומי שלך! 🔥', 'עוד לא למדת היום — שמור על הרצף שלך בלישנא.', 'streak');
+      sent.streak = 1;
+    }
+    localStorage.setItem(key, JSON.stringify(sent));
+  }, [profile, permission, notify]);
+
 
   
   
@@ -239,6 +266,21 @@ const Home = () => {
             <div className="flex-1 text-right">
               <h3 className="font-semibold text-lg text-foreground mb-1">כיתות</h3>
               <p className="text-sm text-muted-foreground">הצטרף לכיתה או נהל ככיתה כמורה</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Lishna Pass */}
+        <Link
+          to="/pass"
+          className="group block bg-gradient-to-br from-amber-400/15 via-primary/15 to-purple-500/15 rounded-2xl p-5 shadow-soft border border-amber-400/40 hover:shadow-elegant transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 via-primary to-purple-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300 text-2xl shadow-md">
+              👑
+            </div>
+            <div className="flex-1 text-right">
+              <h3 className="font-semibold text-lg text-foreground mb-1">Lishna Pass · עונה 1</h3>
+              <p className="text-sm text-muted-foreground">30 דרגות, פרסים אגדיים — חינם, פלוס ופרו</p>
             </div>
           </div>
         </Link>

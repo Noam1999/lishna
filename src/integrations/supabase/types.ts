@@ -450,6 +450,11 @@ export type Database = {
           last_wheel_spin_at: string | null
           last_xp_date: string | null
           owned_skins: string[]
+          pass_claims_free: number[]
+          pass_claims_plus: number[]
+          pass_claims_pro: number[]
+          pass_plus: boolean
+          pass_pro: boolean
           points: number
           power_up_5050: number
           streak: number
@@ -476,6 +481,11 @@ export type Database = {
           last_wheel_spin_at?: string | null
           last_xp_date?: string | null
           owned_skins?: string[]
+          pass_claims_free?: number[]
+          pass_claims_plus?: number[]
+          pass_claims_pro?: number[]
+          pass_plus?: boolean
+          pass_pro?: boolean
           points?: number
           power_up_5050?: number
           streak?: number
@@ -502,6 +512,11 @@ export type Database = {
           last_wheel_spin_at?: string | null
           last_xp_date?: string | null
           owned_skins?: string[]
+          pass_claims_free?: number[]
+          pass_claims_plus?: number[]
+          pass_claims_pro?: number[]
+          pass_plus?: boolean
+          pass_pro?: boolean
           points?: number
           power_up_5050?: number
           streak?: number
