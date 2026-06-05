@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle, Shirt, Users, Swords } from 'lucide-react';
 import { useMilestoneTracker } from '@/hooks/useMilestoneTracker';
+import { useNotifications } from '@/hooks/useNotifications';
+import { WHEEL_COOLDOWN_MS } from '@/hooks/useProfile';
 import { useUnreadMail } from '@/hooks/useUnreadMail';
 import UserAvatar from '@/components/UserAvatar';
 import Footer from '@/components/Footer';
@@ -27,6 +29,31 @@ const Home = () => {
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
   const { count: unreadCount } = useUnreadMail();
   useMilestoneTracker();
+  const { notify, permission } = useNotifications();
+
+  // Native device reminders (wheel ready / streak missed)
+  useEffect(() => {
+    if (!profile || permission !== 'granted') return;
+    const today = new Date().toISOString().split('T')[0];
+    const todayQuiz = profile.last_quiz_date
+      ? new Date(profile.last_quiz_date).toISOString().split('T')[0] === today
+      : false;
+    const wheelReady = !profile.last_wheel_spin_at ||
+      (Date.now() - new Date(profile.last_wheel_spin_at).getTime() >= WHEEL_COOLDOWN_MS) ||
+      (profile.wheel_spins || 0) > 0;
+    const key = `lishna:notif:${today}`;
+    const sent = JSON.parse(localStorage.getItem(key) || '{}');
+    if (wheelReady && !sent.wheel) {
+      notify('הגלגל היומי התחדש! 🎡', 'יש לך סיבוב חדש בגלגל המזל — נסה את מזלך!', 'wheel');
+      sent.wheel = 1;
+    }
+    if (!todayQuiz && new Date().getHours() >= 18 && !sent.streak) {
+      notify('אל תשכח את הרצף היומי שלך! 🔥', 'עוד לא למדת היום — שמור על הרצף שלך בלישנא.', 'streak');
+      sent.streak = 1;
+    }
+    localStorage.setItem(key, JSON.stringify(sent));
+  }, [profile, permission, notify]);
+
 
   
   
