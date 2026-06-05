@@ -182,6 +182,24 @@ const AdminPanel = () => {
       </div>
 
 
+      <div className="bg-card rounded-2xl p-5 shadow-soft border border-border space-y-3">
+        <h3 className="font-bold text-foreground">♻️ אפס XP לכלל המשתמשים</h3>
+        <p className="text-xs text-muted-foreground">מאפס XP, XP יומי ונקודות שבועיות לכל המשתמשים — לפתיחת עונה חדשה של Lishna Pass.</p>
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={async () => {
+            if (!confirm('לאפס XP לכל המשתמשים? פעולה זו לא ניתנת לביטול.')) return;
+            const { error } = await supabase.from('profiles')
+              .update({ points: 0, daily_xp: 0, weekly_points: 0,
+                pass_claims_free: [], pass_claims_plus: [], pass_claims_pro: [],
+                pass_plus: false, pass_pro: false } as any)
+              .gte('points', 0);
+            if (error) toast.error('האיפוס נכשל'); else toast.success('כל ה-XP אופס בהצלחה ✨');
+          }}
+        >אפס XP גלובלי</Button>
+      </div>
+
       <Button asChild variant="outline" className="w-full gap-2 h-12">
         <Link to="/admin/feedback"><Inbox className="w-5 h-5" />פניות משתמשים</Link>
       </Button>
