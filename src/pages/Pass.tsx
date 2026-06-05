@@ -132,7 +132,7 @@ const Pass = () => {
   if (!user) {
     return (
       <PageTransition>
-        <Header />
+        <Header title="Lishna Pass" />
         <div className="min-h-screen flex items-center justify-center p-6">
           <div className="text-center space-y-3">
             <Sparkles className="w-12 h-12 text-primary mx-auto" />
@@ -146,7 +146,7 @@ const Pass = () => {
 
   return (
     <PageTransition>
-      <Header />
+      <Header title="Lishna Pass" />
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5 pb-32">
         {/* Hero */}
         <div className="relative px-4 pt-4">
