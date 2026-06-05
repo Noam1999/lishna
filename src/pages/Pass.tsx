@@ -205,7 +205,7 @@ const Pass = () => {
           {TIERS.map((t, idx) => {
             const tier = idx + 1;
             const unlocked = currentTier > tier || (currentTier === tier && progressInTier === XP_PER_TIER) || currentTier > PASS_TIERS;
-            const reachedOrCurrent = currentTier >= tier;
+            const reachedOrCurrent = currentTier > tier;
             return (
               <div key={tier} className={`grid grid-cols-[40px_1fr_1fr_1fr] gap-2 items-center ${currentTier === tier ? 'scale-[1.02]' : ''}`}>
                 <div className={[
