@@ -243,6 +243,21 @@ const Home = () => {
           </div>
         </Link>
 
+        {/* Lishna Pass */}
+        <Link
+          to="/pass"
+          className="group block bg-gradient-to-br from-amber-400/15 via-primary/15 to-purple-500/15 rounded-2xl p-5 shadow-soft border border-amber-400/40 hover:shadow-elegant transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 via-primary to-purple-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300 text-2xl shadow-md">
+              👑
+            </div>
+            <div className="flex-1 text-right">
+              <h3 className="font-semibold text-lg text-foreground mb-1">Lishna Pass · עונה 1</h3>
+              <p className="text-sm text-muted-foreground">30 דרגות, פרסים אגדיים — חינם, פלוס ופרו</p>
+            </div>
+          </div>
+        </Link>
+
         {/* Wardrobe Link */}
         <Link
           to="/wardrobe"
