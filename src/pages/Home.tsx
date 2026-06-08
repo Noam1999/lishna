@@ -66,16 +66,6 @@ const Home = () => {
       last_perk_grant_date: today,
     } as any);
   }, [profile?.id, (profile as any)?.last_perk_grant_date]);
-    if (!profile) return;
-    const p: any = profile;
-    if (!p.pass_plus && !p.pass_pro) return;
-    const today = new Date().toISOString().split('T')[0];
-    if (p.last_perk_grant_date === today) return;
-    updateProfile({
-      wheel_spins: (profile.wheel_spins || 0) + 1,
-      last_perk_grant_date: today,
-    } as any);
-  }, [profile?.id, (profile as any)?.last_perk_grant_date]);
 
 
   
