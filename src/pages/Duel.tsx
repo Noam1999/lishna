@@ -62,6 +62,10 @@ const Duel = () => {
 
   const subscribe = useCallback((id: string) => {
     subRef.current?.unsubscribe();
+    const refetch = async () => {
+      const { data } = await supabase.from('duels').select('*').eq('id', id).maybeSingle();
+      if (data) setDuel(data as unknown as DuelRow);
+    };
     subRef.current = supabase
       .channel(`duel-${id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'duels', filter: `id=eq.${id}` },
@@ -69,9 +73,13 @@ const Duel = () => {
           if (payload.eventType === 'DELETE') {
             toast('המשחק הסתיים'); setMode('menu'); setDuel(null); return;
           }
-          setDuel(payload.new as unknown as DuelRow);
+          // Refetch full row to avoid partial payloads from REPLICA IDENTITY edge cases.
+          refetch();
         })
       .subscribe();
+    // Polling fallback in case Realtime is delayed/unavailable
+    const poll = setInterval(refetch, 1500);
+    (subRef.current as any)._poll = poll;
   }, []);
 
   const handleCreate = async () => {
@@ -128,7 +136,11 @@ const Duel = () => {
     }
   }, [duel, user]);
 
-  useEffect(() => () => { subRef.current?.unsubscribe(); }, []);
+  useEffect(() => () => {
+    const s: any = subRef.current;
+    if (s?._poll) clearInterval(s._poll);
+    subRef.current?.unsubscribe();
+  }, []);
 
   // Auto-join via URL param
   useEffect(() => {
