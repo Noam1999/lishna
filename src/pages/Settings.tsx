@@ -16,6 +16,7 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import AdminPanel from '@/components/settings/AdminPanel';
 import QuizTimerSetting from '@/components/settings/QuizTimerSetting';
+import NotificationSettings from '@/components/settings/NotificationSettings';
 import Footer from '@/components/Footer';
 import PageTransition from '@/components/PageTransition';
 
@@ -118,6 +119,9 @@ const Settings = () => {
 
           {/* Quiz Timer */}
           <QuizTimerSetting />
+
+          {/* Push Notifications */}
+          <NotificationSettings />
         </div>
 
         {/* User Stats Section */}
