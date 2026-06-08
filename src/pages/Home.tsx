@@ -24,7 +24,7 @@ const Home = () => {
   const navigate = useNavigate();
   const { dictionary, getUnlearnedWords } = useDictionary();
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile, updateProfile } = useProfile();
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
   const { count: unreadCount } = useUnreadMail();
@@ -53,6 +53,19 @@ const Home = () => {
     }
     localStorage.setItem(key, JSON.stringify(sent));
   }, [profile, permission, notify]);
+
+  // Daily +1 wheel spin perk for Lishna Pass Plus / Pro members
+  useEffect(() => {
+    if (!profile) return;
+    const p: any = profile;
+    if (!p.pass_plus && !p.pass_pro) return;
+    const today = new Date().toISOString().split('T')[0];
+    if (p.last_perk_grant_date === today) return;
+    updateProfile({
+      wheel_spins: (profile.wheel_spins || 0) + 1,
+      last_perk_grant_date: today,
+    } as any);
+  }, [profile?.id, (profile as any)?.last_perk_grant_date]);
 
 
   

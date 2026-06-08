@@ -446,6 +446,7 @@ export type Database = {
           display_name: string | null
           equipped_skin: string
           id: string
+          last_perk_grant_date: string | null
           last_quiz_date: string | null
           last_wheel_spin_at: string | null
           last_xp_date: string | null
@@ -477,6 +478,7 @@ export type Database = {
           display_name?: string | null
           equipped_skin?: string
           id?: string
+          last_perk_grant_date?: string | null
           last_quiz_date?: string | null
           last_wheel_spin_at?: string | null
           last_xp_date?: string | null
@@ -508,6 +510,7 @@ export type Database = {
           display_name?: string | null
           equipped_skin?: string
           id?: string
+          last_perk_grant_date?: string | null
           last_quiz_date?: string | null
           last_wheel_spin_at?: string | null
           last_xp_date?: string | null

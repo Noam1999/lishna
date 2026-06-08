@@ -111,9 +111,14 @@ const Pass = () => {
     if (current.includes(tier)) return;
 
     const updates: any = { [claimsKey]: [...current, tier] };
-    if (reward.kind === 'coins')    updates.coins    = profile.coins    + (reward.amount || 0);
-    if (reward.kind === 'diamonds') updates.diamonds = profile.diamonds + (reward.amount || 0);
-    if (reward.kind === 'xp')       updates.points   = profile.points   + (reward.amount || 0);
+    const amt = reward.amount || 0;
+    if (reward.kind === 'coins')      updates.coins    = profile.coins    + amt;
+    if (reward.kind === 'diamonds')   updates.diamonds = profile.diamonds + amt;
+    if (reward.kind === 'xp')         updates.points   = profile.points   + amt;
+    if (reward.kind === 'power_5050') updates.power_up_5050 = (profile.power_up_5050 || 0) + amt;
+    if (reward.kind === 'xp_mul')     updates.xp_multiplier_remaining = (profile.xp_multiplier_remaining || 0) + amt;
+    if (reward.kind === 'coin_mul')   updates.coin_multiplier_remaining = (profile.coin_multiplier_remaining || 0) + amt;
+    if (reward.kind === 'wheel_spin') updates.wheel_spins = (profile.wheel_spins || 0) + amt;
     if (reward.kind === 'skin' && reward.skinId) {
       const owned = profile.owned_skins || [];
       if (!owned.includes(reward.skinId)) updates.owned_skins = [...owned, reward.skinId];

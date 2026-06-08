@@ -14,6 +14,7 @@ import FeedbackButton from "@/components/FeedbackButton";
 import BetaWelcomePopup from "@/components/BetaWelcomePopup";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import Friends from "./pages/Friends";
 import Translator from "./pages/Translator";
@@ -47,6 +48,7 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Home />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/friends" element={<Friends />} />
         <Route path="/translator" element={<Translator />} />
