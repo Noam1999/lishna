@@ -1,4 +1,5 @@
-import { ScrollText, Inbox } from 'lucide-react';
+import { Inbox } from 'lucide-react';
+import Logo from '@/components/Logo';
 import { Link } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,7 +38,7 @@ const Header = ({ title, subtitle }: HeaderProps) => {
         </div>
       )}
       <div className="flex items-center justify-center gap-3 mb-2">
-        <ScrollText className="w-8 h-8 text-primary" />
+        <Logo className="w-9 h-9" />
         <h1 className="text-2xl font-display font-bold text-foreground">{title}</h1>
       </div>
       {subtitle && (

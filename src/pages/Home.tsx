@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, GraduationCap, Brain, ScrollText, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle, Shirt, Users, Swords } from 'lucide-react';
+import { Book, GraduationCap, Brain, Sparkles, LogIn, Flame, Rss, Trophy, Settings, School, ShoppingBag, Inbox, MessageCircle, Shirt, Users, Swords } from 'lucide-react';
+import Logo from '@/components/Logo';
 import { useMilestoneTracker } from '@/hooks/useMilestoneTracker';
 import { useNotifications } from '@/hooks/useNotifications';
 import { WHEEL_COOLDOWN_MS } from '@/hooks/useProfile';
@@ -214,7 +215,7 @@ const Home = () => {
               <span className="text-sm font-medium text-muted-foreground">למד ארמית בבלית</span>
             </div>
             <div className="flex items-center justify-center gap-3 mb-2">
-              <ScrollText className="w-10 h-10 text-primary" />
+              <Logo className="w-12 h-12" />
               <h1 className="text-3xl font-display font-bold text-foreground">לִישָׁנָא</h1>
             </div>
             <p className="text-sm font-medium text-primary mb-1">ארמית. פשוט להבין.</p>
