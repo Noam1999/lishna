@@ -152,6 +152,7 @@ const Duel = () => {
 
   const submitAnswer = async (choice: string) => {
     if (!duel || !user || chosen) return;
+    haptic(15);
     setChosen(choice);
     const field = duel.host_id === user.id ? 'host_answer' : 'guest_answer';
     await supabase.from('duels').update({ [field]: { q: duel.current_question, choice } }).eq('id', duel.id);
