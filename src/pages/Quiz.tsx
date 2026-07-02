@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
+import { haptic } from '@/lib/haptics';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useAchievements } from '@/hooks/useAchievements';
 import { useDailyQuests } from '@/hooks/useDailyQuests';
@@ -101,6 +102,7 @@ const Quiz = () => {
 
   const handleAnswer = (answer: string) => {
     if (showResult) return;
+    haptic(15);
 
     const correct = answer === questions[currentQuestion].correctAnswer;
     const currentQ = questions[currentQuestion];
