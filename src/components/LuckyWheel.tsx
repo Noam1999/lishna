@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useProfile, WHEEL_SEGMENTS, WHEEL_COOLDOWN_MS } from '@/hooks/useProfile';
+import { haptic } from '@/lib/haptics';
 
 const SIZE = 280;
 const RADIUS = SIZE / 2;
@@ -51,6 +52,7 @@ const LuckyWheel = () => {
 
   const handleSpin = async () => {
     if (!ready) return;
+    haptic(15);
     setSpinning(true);
     setReveal(null);
     const result = await spinWheel();

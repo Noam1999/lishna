@@ -13,6 +13,7 @@ import {
   tierFromXp, xpInTier, type Reward, type Track,
 } from '@/lib/pass';
 import { getSkin } from '@/lib/skins';
+import { haptic } from '@/lib/haptics';
 
 const trackMeta: Record<Track, { label: string; sub: string; ring: string; bg: string }> = {
   free: { label: 'חינם',  sub: 'לכולם',     ring: 'ring-slate-400/50',  bg: 'from-slate-700/40 to-slate-800/40' },
@@ -104,6 +105,7 @@ const Pass = () => {
 
   const claim = async (track: Track, tier: number, reward: Reward) => {
     if (!profile) return;
+    haptic(15);
     const claimsKey =
       track === 'free' ? 'pass_claims_free' :
       track === 'plus' ? 'pass_claims_plus' : 'pass_claims_pro';
