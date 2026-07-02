@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, BookOpen, ScrollText } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -159,14 +160,11 @@ const Auth = () => {
         </div>
         
         <div className="relative z-10 text-center">
-          {/* Ancient Book Illustration */}
+          {/* Logo */}
           <div className="w-24 h-24 mx-auto mb-4 relative">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl transform rotate-6" />
-            <div className="absolute inset-0 bg-card rounded-2xl shadow-elegant border border-border flex items-center justify-center">
-              <div className="relative">
-                <BookOpen className="w-12 h-12 text-primary" />
-                <ScrollText className="w-6 h-6 text-accent-foreground absolute -bottom-1 -right-2" />
-              </div>
+            <div className="absolute inset-0 bg-card rounded-2xl shadow-elegant border border-border flex items-center justify-center p-2">
+              <Logo className="w-16 h-16" />
             </div>
           </div>
           

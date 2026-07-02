@@ -10,6 +10,7 @@ import PageTransition from '@/components/PageTransition';
 import UserAvatar from '@/components/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDictionary } from '@/contexts/DictionaryContext';
+import { haptic } from '@/lib/haptics';
 
 const genCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -151,6 +152,7 @@ const Duel = () => {
 
   const submitAnswer = async (choice: string) => {
     if (!duel || !user || chosen) return;
+    haptic(15);
     setChosen(choice);
     const field = duel.host_id === user.id ? 'host_answer' : 'guest_answer';
     await supabase.from('duels').update({ [field]: { q: duel.current_question, choice } }).eq('id', duel.id);

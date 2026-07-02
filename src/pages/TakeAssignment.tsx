@@ -9,6 +9,7 @@ import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
 import { useProfile } from '@/hooks/useProfile';
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
+import { haptic } from '@/lib/haptics';
 
 interface AssignmentSettings {
   allowPowerUps?: boolean;
@@ -82,6 +83,7 @@ const TakeAssignment = () => {
 
   const handleAnswer = (ans: string | null) => {
     if (showResult || !current) return;
+    if (ans !== null) haptic(15);
     setSelected(ans); setShowResult(true);
     const correct = ans !== null && ans === current.correctAnswer;
     if (correct) setScore((s) => s + 1);
