@@ -228,6 +228,14 @@ const Duel = () => {
                 <span className="text-xs text-muted-foreground">שאלה {duel.current_question + 1}/{TOTAL_QUESTIONS}</span>
                 <div className="flex items-center gap-2"><span className="font-bold text-primary">{oppScore}</span><UserAvatar userId={oppId} size={36} /></div>
               </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-l from-primary to-primary/70 rounded-full"
+                  initial={false}
+                  animate={{ width: `${(duel.current_question / TOTAL_QUESTIONS) * 100}%` }}
+                  transition={{ type: 'spring', stiffness: 120, damping: 20 }}
+                />
+              </div>
               <motion.div key={duel.current_question} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                 className="bg-card border border-border rounded-2xl p-6 text-center">
                 <p className="text-xs text-muted-foreground mb-2">מה התרגום?</p>
