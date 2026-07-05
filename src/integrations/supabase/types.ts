@@ -718,6 +718,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      duel_answer_slot_empty: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
