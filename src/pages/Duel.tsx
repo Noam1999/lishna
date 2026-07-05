@@ -265,9 +265,14 @@ const Duel = () => {
 
   const submitAnswer = async (choice: string) => {
     if (!duel || !user || chosen) return;
+    const field = duel.host_id === user.id ? 'host_answer' : 'guest_answer';
+    const alreadyAnswered = field === 'host_answer'
+      ? duel.host_answer?.q === duel.current_question
+      : duel.guest_answer?.q === duel.current_question;
+    if (alreadyAnswered) return;
+
     haptic(15);
     setChosen(choice);
-    const field = duel.host_id === user.id ? 'host_answer' : 'guest_answer';
     const { data, error } = await supabase
       .from('duels')
       .update({ [field]: { q: duel.current_question, choice } })
@@ -362,7 +367,7 @@ const Duel = () => {
                     <Button
                       key={opt}
                       variant={roundFeedback?.q === duel.current_question && opt === roundFeedback.myChoice && !roundFeedback.mineRight ? 'destructive' : chosen === opt || (roundFeedback?.q === duel.current_question && opt === roundFeedback.correct) ? 'default' : 'outline'}
-                      disabled={!!chosen || !!roundFeedback}
+                      disabled={!!chosen || myAnsweredCurrent || !!roundFeedback}
                       onClick={() => submitAnswer(opt)}
                       className="h-12"
                     >
