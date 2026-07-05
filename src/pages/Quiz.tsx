@@ -210,9 +210,23 @@ const Quiz = () => {
       {/* Score Display */}
       <div className="px-6 mb-6">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2">
+          <div className="relative flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2">
             <Trophy className="w-5 h-5 text-primary" />
             <span className="font-semibold text-primary">{quizScore}</span>
+            <AnimatePresence>
+              {showResult && isCorrect && (
+                <motion.span
+                  key={`xp-${currentQuestion}`}
+                  initial={{ opacity: 0, y: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, y: -28, scale: 1 }}
+                  exit={{ opacity: 0, y: -44 }}
+                  transition={{ duration: 0.9, ease: 'easeOut' }}
+                  className="absolute -top-1 left-1/2 -translate-x-1/2 text-sm font-extrabold text-green-500 pointer-events-none whitespace-nowrap drop-shadow"
+                >
+                  +10 XP
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
           <div className="flex items-center gap-2">
             {profile && profile.power_up_5050 > 0 && !usedThisQuestion && !showResult && currentQ.options.length >= 4 && (
