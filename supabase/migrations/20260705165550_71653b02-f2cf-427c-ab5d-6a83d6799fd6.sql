@@ -1,1 +1,0 @@
-DROP FUNCTION IF EXISTS public.duel_answer_slot_empty();
