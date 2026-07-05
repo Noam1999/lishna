@@ -31,6 +31,16 @@ type DuelRow = {
   guest_answer: { q: number; choice: string } | null;
 };
 
+type DuelAnswer = { q: number; choice: string } | null;
+
+type RoundFeedback = {
+  q: number;
+  correct: string;
+  mineRight: boolean;
+  opponentRight: boolean;
+  myChoice: string;
+};
+
 const TOTAL_QUESTIONS = 5;
 
 const Duel = () => {
@@ -42,7 +52,12 @@ const Duel = () => {
   const [joinCode, setJoinCode] = useState('');
   const [duel, setDuel] = useState<DuelRow | null>(null);
   const [chosen, setChosen] = useState<string | null>(null);
+  const [roundFeedback, setRoundFeedback] = useState<RoundFeedback | null>(null);
   const subRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const scheduledRoundsRef = useRef<Set<string>>(new Set());
+  const resolveTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const applyDuelUpdateRef = useRef<(row: DuelRow) => void>(() => undefined);
 
   // Build a set of MCQ questions from the dictionary
   const buildQuestions = useCallback(() => {
@@ -61,27 +76,145 @@ const Duel = () => {
     });
   }, [dictionary]);
 
+  const clearDuelWatchers = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+    if (subRef.current) {
+      supabase.removeChannel(subRef.current);
+      subRef.current = null;
+    }
+  }, []);
+
+  const scheduleRoundResolution = useCallback((row: DuelRow) => {
+    const q = row.current_question;
+    const hostAnswer = row.host_answer as DuelAnswer;
+    const guestAnswer = row.guest_answer as DuelAnswer;
+    if (hostAnswer?.q !== q || guestAnswer?.q !== q) return;
+
+    const roundKey = `${row.id}:${q}`;
+    if (scheduledRoundsRef.current.has(roundKey)) return;
+    scheduledRoundsRef.current.add(roundKey);
+
+    const timer = setTimeout(async () => {
+      const correct = row.questions[q]?.hebrew;
+      if (!correct) return;
+
+      const hostRight = hostAnswer.choice === correct;
+      const guestRight = guestAnswer.choice === correct;
+      const next = q + 1;
+
+      const { data, error } = await supabase
+        .from('duels')
+        .update({
+          host_score: row.host_score + (hostRight ? 1 : 0),
+          guest_score: row.guest_score + (guestRight ? 1 : 0),
+          host_answer: null,
+          guest_answer: null,
+          current_question: next,
+          status: next >= TOTAL_QUESTIONS ? 'done' : 'playing',
+        })
+        .eq('id', row.id)
+        .eq('current_question', q)
+        .select()
+        .maybeSingle();
+
+      if (error) {
+        console.error('Duel round resolution failed:', error);
+        scheduledRoundsRef.current.delete(roundKey);
+        return;
+      }
+
+      if (data) {
+        console.log('Duel State Updated:', data);
+        applyDuelUpdateRef.current(data as unknown as DuelRow);
+      }
+    }, 950);
+
+    resolveTimersRef.current.push(timer);
+  }, []);
+
+  const applyDuelUpdate = useCallback((row: DuelRow) => {
+    console.log('Duel State Updated:', row);
+    setDuel(row);
+
+    if (row.status === 'done') {
+      setRoundFeedback(null);
+      setMode('end');
+      return;
+    }
+
+    if (row.status === 'playing') setMode('play');
+
+    const q = row.current_question;
+    const hostAnswer = row.host_answer as DuelAnswer;
+    const guestAnswer = row.guest_answer as DuelAnswer;
+    const bothAnswered = hostAnswer?.q === q && guestAnswer?.q === q;
+
+    if (!bothAnswered) {
+      setRoundFeedback((prev) => (prev?.q === q ? prev : null));
+      return;
+    }
+
+    const correct = row.questions[q]?.hebrew;
+    if (!correct || !user) return;
+
+    const isHostPlayer = row.host_id === user.id;
+    const myAnswer = isHostPlayer ? hostAnswer : guestAnswer;
+    const opponentAnswer = isHostPlayer ? guestAnswer : hostAnswer;
+
+    setChosen(myAnswer.choice);
+    setRoundFeedback({
+      q,
+      correct,
+      mineRight: myAnswer.choice === correct,
+      opponentRight: opponentAnswer.choice === correct,
+      myChoice: myAnswer.choice,
+    });
+
+    scheduleRoundResolution(row);
+  }, [scheduleRoundResolution, user]);
+
+  useEffect(() => {
+    applyDuelUpdateRef.current = applyDuelUpdate;
+  }, [applyDuelUpdate]);
+
   const subscribe = useCallback((id: string) => {
-    subRef.current?.unsubscribe();
+    clearDuelWatchers();
+
     const refetch = async () => {
-      const { data } = await supabase.from('duels').select('*').eq('id', id).maybeSingle();
-      if (data) setDuel(data as unknown as DuelRow);
+      const { data, error } = await supabase.from('duels').select('*').eq('id', id).maybeSingle();
+      if (error) {
+        console.error('Duel polling failed:', error);
+        return;
+      }
+      if (data) applyDuelUpdate(data as unknown as DuelRow);
     };
-    subRef.current = supabase
+
+    refetch();
+
+    const channel = supabase
       .channel(`duel-${id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'duels', filter: `id=eq.${id}` },
         (payload) => {
           if (payload.eventType === 'DELETE') {
             toast('המשחק הסתיים'); setMode('menu'); setDuel(null); return;
           }
-          // Refetch full row to avoid partial payloads from REPLICA IDENTITY edge cases.
-          refetch();
+
+          const data = payload.new as unknown as DuelRow | null;
+          console.log('Duel State Updated:', data);
+          if (data) applyDuelUpdate(data);
+          else refetch();
         })
-      .subscribe();
-    // Polling fallback in case Realtime is delayed/unavailable
-    const poll = setInterval(refetch, 1500);
-    (subRef.current as any)._poll = poll;
-  }, []);
+      .subscribe((status) => {
+        console.log('Duel realtime status:', status);
+        if (status === 'SUBSCRIBED') refetch();
+      });
+
+    subRef.current = channel;
+    pollRef.current = setInterval(refetch, 1000);
+  }, [applyDuelUpdate, clearDuelWatchers]);
 
   const handleCreate = async () => {
     if (!user) return;
@@ -92,7 +225,7 @@ const Duel = () => {
       .insert({ code, host_id: user.id, status: 'waiting', questions })
       .select().single();
     if (error || !data) { toast.error('יצירת חדר נכשלה'); return; }
-    setDuel(data as unknown as DuelRow); setMode('lobby'); subscribe(data.id);
+    applyDuelUpdate(data as unknown as DuelRow); setMode('lobby'); subscribe(data.id);
   };
 
   const handleJoin = async (codeIn?: string) => {
@@ -103,11 +236,11 @@ const Duel = () => {
     if (!data) { toast.error('חדר לא נמצא'); return; }
     if (data.guest_id && data.guest_id !== user.id) { toast.error('החדר תפוס'); return; }
     if (data.host_id === user.id) {
-      setDuel(data as unknown as DuelRow); setMode(data.status === 'playing' ? 'play' : 'lobby'); subscribe(data.id); return;
+      applyDuelUpdate(data as unknown as DuelRow); setMode(data.status === 'playing' ? 'play' : 'lobby'); subscribe(data.id); return;
     }
     const { data: updated } = await supabase
       .from('duels').update({ guest_id: user.id, status: 'playing' }).eq('id', data.id).select().single();
-    setDuel((updated || data) as unknown as DuelRow); setMode('play'); subscribe(data.id);
+    applyDuelUpdate((updated || data) as unknown as DuelRow); setMode('play'); subscribe(data.id);
   };
 
   // Auto-route lobby → play
@@ -117,47 +250,11 @@ const Duel = () => {
     if (duel.status === 'done') setMode('end');
   }, [duel, mode]);
 
-  // Resolve round: when both answers in for current question.
-  // Either client can adjudicate — first one to see both answers wins the race.
-  // The `resolvingRef` guards against duplicate updates from polling/realtime.
-  const resolvingRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (!duel) return;
-    if (duel.status !== 'playing') return;
-    const q = duel.current_question;
-    if (duel.host_answer?.q !== q || duel.guest_answer?.q !== q) return;
-    if (resolvingRef.current === q) return; // already resolving this round
-    resolvingRef.current = q;
-
-    const correct = duel.questions[q]?.hebrew;
-    const hostRight = duel.host_answer.choice === correct;
-    const guestRight = duel.guest_answer.choice === correct;
-    const next = q + 1;
-    const updates: Partial<DuelRow> = {
-      host_score: duel.host_score + (hostRight ? 1 : 0),
-      guest_score: duel.guest_score + (guestRight ? 1 : 0),
-      host_answer: null,
-      guest_answer: null,
-      current_question: next,
-      status: next >= TOTAL_QUESTIONS ? 'done' : 'playing',
-    };
-    const t = setTimeout(async () => {
-      // Only apply the update if the DB still shows the same round unresolved
-      // (prevents both clients double-applying scores).
-      await supabase
-        .from('duels')
-        .update(updates)
-        .eq('id', duel.id)
-        .eq('current_question', q);
-    }, 1200);
-    return () => clearTimeout(t);
-  }, [duel]);
-
   useEffect(() => () => {
-    const s: any = subRef.current;
-    if (s?._poll) clearInterval(s._poll);
-    subRef.current?.unsubscribe();
-  }, []);
+    clearDuelWatchers();
+    resolveTimersRef.current.forEach(clearTimeout);
+    resolveTimersRef.current = [];
+  }, [clearDuelWatchers]);
 
   // Auto-join via URL param
   useEffect(() => {
@@ -168,13 +265,33 @@ const Duel = () => {
 
   const submitAnswer = async (choice: string) => {
     if (!duel || !user || chosen) return;
+    const field = duel.host_id === user.id ? 'host_answer' : 'guest_answer';
+    const alreadyAnswered = field === 'host_answer'
+      ? duel.host_answer?.q === duel.current_question
+      : duel.guest_answer?.q === duel.current_question;
+    if (alreadyAnswered) return;
+
     haptic(15);
     setChosen(choice);
-    const field = duel.host_id === user.id ? 'host_answer' : 'guest_answer';
-    await supabase.from('duels').update({ [field]: { q: duel.current_question, choice } }).eq('id', duel.id);
+    const { data, error } = await supabase
+      .from('duels')
+      .update({ [field]: { q: duel.current_question, choice } })
+      .eq('id', duel.id)
+      .eq('current_question', duel.current_question)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      console.error('Duel answer submit failed:', error);
+      toast.error('שליחת התשובה נכשלה');
+      setChosen(null);
+      return;
+    }
+
+    if (data) applyDuelUpdate(data as unknown as DuelRow);
   };
 
-  useEffect(() => { setChosen(null); }, [duel?.current_question]);
+  useEffect(() => { setChosen(null); setRoundFeedback(null); }, [duel?.current_question]);
 
   if (!user) { navigate('/auth'); return null; }
 
@@ -183,6 +300,11 @@ const Duel = () => {
   const oppScore = isHost ? duel?.guest_score : duel?.host_score;
   const oppId = isHost ? duel?.guest_id : duel?.host_id;
   const currentQ = duel?.questions?.[duel.current_question];
+  const hostAnsweredCurrent = !!duel && duel.host_answer?.q === duel.current_question;
+  const guestAnsweredCurrent = !!duel && duel.guest_answer?.q === duel.current_question;
+  const bothAnsweredCurrent = hostAnsweredCurrent && guestAnsweredCurrent;
+  const myAnsweredCurrent = isHost ? hostAnsweredCurrent : guestAnsweredCurrent;
+  const waitingForOpponent = !!duel && (!!chosen || myAnsweredCurrent) && !bothAnsweredCurrent && !roundFeedback;
 
   return (
     <PageTransition>
@@ -242,12 +364,28 @@ const Duel = () => {
                 <p className="text-3xl font-display font-bold mb-4">{currentQ.aramaic}</p>
                 <div className="grid grid-cols-1 gap-2">
                   {currentQ.options.map((opt) => (
-                    <Button key={opt} variant={chosen === opt ? 'default' : 'outline'} disabled={!!chosen} onClick={() => submitAnswer(opt)} className="h-12">
+                    <Button
+                      key={opt}
+                      variant={roundFeedback?.q === duel.current_question && opt === roundFeedback.myChoice && !roundFeedback.mineRight ? 'destructive' : chosen === opt || (roundFeedback?.q === duel.current_question && opt === roundFeedback.correct) ? 'default' : 'outline'}
+                      disabled={!!chosen || myAnsweredCurrent || !!roundFeedback}
+                      onClick={() => submitAnswer(opt)}
+                      className="h-12"
+                    >
                       {opt}
                     </Button>
                   ))}
                 </div>
-                {chosen && <p className="text-xs text-muted-foreground mt-3">ממתין ליריב…</p>}
+                {waitingForOpponent && <p className="text-xs text-muted-foreground mt-3">ממתין ליריב…</p>}
+                {roundFeedback?.q === duel.current_question && (
+                  <div className="mt-4 rounded-xl border border-border bg-muted/60 p-3 text-sm space-y-1">
+                    <p className={roundFeedback.mineRight ? 'text-primary font-semibold' : 'text-destructive font-semibold'}>
+                      {roundFeedback.mineRight ? 'ענית נכון!' : `לא נכון · התשובה הנכונה: ${roundFeedback.correct}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {roundFeedback.opponentRight ? 'היריב ענה נכון' : 'היריב טעה'} · עוברים מיד לשאלה הבאה…
+                    </p>
+                  </div>
+                )}
               </motion.div>
             </>
           )}
