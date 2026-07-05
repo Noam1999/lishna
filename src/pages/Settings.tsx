@@ -54,6 +54,11 @@ const Settings = () => {
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
+  const [hapticOn, setHapticOn] = useState<boolean>(() => isHapticEnabled());
+
+  useEffect(() => {
+    setHapticEnabled(hapticOn);
+  }, [hapticOn]);
 
   const rank = getRank(profile?.points || 0);
 
