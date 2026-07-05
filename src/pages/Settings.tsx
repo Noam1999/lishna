@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Vibrate } from 'lucide-react';
+import { isHapticEnabled, setHapticEnabled, haptic } from '@/lib/haptics';
 import { ArrowRight, Sun, Moon, Trophy, BookOpen, MessageCircle, Send, Bug, Lightbulb, MessageSquare } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -52,6 +54,11 @@ const Settings = () => {
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
+  const [hapticOn, setHapticOn] = useState<boolean>(() => isHapticEnabled());
+
+  useEffect(() => {
+    setHapticEnabled(hapticOn);
+  }, [hapticOn]);
 
   const rank = getRank(profile?.points || 0);
 
@@ -122,6 +129,31 @@ const Settings = () => {
 
           {/* Push Notifications */}
           <NotificationSettings />
+
+          {/* Haptic Feedback Toggle */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border">
+            <div className="flex items-center justify-between">
+              <Switch
+                checked={hapticOn}
+                onCheckedChange={(v) => {
+                  setHapticOn(v);
+                  if (v) {
+                    // Give a small confirmation buzz when enabling
+                    setTimeout(() => haptic(15), 0);
+                  }
+                }}
+              />
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <h3 className="font-semibold text-foreground">רטט מגע</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {hapticOn ? 'רטט קל בכל לחיצה' : 'הרטט כבוי'}
+                  </p>
+                </div>
+                <Vibrate className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* User Stats Section */}
