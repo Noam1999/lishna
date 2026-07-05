@@ -255,9 +255,11 @@ const Quiz = () => {
       {/* Progress Bar */}
       <div className="px-6 mb-8">
         <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-l from-primary to-primary/70 rounded-full transition-all duration-500"
-            style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+          <motion.div
+            className="h-full bg-gradient-to-l from-primary to-primary/70 rounded-full"
+            initial={false}
+            animate={{ width: `${((currentQuestion + (showResult ? 1 : 0)) / questions.length) * 100}%` }}
+            transition={{ type: 'spring', stiffness: 120, damping: 20 }}
           />
         </div>
       </div>
