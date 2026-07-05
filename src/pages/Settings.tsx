@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Vibrate } from 'lucide-react';
+import { isHapticEnabled, setHapticEnabled, haptic } from '@/lib/haptics';
 import { ArrowRight, Sun, Moon, Trophy, BookOpen, MessageCircle, Send, Bug, Lightbulb, MessageSquare } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
