@@ -117,25 +117,41 @@ const Duel = () => {
     if (duel.status === 'done') setMode('end');
   }, [duel, mode]);
 
-  // Resolve round: when both answers in for current question
+  // Resolve round: when both answers in for current question.
+  // Either client can adjudicate — first one to see both answers wins the race.
+  // The `resolvingRef` guards against duplicate updates from polling/realtime.
+  const resolvingRef = useRef<number | null>(null);
   useEffect(() => {
-    if (!duel || !user || duel.host_id !== user.id) return; // host adjudicates
+    if (!duel) return;
     if (duel.status !== 'playing') return;
-    if (duel.host_answer?.q === duel.current_question && duel.guest_answer?.q === duel.current_question) {
-      const correct = duel.questions[duel.current_question]?.hebrew;
-      const hostRight = duel.host_answer.choice === correct;
-      const guestRight = duel.guest_answer.choice === correct;
-      const next = duel.current_question + 1;
-      const updates: Partial<DuelRow> = {
-        host_score: duel.host_score + (hostRight ? 1 : 0),
-        guest_score: duel.guest_score + (guestRight ? 1 : 0),
-        host_answer: null, guest_answer: null,
-        current_question: next,
-        status: next >= TOTAL_QUESTIONS ? 'done' : 'playing',
-      };
-      setTimeout(() => { supabase.from('duels').update(updates).eq('id', duel.id); }, 1200);
-    }
-  }, [duel, user]);
+    const q = duel.current_question;
+    if (duel.host_answer?.q !== q || duel.guest_answer?.q !== q) return;
+    if (resolvingRef.current === q) return; // already resolving this round
+    resolvingRef.current = q;
+
+    const correct = duel.questions[q]?.hebrew;
+    const hostRight = duel.host_answer.choice === correct;
+    const guestRight = duel.guest_answer.choice === correct;
+    const next = q + 1;
+    const updates: Partial<DuelRow> = {
+      host_score: duel.host_score + (hostRight ? 1 : 0),
+      guest_score: duel.guest_score + (guestRight ? 1 : 0),
+      host_answer: null,
+      guest_answer: null,
+      current_question: next,
+      status: next >= TOTAL_QUESTIONS ? 'done' : 'playing',
+    };
+    const t = setTimeout(async () => {
+      // Only apply the update if the DB still shows the same round unresolved
+      // (prevents both clients double-applying scores).
+      await supabase
+        .from('duels')
+        .update(updates)
+        .eq('id', duel.id)
+        .eq('current_question', q);
+    }, 1200);
+    return () => clearTimeout(t);
+  }, [duel]);
 
   useEffect(() => () => {
     const s: any = subRef.current;
