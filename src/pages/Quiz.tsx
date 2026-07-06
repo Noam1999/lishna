@@ -111,6 +111,8 @@ const Quiz = () => {
     setSelectedAnswer(answer);
     setShowResult(true);
     setIsCorrect(correct);
+    if (correct) sfxCorrect(); else sfxIncorrect();
+
 
     if (correct) {
       setQuizScore((prev) => prev + 1);
