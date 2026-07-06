@@ -11,6 +11,7 @@ import UserAvatar from '@/components/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDictionary } from '@/contexts/DictionaryContext';
 import { haptic } from '@/lib/haptics';
+import { sfxCorrect, sfxIncorrect, startDuelBgm, stopDuelBgm } from '@/lib/audio';
 
 const genCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
