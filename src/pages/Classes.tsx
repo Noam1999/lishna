@@ -227,15 +227,33 @@ const Classes = () => {
         </section>
       </div>
 
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) { setName(''); setAccessCode(''); setAccessErr(''); } }}>
         <DialogContent dir="rtl">
           <DialogHeader><DialogTitle>צור כיתה חדשה</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="שם הכיתה (לדוגמה: כיתה ז-1)" />
-            <Button onClick={handleCreate} disabled={busy || !name.trim()} className="w-full">צור כיתה</Button>
+            <Input
+              value={accessCode}
+              onChange={(e) => { setAccessCode(e.target.value); setAccessErr(''); }}
+              placeholder="קוד גישה"
+              type="password"
+              inputMode="numeric"
+              className="text-center font-mono"
+            />
+            {accessErr && (
+              <motion.p
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-destructive text-center bg-destructive/10 rounded-lg p-2"
+              >
+                {accessErr}
+              </motion.p>
+            )}
+            <Button onClick={handleCreate} disabled={busy || !name.trim() || !accessCode.trim()} className="w-full">צור כיתה</Button>
           </div>
         </DialogContent>
       </Dialog>
+
 
       <Dialog open={teacherModalOpen} onOpenChange={(o) => { setTeacherModalOpen(o); if (!o) { setTeacherCode(''); setTeacherErr(''); } }}>
         <DialogContent dir="rtl" className="max-w-sm">
