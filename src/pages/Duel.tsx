@@ -11,6 +11,7 @@ import UserAvatar from '@/components/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDictionary } from '@/contexts/DictionaryContext';
 import { haptic } from '@/lib/haptics';
+import { sfxCorrect, sfxIncorrect, startDuelBgm, stopDuelBgm } from '@/lib/audio';
 
 const genCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -179,6 +180,22 @@ const Duel = () => {
   useEffect(() => {
     applyDuelUpdateRef.current = applyDuelUpdate;
   }, [applyDuelUpdate]);
+
+  // Duel background music: start on play, stop on end/leave
+  useEffect(() => {
+    if (mode === 'play') startDuelBgm();
+    else stopDuelBgm();
+    return () => stopDuelBgm();
+  }, [mode]);
+
+  // Play correct/incorrect SFX once per resolved round
+  const lastSfxRoundRef = useRef<number>(-1);
+  useEffect(() => {
+    if (!roundFeedback) return;
+    if (lastSfxRoundRef.current === roundFeedback.q) return;
+    lastSfxRoundRef.current = roundFeedback.q;
+    if (roundFeedback.mineRight) sfxCorrect(); else sfxIncorrect();
+  }, [roundFeedback]);
 
   const subscribe = useCallback((id: string) => {
     clearDuelWatchers();

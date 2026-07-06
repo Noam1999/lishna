@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { sfxCoin } from '@/lib/audio';
 
 type FlightItem = { id: number; icon: string; targetId: string; x: number; y: number };
 
@@ -38,6 +39,7 @@ const RewardFlight = () => {
         y: targetY - window.innerHeight / 2 + (Math.random() - 0.5) * 40,
       }));
       setItems((prev) => [...prev, ...newItems]);
+      sfxCoin();
       const ids = newItems.map((n) => n.id);
       setTimeout(() => setItems((prev) => prev.filter((p) => !ids.includes(p.id))), 1300);
     };
