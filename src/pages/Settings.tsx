@@ -160,7 +160,30 @@ const Settings = () => {
               </div>
             </div>
           </div>
+
+          {/* Audio & Music Toggle */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border">
+            <div className="flex items-center justify-between">
+              <Switch
+                checked={audioOn}
+                onCheckedChange={(v) => {
+                  setAudioOn(v);
+                  if (v) setTimeout(() => sfxCoin(), 0);
+                }}
+              />
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <h3 className="font-semibold text-foreground">אפקטים קוליים ומוזיקה</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {audioOn ? 'צלילים ומוזיקה מופעלים' : 'הצלילים כבויים'}
+                  </p>
+                </div>
+                <Volume2 className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+          </div>
         </div>
+
 
         {/* User Stats Section */}
         <div className="space-y-4">
