@@ -90,7 +90,7 @@ const Classes = () => {
           .select().single();
         if (!error && data) {
           toast.success('הכיתה נוצרה!');
-          setCreateOpen(false); setName('');
+          setCreateOpen(false); setName(''); setAccessCode(''); setAccessErr('');
           refresh();
           return;
         }
