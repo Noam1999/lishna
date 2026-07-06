@@ -75,6 +75,11 @@ const Classes = () => {
 
   const handleCreate = async () => {
     if (!user || !name.trim()) return;
+    if (accessCode.trim() !== '8080') {
+      setAccessErr('קוד גישה שגוי. יצירת כיתה מורשית למורים בלבד.');
+      return;
+    }
+    setAccessErr('');
     setBusy(true);
     try {
       for (let i = 0; i < 5; i++) {
