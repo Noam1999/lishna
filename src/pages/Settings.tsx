@@ -56,10 +56,15 @@ const Settings = () => {
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
   const [hapticOn, setHapticOn] = useState<boolean>(() => isHapticEnabled());
+  const [audioOn, setAudioOn] = useState<boolean>(() => isAudioEnabled());
 
   useEffect(() => {
     setHapticEnabled(hapticOn);
   }, [hapticOn]);
+
+  useEffect(() => {
+    setAudioEnabled(audioOn);
+  }, [audioOn]);
 
   const rank = getRank(profile?.points || 0);
 
