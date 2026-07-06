@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserWords } from '@/hooks/useUserWords';
 import { haptic } from '@/lib/haptics';
+import { sfxCorrect, sfxIncorrect } from '@/lib/audio';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useAchievements } from '@/hooks/useAchievements';
 import { useDailyQuests } from '@/hooks/useDailyQuests';
