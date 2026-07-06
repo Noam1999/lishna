@@ -23,6 +23,8 @@ const Classes = () => {
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
+  const [accessCode, setAccessCode] = useState('');
+  const [accessErr, setAccessErr] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [teacherModalOpen, setTeacherModalOpen] = useState(false);
