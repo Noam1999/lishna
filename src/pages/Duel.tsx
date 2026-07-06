@@ -181,6 +181,22 @@ const Duel = () => {
     applyDuelUpdateRef.current = applyDuelUpdate;
   }, [applyDuelUpdate]);
 
+  // Duel background music: start on play, stop on end/leave
+  useEffect(() => {
+    if (mode === 'play') startDuelBgm();
+    else stopDuelBgm();
+    return () => stopDuelBgm();
+  }, [mode]);
+
+  // Play correct/incorrect SFX once per resolved round
+  const lastSfxRoundRef = useRef<number>(-1);
+  useEffect(() => {
+    if (!roundFeedback) return;
+    if (lastSfxRoundRef.current === roundFeedback.q) return;
+    lastSfxRoundRef.current = roundFeedback.q;
+    if (roundFeedback.mineRight) sfxCorrect(); else sfxIncorrect();
+  }, [roundFeedback]);
+
   const subscribe = useCallback((id: string) => {
     clearDuelWatchers();
 
