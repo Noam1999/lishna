@@ -39,6 +39,7 @@ const RewardFlight = () => {
         y: targetY - window.innerHeight / 2 + (Math.random() - 0.5) * 40,
       }));
       setItems((prev) => [...prev, ...newItems]);
+      sfxCoin();
       const ids = newItems.map((n) => n.id);
       setTimeout(() => setItems((prev) => prev.filter((p) => !ids.includes(p.id))), 1300);
     };
