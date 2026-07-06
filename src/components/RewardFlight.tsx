@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { sfxCoin } from '@/lib/audio';
 
 type FlightItem = { id: number; icon: string; targetId: string; x: number; y: number };
 
