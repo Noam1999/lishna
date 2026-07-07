@@ -143,11 +143,27 @@ const Auth = () => {
     setIsLoading(false);
   };
 
-  const handleSocialLogin = (provider: string) => {
-    toast({
-      title: `התחברות באמצעות ${provider}`,
-      description: 'בקרוב...',
-    });
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast({
+          title: 'שגיאה',
+          description: 'שגיאה בהתחברות עם גוגל',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (result.redirected) return;
+      navigate('/');
+    } catch {
+      toast({ title: 'שגיאה', description: 'שגיאה בהתחברות עם גוגל', variant: 'destructive' });
+    }
+    setIsLoading(false);
   };
 
   return (
