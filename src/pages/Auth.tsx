@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
 import { toast as sonnerToast } from 'sonner';
 import ForgotPasswordDialog from '@/components/ForgotPasswordDialog';
+import LegalDialog, { type LegalDoc } from '@/components/LegalDialog';
 import { lovable } from '@/integrations/lovable';
 
 type AuthMode = 'login' | 'register';
@@ -25,6 +26,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
+  const [legalDoc, setLegalDoc] = useState<LegalDoc | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -331,10 +333,15 @@ const Auth = () => {
         {/* Terms */}
         <p className="text-center text-xs text-muted-foreground mt-6 mb-8">
           בהתחברות/הרשמה אתה מסכים ל
-          <button onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-primary hover:underline mx-1">תנאי השימוש</button>
+          <button type="button" onClick={() => setLegalDoc('terms')} className="text-primary hover:underline mx-1">תנאי השימוש</button>
           ול
-          <button onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-primary hover:underline mx-1">מדיניות הפרטיות</button>
+          <button type="button" onClick={() => setLegalDoc('privacy')} className="text-primary hover:underline mx-1">מדיניות הפרטיות</button>
         </p>
+        <LegalDialog
+          open={legalDoc !== null}
+          onOpenChange={(v) => { if (!v) setLegalDoc(null); }}
+          doc={legalDoc ?? 'terms'}
+        />
       </div>
     </div>
   );
