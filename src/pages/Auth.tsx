@@ -333,10 +333,15 @@ const Auth = () => {
         {/* Terms */}
         <p className="text-center text-xs text-muted-foreground mt-6 mb-8">
           בהתחברות/הרשמה אתה מסכים ל
-          <button onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-primary hover:underline mx-1">תנאי השימוש</button>
+          <button type="button" onClick={() => setLegalDoc('terms')} className="text-primary hover:underline mx-1">תנאי השימוש</button>
           ול
-          <button onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-primary hover:underline mx-1">מדיניות הפרטיות</button>
+          <button type="button" onClick={() => setLegalDoc('privacy')} className="text-primary hover:underline mx-1">מדיניות הפרטיות</button>
         </p>
+        <LegalDialog
+          open={legalDoc !== null}
+          onOpenChange={(v) => { if (!v) setLegalDoc(null); }}
+          doc={legalDoc ?? 'terms'}
+        />
       </div>
     </div>
   );
