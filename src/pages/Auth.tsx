@@ -279,9 +279,9 @@ const Auth = () => {
 
           {mode === 'login' && (
             <div className="text-left">
-              <button type="button" onClick={() => setForgotOpen(true)} className="text-sm text-primary hover:underline">
+              <span className="text-sm text-muted-foreground cursor-not-allowed opacity-60">
                 שכחת סיסמה?
-              </button>
+              </span>
             </div>
           )}
 
@@ -310,9 +310,8 @@ const Auth = () => {
         <div className="space-y-3">
           <button
             type="button"
-            onClick={handleGoogleLogin}
-            disabled={isLoading}
-            className="w-full h-12 bg-card hover:bg-muted border border-border rounded-xl flex items-center justify-center gap-3 transition-colors shadow-soft disabled:opacity-60"
+            disabled
+            className="w-full h-12 bg-card border border-border rounded-xl flex items-center justify-center gap-2 transition-colors shadow-soft opacity-60 cursor-not-allowed"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.44c-.28 1.48-1.12 2.73-2.39 3.58v2.98h3.86c2.26-2.09 3.58-5.17 3.58-8.8z"/>
@@ -321,6 +320,9 @@ const Auth = () => {
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z"/>
             </svg>
             <span className="text-foreground font-medium">התחברות באמצעות גוגל</span>
+            <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full border border-border">
+              בקרוב
+            </span>
           </button>
         </div>
 
