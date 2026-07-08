@@ -38,6 +38,9 @@ const PrivacyContent = () => (
     </section>
     <p className="pt-2 border-t border-border text-muted-foreground">
       לפניות: <a href="mailto:playcom1999@gmail.com" className="text-primary underline">playcom1999@gmail.com</a>
+      <br />
+      <br />
+      ט.ל.ח — החברה יכולה לשנות את מדיניות הפרטיות או את תנאי השימוש בכל עת.
     </p>
   </div>
 );
