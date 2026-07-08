@@ -330,7 +330,7 @@ const Auth = () => {
 
         {/* Terms */}
         <p className="text-center text-xs text-muted-foreground mt-6 mb-8">
-          בהתחברות אתה מסכים ל
+          בהתחברות/הרשמה אתה מסכים ל
           <button onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-primary hover:underline mx-1">תנאי השימוש</button>
           ול
           <button onClick={() => sonnerToast('בקרוב! אנחנו עובדים על זה 🚧')} className="text-primary hover:underline mx-1">מדיניות הפרטיות</button>
