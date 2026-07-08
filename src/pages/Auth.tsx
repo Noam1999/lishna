@@ -26,6 +26,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
+  const [legalDoc, setLegalDoc] = useState<LegalDoc | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
