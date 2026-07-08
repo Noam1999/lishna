@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
 import { toast as sonnerToast } from 'sonner';
 import ForgotPasswordDialog from '@/components/ForgotPasswordDialog';
+import LegalDialog, { type LegalDoc } from '@/components/LegalDialog';
 import { lovable } from '@/integrations/lovable';
 
 type AuthMode = 'login' | 'register';
