@@ -188,7 +188,7 @@ const Auth = () => {
           </div>
           
           <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-            לִישָׁנָא דְּאוֹרַיְיתָא
+            לִישָׁנָא&nbsp;
           </h1>
           <p className="text-muted-foreground text-sm">
             שער לשפת התלמוד הבבלי
