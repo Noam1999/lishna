@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import PageTransition from '@/components/PageTransition';
+import { sendPushTo } from '@/lib/push';
 
 type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string };
 type Profile = { user_id: string; display_name: string | null };
