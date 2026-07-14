@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { enableWebPush, disableWebPush, maybeAutoEnable } from '@/lib/push';
 
 const isPreview = () => {
   if (typeof window === 'undefined') return true;
@@ -22,16 +23,21 @@ export const useNotifications = () => {
     notificationsSupported() ? Notification.permission : 'default'
   );
 
-  // Register SW only in production / installed PWA contexts.
+  // Register SW + auto re-subscribe when permission already granted.
   useEffect(() => {
     if (!notificationsSupported() || isPreview()) return;
     navigator.serviceWorker.register('/sw.js').catch(() => {});
+    maybeAutoEnable().catch(() => {});
   }, []);
 
   const requestPermission = useCallback(async () => {
     if (!notificationsSupported()) return 'denied' as NotificationPermission;
     const p = await Notification.requestPermission();
     setPermission(p);
+    if (p === 'granted' && !isPreview()) {
+      try { localStorage.removeItem('lishna:webpush:optout'); } catch {}
+      enableWebPush().catch(() => {});
+    }
     return p;
   }, []);
 
@@ -47,5 +53,11 @@ export const useNotifications = () => {
     } catch {}
   }, []);
 
-  return { permission, requestPermission, notify, supported: notificationsSupported() };
+  const unsubscribePush = useCallback(async () => {
+    try { localStorage.setItem('lishna:webpush:optout', '1'); } catch {}
+    await disableWebPush();
+  }, []);
+
+  return { permission, requestPermission, notify, unsubscribePush, supported: notificationsSupported() };
 };
+
