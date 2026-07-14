@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import PageTransition from '@/components/PageTransition';
+import { sendPushTo } from '@/lib/push';
 
 type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string };
 type Profile = { user_id: string; display_name: string | null };
@@ -111,8 +112,13 @@ const Chat = () => {
     }
     const { error } = await supabase.from('direct_messages').insert({ sender_id: user.id, recipient_id: userId, body: text });
     if (error) return toast.error('שליחה נכשלה');
+    // Fire-and-forget push to recipient
+    const { data: me } = await supabase.from('profiles').select('display_name').eq('user_id', user.id).maybeSingle();
+    const senderName = (me as { display_name: string | null } | null)?.display_name || 'מישהו';
+    sendPushTo([userId], `הודעה חדשה מ${senderName} 💬`, text.slice(0, 120), `/chat?u=${userId}`);
     setBody('');
   };
+
 
   return (
     <PageTransition>

@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import WordManager from './WordManager';
 import SiteStats from './SiteStats';
+import { sendPushTo } from '@/lib/push';
 
 type UserOption = { user_id: string; display_name: string | null; username: string | null };
 
@@ -67,12 +68,14 @@ const AdminPanel = () => {
           body: `קיבלת מתנה: ${coinsNum ? `${coinsNum} מטבעות` : ''}${coinsNum && diamondsNum ? ' ו-' : ''}${diamondsNum ? `${diamondsNum} יהלומים` : ''}. לחץ על "קבל" כדי להוסיף ליתרה שלך.`,
           meta: { coins: coinsNum, diamonds: diamondsNum, claimed: false },
         });
+        sendPushTo([uid], 'מתנה ממתינה לך! 🎁', 'פתח את תיבת הדואר כדי לקבל את הפרס שלך', '/inbox');
       }
       if (mailTitle.trim() && mailBody.trim()) {
         await supabase.from('system_mail').insert({
           recipient_id: uid, sender_id: user.id, kind: 'system',
           title: mailTitle.trim(), body: mailBody.trim(),
         });
+        sendPushTo([uid], mailTitle.trim(), mailBody.trim().slice(0, 120), '/inbox');
       }
       toast.success('נשלח בהצלחה');
       setTargetUserId(''); setCoins(''); setDiamonds(''); setMailTitle(''); setMailBody('');
@@ -173,6 +176,10 @@ const AdminPanel = () => {
             }]);
             if (error) toast.error('שליחה נכשלה'); else {
               toast.success('עדכון פורסם לכולם');
+              // Push broadcast to all users
+              const { data: allUsers } = await supabase.from('profiles').select('user_id');
+              const ids = (allUsers as { user_id: string }[] | null)?.map(x => x.user_id) || [];
+              if (ids.length) sendPushTo(ids, `✨ ${title}`, (body || 'חדש בלישנא!').slice(0, 120), '/');
               (document.getElementById('sys-title') as HTMLInputElement).value = '';
               (document.getElementById('sys-body') as HTMLTextAreaElement).value = '';
             }
