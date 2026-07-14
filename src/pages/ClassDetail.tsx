@@ -38,7 +38,12 @@ const ClassTeacherTools = ({ classId, initialForbidden }: { classId: string; ini
     const { error } = await supabase.from('class_mail').insert({
       class_id: classId, teacher_id: u.user.id, subject: subject.trim() || null, body: body.trim(),
     });
-    error ? toast.error('שליחה נכשלה') : (toast.success('דואר נשלח לכיתה'), setSubject(''), setBody(''));
+    if (error) { toast.error('שליחה נכשלה'); return; }
+    toast.success('דואר נשלח לכיתה'); setSubject(''); setBody('');
+    // Push to all class members
+    const { data: members } = await supabase.from('class_members').select('student_id').eq('class_id', classId);
+    const ids = (members as { student_id: string }[] | null)?.map(m => m.student_id) || [];
+    if (ids.length) sendPushTo(ids, `דואר חדש מהמורה ✉️`, (subject.trim() || body.trim()).slice(0, 120), '/inbox');
   };
 
   return (
