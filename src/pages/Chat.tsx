@@ -111,8 +111,13 @@ const Chat = () => {
     }
     const { error } = await supabase.from('direct_messages').insert({ sender_id: user.id, recipient_id: userId, body: text });
     if (error) return toast.error('שליחה נכשלה');
+    // Fire-and-forget push to recipient
+    const { data: me } = await supabase.from('profiles').select('display_name').eq('user_id', user.id).maybeSingle();
+    const senderName = (me as { display_name: string | null } | null)?.display_name || 'מישהו';
+    sendPushTo([userId], `הודעה חדשה מ${senderName} 💬`, text.slice(0, 120), `/chat?u=${userId}`);
     setBody('');
   };
+
 
   return (
     <PageTransition>
