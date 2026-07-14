@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDictionary, removeNiqqud } from '@/contexts/DictionaryContext';
 import PageTransition from '@/components/PageTransition';
 import PublicProfileDialog from '@/components/PublicProfileDialog';
+import { sendPushTo } from '@/lib/push';
 
 interface ClassRow { id: string; name: string; class_code: string; teacher_id: string; forbidden_words?: string[]; }
 
