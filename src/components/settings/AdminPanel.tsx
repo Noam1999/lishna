@@ -68,12 +68,14 @@ const AdminPanel = () => {
           body: `קיבלת מתנה: ${coinsNum ? `${coinsNum} מטבעות` : ''}${coinsNum && diamondsNum ? ' ו-' : ''}${diamondsNum ? `${diamondsNum} יהלומים` : ''}. לחץ על "קבל" כדי להוסיף ליתרה שלך.`,
           meta: { coins: coinsNum, diamonds: diamondsNum, claimed: false },
         });
+        sendPushTo([uid], 'מתנה ממתינה לך! 🎁', 'פתח את תיבת הדואר כדי לקבל את הפרס שלך', '/inbox');
       }
       if (mailTitle.trim() && mailBody.trim()) {
         await supabase.from('system_mail').insert({
           recipient_id: uid, sender_id: user.id, kind: 'system',
           title: mailTitle.trim(), body: mailBody.trim(),
         });
+        sendPushTo([uid], mailTitle.trim(), mailBody.trim().slice(0, 120), '/inbox');
       }
       toast.success('נשלח בהצלחה');
       setTargetUserId(''); setCoins(''); setDiamonds(''); setMailTitle(''); setMailBody('');
