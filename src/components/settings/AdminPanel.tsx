@@ -176,6 +176,10 @@ const AdminPanel = () => {
             }]);
             if (error) toast.error('שליחה נכשלה'); else {
               toast.success('עדכון פורסם לכולם');
+              // Push broadcast to all users
+              const { data: allUsers } = await supabase.from('profiles').select('user_id');
+              const ids = (allUsers as { user_id: string }[] | null)?.map(x => x.user_id) || [];
+              if (ids.length) sendPushTo(ids, `✨ ${title}`, (body || 'חדש בלישנא!').slice(0, 120), '/');
               (document.getElementById('sys-title') as HTMLInputElement).value = '';
               (document.getElementById('sys-body') as HTMLTextAreaElement).value = '';
             }
