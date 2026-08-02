@@ -221,6 +221,31 @@ const Home = () => {
             <p className="text-sm font-medium text-primary mb-1">ארמית. פשוט להבין.</p>
             <p className="text-muted-foreground text-xs max-w-xs mx-auto">המפתח שלך לשפת הגמרא אצלכם בכיס! למדו ארמית עם תחרויות ומשימות יומיות.</p>
           </div>
+
+          {/* Experiential Learning — signature floating orb */}
+          <div className="flex justify-center mt-8">
+            <Link
+              to="/experiential"
+              aria-label="לימוד חווייתי"
+              className="group relative flex flex-col items-center"
+            >
+              <span className="absolute top-1 w-28 h-28 rounded-full bg-primary/20 blur-2xl animate-pulse" />
+              <span className="absolute top-0 w-[7.5rem] h-[7.5rem] rounded-full border border-primary/30 [animation:spin_14s_linear_infinite]"
+                style={{ borderStyle: 'dashed' }} />
+              <span className="relative w-28 h-28 rounded-full bg-gradient-to-br from-primary via-teal-500 to-amber-400 p-[2px] shadow-elegant transition-transform duration-500 group-hover:scale-105 group-active:scale-95">
+                <span className="w-full h-full rounded-full bg-card/95 backdrop-blur-sm flex flex-col items-center justify-center gap-1 text-center">
+                  <span className="text-2xl leading-none">📜</span>
+                  <span className="font-display text-[13px] font-bold text-foreground leading-tight px-2">
+                    לימוד<br />חווייתי
+                  </span>
+                </span>
+              </span>
+              <span className="mt-3 text-[11px] font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                דף גמרא אינטראקטיבי · חדש ✨
+              </span>
+            </Link>
+          </div>
+
         </div>
       </div>
 
