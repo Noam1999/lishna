@@ -36,6 +36,7 @@ import Inbox from "./pages/Inbox";
 import Wardrobe from "./pages/Wardrobe";
 import Duel from "./pages/Duel";
 import Pass from "./pages/Pass";
+import Experiential from "./pages/Experiential";
 import RewardFlight from "./components/RewardFlight";
 import NotificationPrompt from "./components/NotificationPrompt";
 
