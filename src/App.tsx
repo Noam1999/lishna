@@ -72,7 +72,9 @@ const AnimatedRoutes = () => {
         <Route path="/duel" element={<Duel />} />
         <Route path="/duel/:code" element={<Duel />} />
         <Route path="/pass" element={<Pass />} />
+        <Route path="/experiential" element={<Experiential />} />
         <Route path="*" element={<NotFound />} />
+
       </Routes>
     </AnimatePresence>
   );
