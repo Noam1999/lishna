@@ -1,7 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Volume2, Star, Sparkles, Film, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import {
+  ArrowRight,
+  Volume2,
+  Star,
+  Sparkles,
+  Film,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  BookOpen,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
 import Footer from '@/components/Footer';
@@ -9,14 +21,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { SEDARIM, type GlossWord } from '@/data/experiential';
-import { removeNiqqud, useDictionary } from '@/contexts/DictionaryContext';
+import { SEDARIM, type GlossWord, type QuizQuestion } from '@/data/experiential';
+import { SHAS, dapimOf, findMasechet, gematria } from '@/data/shas';
+import { fetchSefariaAmud } from '@/lib/sefaria';
+import { removeNiqqud, useDictionary, type DictionaryWord } from '@/contexts/DictionaryContext';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAudioEnabled, sfxCorrect, sfxIncorrect } from '@/lib/audio';
 import { haptic } from '@/lib/haptics';
 
 const PERSONAL_KEY = 'lishna:personal-dict';
+const PREFIXES = ['ו', 'ד', 'ב', 'כ', 'ל', 'מ', 'ש', 'ה', 'ו'];
 
 const speak = (word: string) => {
   if (!isAudioEnabled()) {
@@ -36,18 +51,47 @@ const speak = (word: string) => {
   }
 };
 
+/** Curated demo content for Berakhot 2a (fallback + enriched quiz) */
+const berakhotAmud = SEDARIM[0].masechtot[0].dapim[0].amudim[0];
+
+interface MatchedWord {
+  entry: DictionaryWord;
+  /** the exact token as it appears in the text */
+  token: string;
+}
+
 const WordChip = ({
-  gloss,
+  token,
+  match,
   studyMode,
   onSave,
   saved,
 }: {
-  gloss: GlossWord;
+  token: string;
+  match?: MatchedWord;
   studyMode: boolean;
   onSave: (g: GlossWord) => void;
   saved: boolean;
 }) => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  if (!match) {
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <span role="button" tabIndex={0} className="cursor-default rounded-sm outline-none">
+            {token}
+          </span>
+        </PopoverTrigger>
+        <PopoverContent side="top" align="center" className="w-56 text-right text-xs text-muted-foreground">
+          מילה זו תתווסף למילון האתר בהמשך 📝
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  const { entry } = match;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -56,14 +100,14 @@ const WordChip = ({
           type="button"
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
-          aria-label={`${gloss.word} — ${gloss.hebrew}`}
+          aria-label={`${token} — ${entry.hebrew}`}
           className={`rounded-md px-0.5 -mx-0.5 transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-ring ${
             studyMode
               ? 'bg-yellow-100 dark:bg-yellow-500/25 decoration-primary/40 underline decoration-dotted underline-offset-4'
               : 'hover:bg-yellow-100 dark:hover:bg-yellow-500/25'
           }`}
         >
-          {gloss.word}
+          {token}
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -73,28 +117,36 @@ const WordChip = ({
         onMouseLeave={() => setOpen(false)}
         className="w-64 text-right"
       >
-        <p className="font-display text-lg font-bold text-foreground">{gloss.word}</p>
-        <p className="text-primary font-semibold text-sm mt-0.5">{gloss.hebrew}</p>
-        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{gloss.context}</p>
-        <div className="flex items-center gap-2 mt-3">
+        <p className="font-display text-lg font-bold text-foreground">{entry.aramaic}</p>
+        <p className="text-primary font-semibold text-sm mt-0.5">{entry.hebrew}</p>
+        {entry.culturalContext && (
+          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{entry.culturalContext}</p>
+        )}
+        <div className="flex flex-wrap items-center gap-2 mt-3">
           <button
-            onClick={() => speak(gloss.word)}
+            onClick={() => speak(entry.aramaic)}
             className="flex items-center gap-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-full px-3 py-1.5 hover:bg-secondary/70 transition-colors"
             aria-label="השמעת המילה"
           >
-            <Volume2 className="w-3.5 h-3.5" /> השמע
+            <Volume2 className="w-3.5 h-3.5" /> השמע 🔊
           </button>
           <button
-            onClick={() => onSave(gloss)}
+            onClick={() =>
+              onSave({ word: entry.aramaic, hebrew: entry.hebrew, context: entry.culturalContext })
+            }
             className={`flex items-center gap-1 text-xs font-medium rounded-full px-3 py-1.5 transition-colors ${
-              saved
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-accent text-accent-foreground hover:bg-accent/70'
+              saved ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground hover:bg-accent/70'
             }`}
             aria-label="שמור למילון אישי"
           >
             <Star className={`w-3.5 h-3.5 ${saved ? 'fill-current' : ''}`} />
             {saved ? 'נשמר' : 'שמור'}
+          </button>
+          <button
+            onClick={() => navigate(`/translator?q=${encodeURIComponent(entry.aramaic)}`)}
+            className="flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary rounded-full px-3 py-1.5 hover:bg-primary/20 transition-colors w-full justify-center"
+          >
+            <BookOpen className="w-3.5 h-3.5" /> לצפייה במילון האתר 📖
           </button>
         </div>
       </PopoverContent>
@@ -107,17 +159,14 @@ const Experiential = () => {
   const { dictionary } = useDictionary();
   const { markWordAsLearned } = useUserWords();
 
-  const [sederId, setSederId] = useState(SEDARIM[0].id);
-  const seder = SEDARIM.find((s) => s.id === sederId) ?? SEDARIM[0];
+  const [sederId, setSederId] = useState('zeraim');
+  const [masechetId, setMasechetId] = useState('berakhot');
+  const [dafId, setDafId] = useState('2');
+  const [amudId, setAmudId] = useState<'a' | 'b'>('a');
 
-  const [masechetId, setMasechetId] = useState(seder.masechtot[0].id);
-  const masechet = seder.masechtot.find((m) => m.id === masechetId) ?? seder.masechtot[0];
-
-  const [dafId, setDafId] = useState(masechet.dapim[0].id);
-  const daf = masechet.dapim.find((d) => d.id === dafId) ?? masechet.dapim[0];
-
-  const [amudId, setAmudId] = useState(daf.amudim[0].id);
-  const amud = daf.amudim.find((a) => a.id === amudId) ?? daf.amudim[0];
+  const seder = SHAS.find((s) => s.id === sederId) ?? SHAS[0];
+  const { masechet } = findMasechet(sederId, masechetId);
+  const dapim = useMemo(() => dapimOf(masechet), [masechet]);
 
   const [studyMode, setStudyMode] = useState(true);
   const [saved, setSaved] = useState<string[]>(() => {
@@ -128,18 +177,107 @@ const Experiential = () => {
     }
   });
 
-  // Keep the cascading selectors valid
+  // Keep cascading selectors valid
   useEffect(() => {
-    if (!seder.masechtot.some((m) => m.id === masechetId)) setMasechetId(seder.masechtot[0].id);
+    if (!seder.masechtot.some((x) => x.id === masechetId)) setMasechetId(seder.masechtot[0].id);
   }, [sederId]);
   useEffect(() => {
-    if (!masechet.dapim.some((d) => d.id === dafId)) setDafId(masechet.dapim[0].id);
+    if (!dapim.some((d) => d.id === dafId)) setDafId(dapim[0]?.id ?? '2');
   }, [masechetId]);
-  useEffect(() => {
-    if (!daf.amudim.some((a) => a.id === amudId)) setAmudId(daf.amudim[0].id);
-  }, [dafId]);
 
-  // Quiz state
+  // ---- Dictionary lookup map (Master Site Dictionary) ----
+  const dictMap = useMemo(() => {
+    const map = new Map<string, DictionaryWord>();
+    dictionary.forEach((w) => {
+      const key = removeNiqqud(w.aramaic).trim();
+      if (key && !map.has(key)) map.set(key, w);
+    });
+    return map;
+  }, [dictionary]);
+
+  const lookup = (token: string): DictionaryWord | undefined => {
+    const clean = removeNiqqud(token).replace(/[^\u05D0-\u05EA]/g, '');
+    if (!clean) return undefined;
+    const direct = dictMap.get(clean);
+    if (direct) return direct;
+    if (clean.length > 2 && PREFIXES.includes(clean[0])) {
+      const stripped = dictMap.get(clean.slice(1));
+      if (stripped) return stripped;
+    }
+    return undefined;
+  };
+
+  // ---- Sefaria text ----
+  const [lines, setLines] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const isDemo = masechetId === 'berakhot' && dafId === '2' && amudId === 'a';
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      if (!masechet.sefaria) {
+        setLines([]);
+        setLoadError('למסכת זו אין תלמוד בבלי — בחר מסכת אחרת.');
+        return;
+      }
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const { lines: fetched } = await fetchSefariaAmud(masechet.sefaria, dafId, amudId);
+        if (!cancelled) setLines(fetched);
+      } catch {
+        if (!cancelled) {
+          if (isDemo) {
+            setLines(berakhotAmud.text.replace(/\[\[|\]\]/g, '').split('\n'));
+            setLoadError(null);
+          } else {
+            setLines([]);
+            setLoadError('לא הצלחנו לטעון את הטקסט כרגע. נסה שוב או בחר עמוד אחר.');
+          }
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [masechet.sefaria, dafId, amudId]);
+
+  // ---- Matched words on the current page ----
+  const matchedWords = useMemo(() => {
+    const found = new Map<number, DictionaryWord>();
+    lines.forEach((line) =>
+      line.split(/\s+/).forEach((tok) => {
+        const hit = lookup(tok);
+        if (hit) found.set(hit.id, hit);
+      })
+    );
+    return Array.from(found.values());
+  }, [lines, dictMap]);
+
+  // ---- Quiz ----
+  const quiz: QuizQuestion[] = useMemo(() => {
+    if (isDemo) return berakhotAmud.quiz;
+    const pool = matchedWords.slice(0, 5);
+    return pool.map((w) => {
+      const distractors = dictionary
+        .filter((d) => d.id !== w.id && d.hebrew !== w.hebrew)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3)
+        .map((d) => d.hebrew);
+      const options = [...distractors, w.hebrew].sort(() => Math.random() - 0.5);
+      return {
+        question: `מה פירוש המילה "${w.aramaic}"?`,
+        options,
+        correct: options.indexOf(w.hebrew),
+        explanation: w.culturalContext,
+      };
+    });
+  }, [isDemo, matchedWords, dictionary]);
+
   const [qIndex, setQIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -151,13 +289,7 @@ const Experiential = () => {
     setScore(0);
     setFinished(false);
   };
-  useEffect(resetQuiz, [sederId, masechetId, dafId, amudId]);
-
-  const glossMap = useMemo(() => {
-    const map = new Map<string, GlossWord>();
-    amud.glossary.forEach((g) => map.set(g.word, g));
-    return map;
-  }, [amud]);
+  useEffect(resetQuiz, [sederId, masechetId, dafId, amudId, quiz.length]);
 
   const saveWord = async (g: GlossWord) => {
     haptic();
@@ -172,10 +304,7 @@ const Experiential = () => {
     localStorage.setItem(PERSONAL_KEY, JSON.stringify(list));
     setSaved((prev) => [...prev, g.word]);
 
-    // If the word exists in the main dictionary — mark it as learned for the account too
-    const match = dictionary.find(
-      (w) => removeNiqqud(w.aramaic) === removeNiqqud(g.word)
-    );
+    const match = dictionary.find((w) => removeNiqqud(w.aramaic) === removeNiqqud(g.word));
     if (user && match) await markWordAsLearned(match.id);
     toast.success(`"${g.word}" נשמרה למילון האישי ⭐`);
   };
@@ -184,8 +313,7 @@ const Experiential = () => {
     if (picked !== null) return;
     haptic();
     setPicked(i);
-    const q = amud.quiz[qIndex];
-    if (i === q.correct) {
+    if (i === quiz[qIndex].correct) {
       setScore((s) => s + 1);
       sfxCorrect();
     } else {
@@ -194,7 +322,7 @@ const Experiential = () => {
   };
 
   const next = () => {
-    if (qIndex + 1 >= amud.quiz.length) setFinished(true);
+    if (qIndex + 1 >= quiz.length) setFinished(true);
     else {
       setQIndex((i) => i + 1);
       setPicked(null);
@@ -202,26 +330,28 @@ const Experiential = () => {
   };
 
   const renderText = () =>
-    amud.text.split('\n').map((line, li) => (
+    lines.map((line, li) => (
       <p key={li} className="mb-4 leading-[2.2] text-lg md:text-xl font-display text-foreground">
-        {line.split(/(\[\[[^\]]+\]\])/g).map((part, pi) => {
-          const m = part.match(/^\[\[([^\]]+)\]\]$/);
-          if (!m) return <span key={pi}>{part}</span>;
-          const g = glossMap.get(m[1]) ?? { word: m[1], hebrew: '', context: '' };
+        {line.split(/(\s+)/).map((part, pi) => {
+          if (/^\s+$/.test(part)) return <span key={pi}>{part}</span>;
+          const entry = lookup(part);
           return (
             <WordChip
               key={pi}
-              gloss={g}
+              token={part}
+              match={entry ? { entry, token: part } : undefined}
               studyMode={studyMode}
               onSave={saveWord}
-              saved={saved.includes(g.word)}
+              saved={entry ? saved.includes(entry.aramaic) : false}
             />
           );
         })}
       </p>
     ));
 
-  const q = amud.quiz[qIndex];
+  const q = quiz[qIndex];
+  const amudLabel = amudId === 'a' ? "עמוד א'" : "עמוד ב'";
+  const dafLabel = `דף ${gematria(Number(dafId))}`;
 
   return (
     <PageTransition>
@@ -244,7 +374,7 @@ const Experiential = () => {
                   לימוד חווייתי
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  {seder.label} · {masechet.label} · {daf.label} {amud.label}
+                  {seder.label} · מסכת {masechet.label} · {dafLabel} {amudLabel}
                 </p>
               </div>
             </div>
@@ -255,8 +385,8 @@ const Experiential = () => {
                 <SelectTrigger className="w-[150px] bg-card" aria-label="סדר">
                   <SelectValue placeholder="סדר" />
                 </SelectTrigger>
-                <SelectContent>
-                  {SEDARIM.map((s) => (
+                <SelectContent className="max-h-72">
+                  {SHAS.map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -266,19 +396,21 @@ const Experiential = () => {
                 <SelectTrigger className="w-[150px] bg-card" aria-label="מסכת">
                   <SelectValue placeholder="מסכת" />
                 </SelectTrigger>
-                <SelectContent>
-                  {seder.masechtot.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
+                <SelectContent className="max-h-72">
+                  {seder.masechtot.map((x) => (
+                    <SelectItem key={x.id} value={x.id}>
+                      {x.label}{!x.sefaria ? ' (אין בבלי)' : ''}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              <Select value={dafId} onValueChange={setDafId}>
-                <SelectTrigger className="w-[110px] bg-card" aria-label="דף">
+              <Select value={dafId} onValueChange={setDafId} disabled={!dapim.length}>
+                <SelectTrigger className="w-[120px] bg-card" aria-label="דף">
                   <SelectValue placeholder="דף" />
                 </SelectTrigger>
-                <SelectContent>
-                  {masechet.dapim.map((d) => (
+                <SelectContent className="max-h-72">
+                  {dapim.map((d) => (
                     <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -289,9 +421,8 @@ const Experiential = () => {
                   <SelectValue placeholder="עמוד" />
                 </SelectTrigger>
                 <SelectContent>
-                  {daf.amudim.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>{a.label}</SelectItem>
-                  ))}
+                  <SelectItem value="a">עמוד א'</SelectItem>
+                  <SelectItem value="b">עמוד ב'</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -314,7 +445,7 @@ const Experiential = () => {
 
         {/* Split screen */}
         <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* Panel 1 — quiz / video (left on desktop = second in RTL grid order) */}
+          {/* Panel 1 — quiz / video */}
           <div className="lg:order-2">
             <div className="bg-card rounded-2xl border border-border shadow-soft p-4 h-full">
               <Tabs defaultValue="quiz">
@@ -324,14 +455,21 @@ const Experiential = () => {
                 </TabsList>
 
                 <TabsContent value="quiz" className="mt-4">
-                  {finished ? (
+                  {!quiz.length ? (
+                    <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-10 text-center">
+                      <p className="font-semibold text-foreground">אין עדיין מילים מזוהות בדף זה 📝</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        החידון נבנה אוטומטית ממילות המילון שנמצאו בטקסט.
+                      </p>
+                    </div>
+                  ) : finished ? (
                     <div className="text-center py-10">
-                      <p className="text-4xl mb-3">{score === amud.quiz.length ? '🏆' : '💪'}</p>
+                      <p className="text-4xl mb-3">{score === quiz.length ? '🏆' : '💪'}</p>
                       <p className="text-lg font-bold text-foreground">
-                        {score} מתוך {amud.quiz.length}
+                        {score} מתוך {quiz.length}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {score === amud.quiz.length ? 'מושלם! שולט בדף הזה.' : 'עוד סיבוב וזה בכיס.'}
+                        {score === quiz.length ? 'מושלם! שולט בדף הזה.' : 'עוד סיבוב וזה בכיס.'}
                       </p>
                       <button
                         onClick={() => { haptic(); resetQuiz(); }}
@@ -344,14 +482,14 @@ const Experiential = () => {
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-xs text-muted-foreground">
-                          שאלה {qIndex + 1} מתוך {amud.quiz.length}
+                          שאלה {qIndex + 1} מתוך {quiz.length}
                         </span>
                         <span className="text-xs font-bold text-primary">ניקוד: {score}</span>
                       </div>
                       <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-4">
                         <div
                           className="h-full bg-primary rounded-full transition-all duration-500"
-                          style={{ width: `${(qIndex / amud.quiz.length) * 100}%` }}
+                          style={{ width: `${(qIndex / quiz.length) * 100}%` }}
                         />
                       </div>
                       <AnimatePresence mode="wait">
@@ -405,7 +543,7 @@ const Experiential = () => {
                                 onClick={() => { haptic(); next(); }}
                                 className="w-full bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-semibold shadow-soft"
                               >
-                                {qIndex + 1 >= amud.quiz.length ? 'סיום' : 'לשאלה הבאה'}
+                                {qIndex + 1 >= quiz.length ? 'סיום' : 'לשאלה הבאה'}
                               </button>
                             </div>
                           )}
@@ -416,11 +554,11 @@ const Experiential = () => {
                 </TabsContent>
 
                 <TabsContent value="video" className="mt-4">
-                  {amud.videoUrl ? (
+                  {isDemo && berakhotAmud.videoUrl ? (
                     <div className="aspect-video rounded-xl overflow-hidden border border-border">
                       <iframe
-                        src={amud.videoUrl}
-                        title={`סרטון הסבר — ${masechet.label} ${daf.label} ${amud.label}`}
+                        src={berakhotAmud.videoUrl}
+                        title={`סרטון הסבר — ${masechet.label} ${dafLabel} ${amudLabel}`}
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
                         allowFullScreen
@@ -442,18 +580,36 @@ const Experiential = () => {
             </div>
           </div>
 
-          {/* Panel 2 — Gemara text (right on desktop) */}
+          {/* Panel 2 — Gemara text */}
           <div className="lg:order-1">
             <div className="bg-card rounded-2xl border border-border shadow-soft p-5 md:p-7 h-full">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 gap-3">
                 <h2 className="font-display text-lg font-bold text-foreground">
-                  {masechet.label} · {daf.label} {amud.label}
+                  {masechet.label} · {dafLabel} {amudLabel}
                 </h2>
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground shrink-0">
                   {studyMode ? 'מילות מפתח מסומנות' : 'רחף או לחץ לגילוי'}
                 </span>
               </div>
-              <div className="text-justify">{renderText()}</div>
+
+              {loading ? (
+                <div className="py-16 flex flex-col items-center gap-3 text-muted-foreground">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <p className="text-sm">טוען את הדף...</p>
+                </div>
+              ) : loadError ? (
+                <div className="py-14 text-center">
+                  <AlertCircle className="w-7 h-7 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">{loadError}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="text-justify">{renderText()}</div>
+                  <p className="text-[11px] text-muted-foreground mt-6 border-t border-border pt-3">
+                    זוהו {matchedWords.length} מילים ממילון האתר בדף זה.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
