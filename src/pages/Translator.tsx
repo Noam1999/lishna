@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Copy, Volume2, Plus, ArrowLeftRight, BookOpen, Search, Check } from 'lucide-react';
 import Header from '@/components/Header';
 import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
@@ -17,6 +18,16 @@ const Translator = () => {
   const [direction, setDirection] = useState<'hebrew-to-aramaic' | 'aramaic-to-hebrew'>('hebrew-to-aramaic');
   const [result, setResult] = useState<DictionaryWord | null>(null);
   const [recentSearches, setRecentSearches] = useState<DictionaryWord[]>([]);
+  const [searchParams] = useSearchParams();
+
+  // Deep link support: /translator?q=<aramaic word>
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) {
+      setDirection('aramaic-to-hebrew');
+      setQuery(q);
+    }
+  }, [searchParams]);
 
   // Load recent searches from localStorage on mount
   useEffect(() => {
