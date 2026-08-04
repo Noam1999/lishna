@@ -751,6 +751,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_points: { Args: { _pts: number }; Returns: undefined }
+      award_quiz_rewards: { Args: { _score: number }; Returns: Json }
+      buy_pass: { Args: { _kind: string }; Returns: Json }
+      buy_skin: { Args: { _skin_id: string }; Returns: Json }
+      claim_daily_quest: { Args: { _quest_id: string }; Returns: Json }
+      claim_mail_reward: { Args: { _mail_id: string }; Returns: Json }
+      claim_pass_reward: {
+        Args: {
+          _amount: number
+          _kind: string
+          _skin_id: string
+          _tier: number
+          _track: string
+        }
+        Returns: Json
+      }
+      claim_teacher_role: { Args: { _code: string }; Returns: boolean }
+      economy_open: { Args: never; Returns: undefined }
+      exchange_currency: {
+        Args: { _amount: number; _direction: string }
+        Returns: Json
+      }
+      grant_pass_daily_perk: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -770,6 +793,40 @@ export type Database = {
         Args: { _school_id: string; _user_id: string }
         Returns: boolean
       }
+      join_class_by_code: { Args: { _code: string }; Returns: Json }
+      join_duel_by_code: {
+        Args: { _code: string }
+        Returns: {
+          code: string
+          created_at: string
+          current_question: number
+          guest_answer: Json | null
+          guest_id: string | null
+          guest_score: number
+          host_answer: Json | null
+          host_id: string
+          host_score: number
+          id: string
+          questions: Json
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "duels"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      purchase_shop_item: { Args: { _item: string }; Returns: Json }
+      spin_wheel: { Args: never; Returns: Json }
+      submit_assignment: {
+        Args: { _assignment_id: string; _details: Json }
+        Returns: Json
+      }
+      sync_words_mastered: { Args: never; Returns: number }
+      update_quiz_streak: { Args: never; Returns: undefined }
+      use_power_up_5050: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "teacher"

@@ -87,6 +87,8 @@ export const useProfile = () => {
     setLoading(false);
   };
 
+  // Only non-economic, user-owned fields may be written directly.
+  // Every currency / progression change goes through a validated server function.
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user || !profile) return { error: new Error('No user or profile') };
 
@@ -96,170 +98,115 @@ export const useProfile = () => {
       .eq('user_id', user.id);
 
     if (!error) {
-      // Trigger flying reward animations on gains
-      if (typeof updates.coins === 'number' && updates.coins > profile.coins) {
-        emitReward('coins', updates.coins - profile.coins);
-      }
-      if (typeof updates.diamonds === 'number' && updates.diamonds > profile.diamonds) {
-        emitReward('diamonds', updates.diamonds - profile.diamonds);
-      }
       setProfile({ ...profile, ...updates });
     }
 
     return { error };
   };
 
+  // Applies server-side reward results locally (animations + fresh data).
+  const afterEconomy = async (gained?: { coins?: number; diamonds?: number }) => {
+    if (gained?.coins) emitReward('coins', gained.coins);
+    if (gained?.diamonds) emitReward('diamonds', gained.diamonds);
+    await fetchProfile();
+  };
+
   const addPoints = async (pointsToAdd: number) => {
-    if (!user || !profile) return;
-
-    const today = new Date().toISOString().split('T')[0];
-    const isNewDay = profile.last_xp_date !== today;
-    
-    const newDailyXp = isNewDay ? pointsToAdd : profile.daily_xp + pointsToAdd;
-    const newPoints = profile.points + pointsToAdd;
-
-    await updateProfile({
-      points: newPoints,
-      daily_xp: newDailyXp,
-      last_xp_date: today,
-    });
+    if (!user) return;
+    await supabase.rpc('add_points', { _pts: pointsToAdd });
+    await fetchProfile();
   };
 
   const updateQuizStreak = async () => {
-    if (!user || !profile) return;
-
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
-    const lastQuizDate = profile.last_quiz_date 
-      ? new Date(profile.last_quiz_date).toISOString().split('T')[0]
-      : null;
-
-    let newStreak = profile.streak;
-
-    if (!lastQuizDate) {
-      // First quiz ever
-      newStreak = 1;
-    } else {
-      const lastDate = new Date(lastQuizDate);
-      const diffTime = now.getTime() - lastDate.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) {
-        // Already did a quiz today, keep streak
-      } else if (diffDays === 1) {
-        // Yesterday, increment streak
-        newStreak = profile.streak + 1;
-      } else if (diffDays >= 2) {
-        // Missed a day, reset streak
-        newStreak = 1;
-      }
-    }
-
-    await updateProfile({
-      streak: newStreak,
-      last_quiz_date: now.toISOString(),
-    });
+    if (!user) return;
+    await supabase.rpc('update_quiz_streak');
+    await fetchProfile();
   };
 
   const incrementWordsMastered = async () => {
-    if (!user || !profile) return;
-
-    await updateProfile({
-      words_mastered: profile.words_mastered + 1,
-    });
+    if (!user) return;
+    await supabase.rpc('sync_words_mastered');
+    await fetchProfile();
   };
 
   // Award coins + XP after a test/assignment based on the score (0-100).
-  // Applies active multipliers and decrements them by 1.
+  // Multipliers and amounts are computed and validated on the server.
   const awardScoreRewards = async (score: number) => {
-    if (!user || !profile || score <= 0) return { coinsEarned: 0, xpEarned: 0 };
-
-    const xpMul = profile.xp_multiplier_remaining > 0 ? 2 : 1;
-    const coinMul = profile.coin_multiplier_remaining > 0 ? 2 : 1;
-    const xpEarned = score * xpMul;
-    const coinsEarned = score * coinMul;
-
-    const today = new Date().toISOString().split('T')[0];
-    const isNewDay = profile.last_xp_date !== today;
-    const newDailyXp = isNewDay ? xpEarned : profile.daily_xp + xpEarned;
-
-    await updateProfile({
-      points: profile.points + xpEarned,
-      coins: profile.coins + coinsEarned,
-      daily_xp: newDailyXp,
-      last_xp_date: today,
-      xp_multiplier_remaining: Math.max(0, profile.xp_multiplier_remaining - 1),
-      coin_multiplier_remaining: Math.max(0, profile.coin_multiplier_remaining - 1),
-    });
-
-    return { coinsEarned, xpEarned };
+    if (!user) return { coinsEarned: 0, xpEarned: 0 };
+    const { data } = await supabase.rpc('award_quiz_rewards', { _score: Math.round(score) });
+    const res = (data as { coinsEarned?: number; xpEarned?: number } | null) || {};
+    await afterEconomy({ coins: res.coinsEarned });
+    return { coinsEarned: res.coinsEarned ?? 0, xpEarned: res.xpEarned ?? 0 };
   };
 
   const purchaseItem = async (item: ShopItem) => {
-    if (!user || !profile) return { error: new Error('No user') };
-    const price = SHOP_PRICES[item];
-    if (profile.coins < price) return { error: new Error('not_enough_coins') };
-
-    const updates: Partial<Profile> = { coins: profile.coins - price };
-    if (item === 'xp_multiplier') updates.xp_multiplier_remaining = profile.xp_multiplier_remaining + 3;
-    if (item === 'coin_multiplier') updates.coin_multiplier_remaining = profile.coin_multiplier_remaining + 3;
-    if (item === 'power_up_5050') updates.power_up_5050 = profile.power_up_5050 + 1;
-
-    return await updateProfile(updates);
+    if (!user) return { error: new Error('No user') };
+    const { data, error } = await supabase.rpc('purchase_shop_item', { _item: item });
+    const res = data as { error?: string } | null;
+    await fetchProfile();
+    if (error) return { error: error as unknown as Error };
+    if (res?.error) return { error: new Error(res.error) };
+    return { error: null };
   };
 
   const usePowerUp5050 = async () => {
-    if (!user || !profile || profile.power_up_5050 <= 0) return { error: new Error('none') };
-    return await updateProfile({ power_up_5050: profile.power_up_5050 - 1 });
+    if (!user) return { error: new Error('none') };
+    const { data, error } = await supabase.rpc('use_power_up_5050');
+    const res = data as { error?: string } | null;
+    await fetchProfile();
+    if (error) return { error: error as unknown as Error };
+    if (res?.error) return { error: new Error(res.error) };
+    return { error: null };
   };
 
   // Convert coins -> diamonds (100 coins = 1 diamond)
   const exchangeCoinsToDiamonds = async (diamondAmount: number) => {
-    if (!user || !profile) return { error: new Error('no_profile') };
-    const coinsCost = diamondAmount * COINS_PER_DIAMOND;
-    if (profile.coins < coinsCost) return { error: new Error('not_enough_coins') };
-    return await updateProfile({
-      coins: profile.coins - coinsCost,
-      diamonds: profile.diamonds + diamondAmount,
+    const { data, error } = await supabase.rpc('exchange_currency', {
+      _direction: 'coins_to_diamonds',
+      _amount: diamondAmount,
     });
+    const res = data as { error?: string } | null;
+    await afterEconomy({ diamonds: res?.error ? 0 : diamondAmount });
+    if (error) return { error: error as unknown as Error };
+    if (res?.error) return { error: new Error(res.error) };
+    return { error: null };
   };
 
   // Convert diamonds -> coins (1 diamond = 100 coins)
   const exchangeDiamondsToCoins = async (diamondAmount: number) => {
-    if (!user || !profile) return { error: new Error('no_profile') };
-    if (profile.diamonds < diamondAmount) return { error: new Error('not_enough_diamonds') };
-    return await updateProfile({
-      diamonds: profile.diamonds - diamondAmount,
-      coins: profile.coins + diamondAmount * COINS_PER_DIAMOND,
+    const { data, error } = await supabase.rpc('exchange_currency', {
+      _direction: 'diamonds_to_coins',
+      _amount: diamondAmount,
     });
-  };
-
-  const pickWheelSegment = (): number => {
-    const total = WHEEL_SEGMENTS.reduce((s, x) => s + x.weight, 0);
-    let r = Math.random() * total;
-    for (let i = 0; i < WHEEL_SEGMENTS.length; i++) {
-      r -= WHEEL_SEGMENTS[i].weight;
-      if (r <= 0) return i;
-    }
-    return WHEEL_SEGMENTS.length - 1;
+    const res = data as { error?: string } | null;
+    await afterEconomy({ coins: res?.error ? 0 : diamondAmount * COINS_PER_DIAMOND });
+    if (error) return { error: error as unknown as Error };
+    if (res?.error) return { error: new Error(res.error) };
+    return { error: null };
   };
 
   const spinWheel = async (): Promise<{ segmentIndex: number; prize: WheelPrize } | { error: Error }> => {
-    if (!user || !profile) return { error: new Error('no_profile') };
-    const hasBonusSpin = (profile.wheel_spins || 0) > 0;
-    if (!hasBonusSpin && profile.last_wheel_spin_at) {
-      const last = new Date(profile.last_wheel_spin_at).getTime();
-      if (Date.now() - last < WHEEL_COOLDOWN_MS) return { error: new Error('cooldown') };
-    }
-    const segmentIndex = pickWheelSegment();
-    const prize = WHEEL_SEGMENTS[segmentIndex].prize;
-    const updates: Partial<Profile> = {};
-    if (hasBonusSpin) updates.wheel_spins = profile.wheel_spins - 1;
-    else updates.last_wheel_spin_at = new Date().toISOString();
-    if (prize.kind === 'coins') updates.coins = profile.coins + prize.amount;
-    if (prize.kind === 'diamonds') updates.diamonds = profile.diamonds + prize.amount;
-    await updateProfile(updates);
+    if (!user) return { error: new Error('no_profile') };
+    const { data, error } = await supabase.rpc('spin_wheel');
+    if (error) return { error: error as unknown as Error };
+    const res = data as { error?: string; segmentIndex?: number; kind?: string; amount?: number } | null;
+    if (!res || res.error) return { error: new Error(res?.error || 'failed') };
+    const segmentIndex = res.segmentIndex ?? 0;
+    const prize = WHEEL_SEGMENTS[segmentIndex]?.prize ?? { kind: 'none', label: 'אין פרס' };
+    await afterEconomy({
+      coins: res.kind === 'coins' ? res.amount : 0,
+      diamonds: res.kind === 'diamonds' ? res.amount : 0,
+    });
     return { segmentIndex, prize };
+  };
+
+  const buySkin = async (skinId: string) => {
+    const { data, error } = await supabase.rpc('buy_skin', { _skin_id: skinId });
+    const res = data as { error?: string } | null;
+    await fetchProfile();
+    if (error) return { error: error as unknown as Error };
+    if (res?.error) return { error: new Error(res.error) };
+    return { error: null };
   };
 
   return {
@@ -276,5 +223,6 @@ export const useProfile = () => {
     exchangeCoinsToDiamonds,
     exchangeDiamondsToCoins,
     spinWheel,
+    buySkin,
   };
 };
