@@ -218,7 +218,7 @@ const Home = () => {
               <Logo className="w-12 h-12" />
               <h1 className="text-3xl font-display font-bold text-foreground">לִישָׁנָא</h1>
             </div>
-            <p className="text-sm font-medium text-primary mb-1">ארמית. פשוט להבין.</p>
+            <p className="text-sm font-medium text-primary mb-1">לימוד ארמית חווייתי</p>
             <p className="text-muted-foreground text-xs max-w-xs mx-auto">המפתח שלך לשפת הגמרא אצלכם בכיס! למדו ארמית עם תחרויות ומשימות יומיות.</p>
           </div>
 
