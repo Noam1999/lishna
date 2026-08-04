@@ -212,7 +212,7 @@ const Home = () => {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border rounded-full px-4 py-2 mb-6 shadow-soft">
               <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-              <span className="text-sm font-medium text-muted-foreground">למד ארמית בבלית</span>
+              <span className="text-sm font-medium text-muted-foreground">למד ארמית וגמרא בצורה חווייתית!</span>
             </div>
             <div className="flex items-center justify-center gap-3 mb-2">
               <Logo className="w-12 h-12" />
