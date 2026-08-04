@@ -249,15 +249,15 @@ const Duel = () => {
     if (!user) return;
     const code = (codeIn ?? joinCode).trim().toUpperCase();
     if (code.length !== 5) { toast.error('הקוד הוא 5 תווים'); return; }
-    const { data } = await supabase.from('duels').select('*').eq('code', code).maybeSingle();
-    if (!data) { toast.error('חדר לא נמצא'); return; }
-    if (data.guest_id && data.guest_id !== user.id) { toast.error('החדר תפוס'); return; }
-    if (data.host_id === user.id) {
-      applyDuelUpdate(data as unknown as DuelRow); setMode(data.status === 'playing' ? 'play' : 'lobby'); subscribe(data.id); return;
-    }
-    const { data: updated } = await supabase
-      .from('duels').update({ guest_id: user.id, status: 'playing' }).eq('id', data.id).select().single();
-    applyDuelUpdate((updated || data) as unknown as DuelRow); setMode('play'); subscribe(data.id);
+    // Joining goes through the server so duel rows stay private to their two players.
+    const { data, error } = await supabase.rpc('join_duel_by_code', { _code: code });
+    const row = Array.isArray(data) ? data[0] : data;
+    if (error) { toast.error(error.message.includes('duel_full') ? 'החדר תפוס' : 'הצטרפות נכשלה'); return; }
+    if (!row) { toast.error('חדר לא נמצא'); return; }
+    const duelRow = row as unknown as DuelRow;
+    applyDuelUpdate(duelRow);
+    setMode(duelRow.host_id === user.id && duelRow.status !== 'playing' ? 'lobby' : 'play');
+    subscribe(duelRow.id);
   };
 
   // Auto-route lobby → play
