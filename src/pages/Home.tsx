@@ -25,7 +25,7 @@ const Home = () => {
   const navigate = useNavigate();
   const { dictionary, getUnlearnedWords } = useDictionary();
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile, fetchProfile } = useProfile();
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
   const { count: unreadCount } = useUnreadMail();
@@ -62,10 +62,7 @@ const Home = () => {
     if (!p.pass_plus && !p.pass_pro) return;
     const today = new Date().toISOString().split('T')[0];
     if (p.last_perk_grant_date === today) return;
-    updateProfile({
-      wheel_spins: (profile.wheel_spins || 0) + 1,
-      last_perk_grant_date: today,
-    } as any);
+    supabase.rpc('grant_pass_daily_perk').then(() => fetchProfile());
   }, [profile?.id, (profile as any)?.last_perk_grant_date]);
 
 
