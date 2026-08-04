@@ -106,12 +106,13 @@ const Classes = () => {
     if (!user || !joinCode.trim()) return;
     setBusy(true);
     try {
-      const code = joinCode.trim().toUpperCase();
-      const { data: cls } = await supabase.from('classes').select('*').eq('class_code', code).maybeSingle();
-      if (!cls) { toast.error('קוד כיתה לא נמצא'); return; }
-      const { error } = await supabase.from('class_members').insert({ class_id: cls.id, student_id: user.id });
-      if (error && !error.message.includes('duplicate')) throw error;
-      toast.success(`הצטרפת לכיתה ${cls.name}`);
+      const { data, error } = await supabase.rpc('join_class_by_code', { _code: joinCode.trim() });
+      const res = data as { error?: string; name?: string } | null;
+      if (error || !res || res.error) {
+        toast.error(res?.error === 'own_class' ? 'זו הכיתה שלך' : 'קוד כיתה לא נמצא');
+        return;
+      }
+      toast.success(`הצטרפת לכיתה ${res.name ?? ''}`);
       setJoinCode('');
       refresh();
     } catch {

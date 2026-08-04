@@ -115,18 +115,17 @@ const TakeAssignment = () => {
   useEffect(() => {
     if (!done || !assignment || !user || submitting) return;
     setSubmitting(true);
-    const finalScore = score;
-    supabase.from('assignment_submissions').upsert({
-      assignment_id: assignment.id,
-      student_id: user.id,
-      score: finalScore,
-      total: questions.length,
-      details,
-    }, { onConflict: 'assignment_id,student_id' }).then(async ({ error }) => {
-      if (error) {
-        toast.error('שגיאה בשליחת התוצאה');
+    // The score is computed and stored by the server from the submitted answers.
+    supabase.rpc('submit_assignment', {
+      _assignment_id: assignment.id,
+      _details: details,
+    }).then(async ({ data, error }) => {
+      const res = data as { error?: string; score?: number; total?: number } | null;
+      if (error || !res || res.error) {
+        toast.error(res?.error === 'already_submitted' ? 'כבר הגשת את המטלה' : 'שגיאה בשליחת התוצאה');
       } else {
-        const pct = questions.length ? Math.round((finalScore / questions.length) * 100) : 0;
+        const total = res.total || questions.length || 1;
+        const pct = Math.round(((res.score ?? 0) / total) * 100);
         const rewards = await awardScoreRewards(pct);
         toast.success(`התוצאה נשלחה! +${rewards?.coinsEarned ?? 0} 💰  +${rewards?.xpEarned ?? 0} ✨`);
       }

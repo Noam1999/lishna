@@ -12,7 +12,7 @@ export interface UserWord {
 
 export const useUserWords = () => {
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile, incrementWordsMastered } = useProfile();
   const [learnedWordIds, setLearnedWordIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
 
@@ -101,10 +101,9 @@ export const useUserWords = () => {
     }
 
     // Update the profile's words_mastered count
+    // Recompute the mastered-word count server-side
     if (profile) {
-      await updateProfile({
-        words_mastered: profile.words_mastered + 1,
-      });
+      await incrementWordsMastered();
     }
 
     return true;

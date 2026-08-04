@@ -49,7 +49,7 @@ export const primeUserSkin = (userId: string, skin: string) => {
 
 export const AvatarProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile, buySkin } = useProfile();
 
   const owned = profile?.owned_skins ?? [DEFAULT_SKIN_ID];
   const equipped = profile?.equipped_skin || DEFAULT_SKIN_ID;
@@ -57,11 +57,12 @@ export const AvatarProvider = ({ children }: { children: ReactNode }) => {
   // Keep current user's skin primed for any UserAvatar instances referencing by id.
   if (user) primeUserSkin(user.id, equipped);
 
+  // Skins are granted only by the server (purchase / pass reward).
   const addSkin = useCallback(async (id: string) => {
     if (!profile) return;
     if (owned.includes(id)) return;
-    await updateProfile({ owned_skins: [...owned, id] });
-  }, [profile, owned, updateProfile]);
+    await buySkin(id);
+  }, [profile, owned, buySkin]);
 
   const equipSkin = useCallback(async (id: string) => {
     if (!profile || !owned.includes(id)) return;

@@ -7,6 +7,7 @@ import PageTransition from '@/components/PageTransition';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { useProfile } from '@/hooks/useProfile';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   TIERS, XP_PER_TIER, PASS_TIERS, PASS_PLUS_PRICE, PASS_PRO_PRICE,
@@ -77,7 +78,7 @@ const RewardCell = ({
 
 const Pass = () => {
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile, fetchProfile } = useProfile();
   const [busy, setBusy] = useState(false);
 
   const xp = profile?.points ?? 0;
@@ -95,11 +96,11 @@ const Pass = () => {
     if (profile.diamonds < price) { toast.error('אין מספיק יהלומים'); return; }
     if ((kind === 'plus' && passPlus) || (kind === 'pro' && passPro)) return;
     setBusy(true);
-    await updateProfile({
-      diamonds: profile.diamonds - price,
-      ...(kind === 'plus' ? { pass_plus: true } : { pass_pro: true }),
-    } as any);
+    const { data } = await supabase.rpc('buy_pass', { _kind: kind });
+    await fetchProfile();
     setBusy(false);
+    const res = data as { error?: string } | null;
+    if (res?.error) { toast.error('הרכישה נכשלה'); return; }
     toast.success(kind === 'plus' ? 'Lishna Pass Plus הופעל! 💫' : 'Lishna Pass Pro הופעל! 👑');
   };
 
@@ -112,21 +113,16 @@ const Pass = () => {
     const current = (profile as any)[claimsKey] as number[] | undefined ?? [];
     if (current.includes(tier)) return;
 
-    const updates: any = { [claimsKey]: [...current, tier] };
-    const amt = reward.amount || 0;
-    if (reward.kind === 'coins')      updates.coins    = profile.coins    + amt;
-    if (reward.kind === 'diamonds')   updates.diamonds = profile.diamonds + amt;
-    if (reward.kind === 'xp')         updates.points   = profile.points   + amt;
-    if (reward.kind === 'power_5050') updates.power_up_5050 = (profile.power_up_5050 || 0) + amt;
-    if (reward.kind === 'xp_mul')     updates.xp_multiplier_remaining = (profile.xp_multiplier_remaining || 0) + amt;
-    if (reward.kind === 'coin_mul')   updates.coin_multiplier_remaining = (profile.coin_multiplier_remaining || 0) + amt;
-    if (reward.kind === 'wheel_spin') updates.wheel_spins = (profile.wheel_spins || 0) + amt;
-    if (reward.kind === 'skin' && reward.skinId) {
-      const owned = profile.owned_skins || [];
-      if (!owned.includes(reward.skinId)) updates.owned_skins = [...owned, reward.skinId];
-    }
-
-    await updateProfile(updates);
+    const { data } = await supabase.rpc('claim_pass_reward', {
+      _track: track,
+      _tier: tier,
+      _kind: reward.kind,
+      _amount: reward.amount ?? 0,
+      _skin_id: reward.skinId ?? null,
+    });
+    await fetchProfile();
+    const res = data as { error?: string } | null;
+    if (res?.error) { toast.error('לא ניתן לקבל את הפרס'); return; }
     toast.success(`התקבל: ${reward.label} ✨`);
   };
 

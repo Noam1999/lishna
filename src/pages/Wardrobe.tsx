@@ -26,7 +26,7 @@ const RARITY_BADGE: Record<Skin['rarity'], string> = {
 const Wardrobe = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile, buySkin } = useProfile();
   const { owned, equipped, ownsSkin, equipSkin } = useAvatar();
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -43,11 +43,7 @@ const Wardrobe = () => {
     if (profile.coins < skin.coins) { toast.error('אין מספיק מטבעות'); return; }
     if (profile.diamonds < skin.diamonds) { toast.error('אין מספיק יהלומים'); return; }
     setBusy(skin.id);
-    const { error } = await updateProfile({
-      coins: profile.coins - skin.coins,
-      diamonds: profile.diamonds - skin.diamonds,
-      owned_skins: [...(profile.owned_skins ?? []), skin.id],
-    });
+    const { error } = await buySkin(skin.id);
     setBusy(null);
     if (error) { toast.error('הרכישה נכשלה'); return; }
     toast.success(`🎉 רכשת: ${skin.name}`);

@@ -29,7 +29,7 @@ export const getQuestLabel = (questType: string): { label: string; icon: string 
 
 export const useDailyQuests = () => {
   const { user } = useAuth();
-  const { profile, addPoints, updateProfile } = useProfile();
+  const { profile, addPoints, updateProfile, fetchProfile } = useProfile();
   const [quests, setQuests] = useState<DailyQuest[]>([]);
   const [loading, setLoading] = useState(true);
   const [justClaimed, setJustClaimed] = useState<string | null>(null);
@@ -141,32 +141,16 @@ export const useDailyQuests = () => {
     const quest = quests.find(q => q.id === questId);
     if (!quest || !quest.completed || quest.claimed) return;
 
-    await supabase
-      .from('daily_quests')
-      .update({ claimed: true })
-      .eq('id', questId);
+    // Server validates the quest state and grants the rewards.
+    const { data } = await supabase.rpc('claim_daily_quest', { _quest_id: questId });
+    const res = data as { error?: string; xp?: number; coins?: number; diamonds?: number; wheel_spin?: number } | null;
+    if (!res || res.error) return;
+    await fetchProfile();
 
-    // XP reward (always)
-    await addPoints(quest.bonus_xp);
-
-    // Bonus rewards — coins / diamonds / a wheel spin (deterministic per quest id)
-    const seed = quest.id.charCodeAt(0) + quest.id.charCodeAt(quest.id.length - 1);
-    const kind = seed % 3; // 0=coins, 1=diamonds, 2=wheel spin
-    const updates: Record<string, number> = {};
-    let label = `+${quest.bonus_xp} XP`;
-    if (kind === 0) {
-      const c = 30 + (seed % 70);
-      updates.coins = profile.coins + c;
-      label += ` · +${c} 💰`;
-    } else if (kind === 1) {
-      const d = 1 + (seed % 3);
-      updates.diamonds = profile.diamonds + d;
-      label += ` · +${d} 💎`;
-    } else {
-      updates.wheel_spins = (profile.wheel_spins || 0) + 1;
-      label += ` · 🎡 סיבוב גלגל`;
-    }
-    if (Object.keys(updates).length) await updateProfile(updates);
+    let label = `+${res.xp ?? 0} XP`;
+    if (res.coins) label += ` · +${res.coins} 💰`;
+    if (res.diamonds) label += ` · +${res.diamonds} 💎`;
+    if (res.wheel_spin) label += ` · 🎡 סיבוב גלגל`;
 
     setJustClaimed(questId);
     setLastRewardLabel(label);

@@ -32,16 +32,12 @@ export const useUserRole = () => {
 
   const becomeTeacherWithCode = async (code: string): Promise<{ ok: boolean }> => {
     if (!user) return { ok: false };
-    if (code.trim() !== TEACHER_CODE) return { ok: false };
+    // The access code is verified server-side; the role is granted there.
+    const { data, error } = await supabase.rpc('claim_teacher_role', { _code: code.trim() });
+    if (error || data !== true) return { ok: false };
     localStorage.setItem(teacherKey(user.id), '1');
     setLocalTeacher(true);
-    // Best-effort DB insert (may fail silently if RLS blocks it)
-    try {
-      await supabase.from('user_roles').insert({ user_id: user.id, role: 'teacher' as const });
-      await refetch();
-    } catch {
-      /* ignore */
-    }
+    await refetch();
     return { ok: true };
   };
 

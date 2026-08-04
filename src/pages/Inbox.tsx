@@ -17,7 +17,7 @@ type ClsMail = { id: string; subject: string | null; body: string; created_at: s
 const Inbox = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile, fetchProfile } = useProfile();
   const [sys, setSys] = useState<SysMail[]>([]);
   const [cls, setCls] = useState<ClsMail[]>([]);
   const [claiming, setClaiming] = useState<string | null>(null);
@@ -44,17 +44,15 @@ const Inbox = () => {
     if (!user || !profile || !m.meta) return;
     setClaiming(m.id);
     try {
-      const addCoins = m.meta.coins || 0;
-      const addDiamonds = m.meta.diamonds || 0;
-      await updateProfile({
-        coins: profile.coins + addCoins,
-        diamonds: profile.diamonds + addDiamonds,
-      });
-      await supabase.from('system_mail').update({
-        read_at: new Date().toISOString(),
-        meta: { ...m.meta, claimed: true },
-      }).eq('id', m.id);
-      toast.success('המתנה התקבלה!');
+      // The server verifies the gift is genuine and credits the reward.
+      const { data, error } = await supabase.rpc('claim_mail_reward', { _mail_id: m.id });
+      const res = data as { error?: string } | null;
+      if (error || !res || res.error) {
+        toast.error('לא ניתן לקבל את המתנה');
+      } else {
+        await fetchProfile();
+        toast.success('המתנה התקבלה!');
+      }
       load();
     } catch {
       toast.error('שגיאה בקבלת המתנה');
