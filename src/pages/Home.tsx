@@ -301,8 +301,8 @@ const Home = () => {
               <School className="w-7 h-7" />
             </div>
             <div className="flex-1 text-right">
-              <h3 className="font-semibold text-lg text-foreground mb-1">כיתות</h3>
-              <p className="text-sm text-muted-foreground">הצטרף לכיתה או נהל ככיתה כמורה</p>
+              <h3 className="font-semibold text-lg text-foreground mb-1">ביה"ס שלי</h3>
+              <p className="text-sm text-muted-foreground">המרחב הבית ספרי, כיתות ומטלות</p>
             </div>
           </div>
         </Link>
