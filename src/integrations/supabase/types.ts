@@ -71,6 +71,7 @@ export type Database = {
         Row: {
           assignment_id: string
           details: Json | null
+          duration_seconds: number | null
           id: string
           score: number
           student_id: string
@@ -80,6 +81,7 @@ export type Database = {
         Insert: {
           assignment_id: string
           details?: Json | null
+          duration_seconds?: number | null
           id?: string
           score?: number
           student_id: string
@@ -89,6 +91,7 @@ export type Database = {
         Update: {
           assignment_id?: string
           details?: Json | null
+          duration_seconds?: number | null
           id?: string
           score?: number
           student_id?: string
@@ -111,7 +114,10 @@ export type Database = {
           created_at: string
           due_at: string | null
           id: string
+          mode: string
+          questions: Json
           settings: Json
+          source: Json | null
           teacher_id: string
           title: string
           type: string
@@ -122,7 +128,10 @@ export type Database = {
           created_at?: string
           due_at?: string | null
           id?: string
+          mode?: string
+          questions?: Json
           settings?: Json
+          source?: Json | null
           teacher_id: string
           title: string
           type?: string
@@ -133,7 +142,10 @@ export type Database = {
           created_at?: string
           due_at?: string | null
           id?: string
+          mode?: string
+          questions?: Json
           settings?: Json
+          source?: Json | null
           teacher_id?: string
           title?: string
           type?: string
@@ -785,6 +797,10 @@ export type Database = {
         Args: { _class_id: string; _user_id: string }
         Returns: boolean
       }
+      is_class_staff: {
+        Args: { _class_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_class_teacher: {
         Args: { _class_id: string; _user_id: string }
         Returns: boolean
@@ -818,10 +834,18 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      join_school_by_code: {
+        Args: { _code: string; _name: string }
+        Returns: Json
+      }
       purchase_shop_item: { Args: { _item: string }; Returns: Json }
       spin_wheel: { Args: never; Returns: Json }
       submit_assignment: {
-        Args: { _assignment_id: string; _details: Json }
+        Args: {
+          _assignment_id: string
+          _details: Json
+          _duration_seconds?: number
+        }
         Returns: Json
       }
       sync_words_mastered: { Args: never; Returns: number }
