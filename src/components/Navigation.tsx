@@ -9,7 +9,7 @@ const Navigation = () => {
     { path: '/translator', label: 'תרגומון', icon: Search },
     { path: '/flashcards', label: 'כרטיסיות', icon: GraduationCap },
     { path: '/quiz', label: 'מבחנים', icon: Brain },
-    { path: '/classes', label: 'הכיתה שלי', icon: School },
+    { path: '/classes', label: 'ביה"ס שלי', icon: School },
   ];
 
   // Hide navigation on auth page

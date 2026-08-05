@@ -5,7 +5,7 @@ import { CheckCircle, XCircle, Trophy, ArrowRight, Zap, Timer } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDictionary, DictionaryWord } from '@/contexts/DictionaryContext';
+import { useDictionary } from '@/contexts/DictionaryContext';
 import { useProfile } from '@/hooks/useProfile';
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
@@ -17,8 +17,9 @@ interface AssignmentSettings {
   timerEnabled?: boolean;
   secondsPerQuestion?: number;
 }
-interface Assignment { id: string; title: string; type: string; word_ids: number[]; class_id: string; settings?: AssignmentSettings | null; }
-interface Question { word: DictionaryWord; options: string[]; correctAnswer: string; }
+interface GemaraQuestion { q: string; options: string[]; correct: number }
+interface Assignment { id: string; title: string; type: string; word_ids: number[]; class_id: string; settings?: AssignmentSettings | null; mode?: string | null; questions?: GemaraQuestion[] | null; source?: { masechet?: string; daf?: string; amud?: string } | null; }
+interface Question { prompt: string; options: string[]; correctAnswer: string; wordId?: number; questionIndex?: number; isGemara?: boolean; }
 
 const TakeAssignment = () => {
   const { id } = useParams();
@@ -32,7 +33,8 @@ const TakeAssignment = () => {
   const [selected, setSelected] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
-  const [details, setDetails] = useState<{ word_id: number; correct: boolean }[]>([]);
+  const [details, setDetails] = useState<{ word_id?: number; question_index?: number; correct: boolean }[]>([]);
+  const startedAt = useRef<number>(Date.now());
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [hiddenOptions, setHiddenOptions] = useState<string[]>([]);
@@ -58,13 +60,27 @@ const TakeAssignment = () => {
 
   useEffect(() => {
     if (!assignment) return;
+    if (assignment.mode === 'gemara') {
+      const src = assignment.questions || [];
+      if (!src.length) { toast.error('אין שאלות במטלה'); return; }
+      const withIdx = src.map((q, i) => ({ q, i }));
+      const ordered = shuffle ? [...withIdx].sort(() => Math.random() - 0.5) : withIdx;
+      setQuestions(ordered.map(({ q, i }) => ({
+        prompt: q.q,
+        options: [...q.options].sort(() => Math.random() - 0.5),
+        correctAnswer: q.options[q.correct],
+        questionIndex: i,
+        isGemara: true,
+      })));
+      return;
+    }
     const words = dictionary.filter((w) => assignment.word_ids.includes(w.id));
     if (words.length < 4) { toast.error('לא מספיק מילים במטלה'); return; }
     const ordered = shuffle ? [...words].sort(() => Math.random() - 0.5) : words;
     const qs: Question[] = ordered.map((word) => {
       const others = words.filter((w) => w.id !== word.id).sort(() => Math.random() - 0.5).slice(0, 3).map((w) => w.hebrew);
       const options = [...others, word.hebrew].sort(() => Math.random() - 0.5);
-      return { word, options, correctAnswer: word.hebrew };
+      return { prompt: word.aramaic, options, correctAnswer: word.hebrew, wordId: word.id };
     });
     setQuestions(qs);
   }, [assignment, dictionary, shuffle]);
@@ -87,7 +103,9 @@ const TakeAssignment = () => {
     setSelected(ans); setShowResult(true);
     const correct = ans !== null && ans === current.correctAnswer;
     if (correct) setScore((s) => s + 1);
-    setDetails((d) => [...d, { word_id: current.word.id, correct }]);
+    setDetails((d) => [...d, current.isGemara
+      ? { question_index: current.questionIndex as number, correct }
+      : { word_id: current.wordId as number, correct }]);
     advanceTimer.current = setTimeout(goNext, 1500);
   };
 
@@ -108,7 +126,7 @@ const TakeAssignment = () => {
     }, 1000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, timerEnabled, seconds, showResult, done, current?.word.id]);
+  }, [idx, timerEnabled, seconds, showResult, done, current?.prompt]);
 
   useEffect(() => () => { if (advanceTimer.current) clearTimeout(advanceTimer.current); }, []);
 
@@ -119,6 +137,7 @@ const TakeAssignment = () => {
     supabase.rpc('submit_assignment', {
       _assignment_id: assignment.id,
       _details: details,
+      _duration_seconds: Math.max(0, Math.round((Date.now() - startedAt.current) / 1000)),
     }).then(async ({ data, error }) => {
       const res = data as { error?: string; score?: number; total?: number } | null;
       if (error || !res || res.error) {
@@ -163,7 +182,10 @@ const TakeAssignment = () => {
         </button>
         <div className="flex-1">
           <h1 className="font-bold">{assignment.title}</h1>
-          <p className="text-xs text-muted-foreground">שאלה {idx + 1} מתוך {questions.length}</p>
+          <p className="text-xs text-muted-foreground">
+            שאלה {idx + 1} מתוך {questions.length}
+            {assignment.source?.masechet ? ` · ${assignment.source.masechet} ${assignment.source.daf || ''} ${assignment.source.amud || ''}` : ''}
+          </p>
         </div>
         {timerEnabled && timeLeft !== null && (
           <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${timeLeft <= 5 ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-primary/10 text-primary'}`}>
@@ -198,8 +220,8 @@ const TakeAssignment = () => {
 
       <div className="px-6 mt-4 mb-6">
         <div className="bg-card rounded-2xl p-6 border border-border text-center">
-          <p className="text-sm text-muted-foreground mb-3">מה הפירוש של:</p>
-          <p className="text-4xl font-display font-bold">{current.word.aramaic}</p>
+          <p className="text-sm text-muted-foreground mb-3">{current.isGemara ? 'שאלה:' : 'מה הפירוש של:'}</p>
+          <p className={current.isGemara ? 'text-2xl font-bold leading-relaxed' : 'text-4xl font-display font-bold'}>{current.prompt}</p>
         </div>
       </div>
 
