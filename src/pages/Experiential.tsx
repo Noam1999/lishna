@@ -3,156 +3,38 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
-  Volume2,
-  Star,
   Sparkles,
   Film,
   CheckCircle2,
   XCircle,
   RotateCcw,
-  BookOpen,
   Loader2,
   AlertCircle,
+  Lock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
 import Footer from '@/components/Footer';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { SEDARIM, type GlossWord, type QuizQuestion } from '@/data/experiential';
-import { SHAS, dapimOf, findMasechet, gematria } from '@/data/shas';
+import { SHAS, dapimOf, gematria } from '@/data/shas';
+import { YERUSHALMI } from '@/data/yerushalmi';
 import { fetchSefariaAmud } from '@/lib/sefaria';
+import GemaraText, { useDictLookup } from '@/components/GemaraText';
 import { removeNiqqud, useDictionary, type DictionaryWord } from '@/contexts/DictionaryContext';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useAuth } from '@/contexts/AuthContext';
-import { isAudioEnabled, sfxCorrect, sfxIncorrect } from '@/lib/audio';
+import { sfxCorrect, sfxIncorrect } from '@/lib/audio';
 import { haptic } from '@/lib/haptics';
 
 const PERSONAL_KEY = 'lishna:personal-dict';
-const PREFIXES = ['ו', 'ד', 'ב', 'כ', 'ל', 'מ', 'ש', 'ה', 'ו'];
-
-const speak = (word: string) => {
-  if (!isAudioEnabled()) {
-    toast.info('השמע כבוי בהגדרות');
-    return;
-  }
-  try {
-    const synth = window.speechSynthesis;
-    if (!synth) return;
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(word);
-    u.lang = 'he-IL';
-    u.rate = 0.85;
-    synth.speak(u);
-  } catch {
-    /* noop */
-  }
-};
 
 /** Curated demo content for Berakhot 2a (fallback + enriched quiz) */
 const berakhotAmud = SEDARIM[0].masechtot[0].dapim[0].amudim[0];
 
-interface MatchedWord {
-  entry: DictionaryWord;
-  /** the exact token as it appears in the text */
-  token: string;
-}
-
-const WordChip = ({
-  token,
-  match,
-  studyMode,
-  onSave,
-  saved,
-}: {
-  token: string;
-  match?: MatchedWord;
-  studyMode: boolean;
-  onSave: (g: GlossWord) => void;
-  saved: boolean;
-}) => {
-  const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-
-  if (!match) {
-    return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <span role="button" tabIndex={0} className="cursor-default rounded-sm outline-none">
-            {token}
-          </span>
-        </PopoverTrigger>
-        <PopoverContent side="top" align="center" className="w-56 text-right text-xs text-muted-foreground">
-          מילה זו תתווסף למילון האתר בהמשך 📝
-        </PopoverContent>
-      </Popover>
-    );
-  }
-
-  const { entry } = match;
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-          aria-label={`${token} — ${entry.hebrew}`}
-          className={`rounded-md px-0.5 -mx-0.5 transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-            studyMode
-              ? 'bg-yellow-100 dark:bg-yellow-500/25 decoration-primary/40 underline decoration-dotted underline-offset-4'
-              : 'hover:bg-yellow-100 dark:hover:bg-yellow-500/25'
-          }`}
-        >
-          {token}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        side="top"
-        align="center"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        className="w-64 text-right"
-      >
-        <p className="font-display text-lg font-bold text-foreground">{entry.aramaic}</p>
-        <p className="text-primary font-semibold text-sm mt-0.5">{entry.hebrew}</p>
-        {entry.culturalContext && (
-          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{entry.culturalContext}</p>
-        )}
-        <div className="flex flex-wrap items-center gap-2 mt-3">
-          <button
-            onClick={() => speak(entry.aramaic)}
-            className="flex items-center gap-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-full px-3 py-1.5 hover:bg-secondary/70 transition-colors"
-            aria-label="השמעת המילה"
-          >
-            <Volume2 className="w-3.5 h-3.5" /> השמע 🔊
-          </button>
-          <button
-            onClick={() =>
-              onSave({ word: entry.aramaic, hebrew: entry.hebrew, context: entry.culturalContext })
-            }
-            className={`flex items-center gap-1 text-xs font-medium rounded-full px-3 py-1.5 transition-colors ${
-              saved ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground hover:bg-accent/70'
-            }`}
-            aria-label="שמור למילון אישי"
-          >
-            <Star className={`w-3.5 h-3.5 ${saved ? 'fill-current' : ''}`} />
-            {saved ? 'נשמר' : 'שמור'}
-          </button>
-          <button
-            onClick={() => navigate(`/translator?q=${encodeURIComponent(entry.aramaic)}`)}
-            className="flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary rounded-full px-3 py-1.5 hover:bg-primary/20 transition-colors w-full justify-center"
-          >
-            <BookOpen className="w-3.5 h-3.5" /> לצפייה במילון האתר 📖
-          </button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-};
 
 const Experiential = () => {
   const { user } = useAuth();
