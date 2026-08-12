@@ -37,17 +37,22 @@ const berakhotAmud = SEDARIM[0].masechtot[0].dapim[0].amudim[0];
 
 
 const Experiential = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const { dictionary } = useDictionary();
   const { markWordAsLearned } = useUserWords();
+  const lookup = useDictLookup();
+
+  const [corpus, setCorpus] = useState<'bavli' | 'yerushalmi'>('bavli');
+  const CORPUS = corpus === 'bavli' ? SHAS : YERUSHALMI;
 
   const [sederId, setSederId] = useState('zeraim');
   const [masechetId, setMasechetId] = useState('berakhot');
   const [dafId, setDafId] = useState('2');
   const [amudId, setAmudId] = useState<'a' | 'b'>('a');
 
-  const seder = SHAS.find((s) => s.id === sederId) ?? SHAS[0];
-  const { masechet } = findMasechet(sederId, masechetId);
+  const seder = CORPUS.find((s) => s.id === sederId) ?? CORPUS[0];
+  const masechet = seder.masechtot.find((x) => x.id === masechetId) ?? seder.masechtot[0];
   const dapim = useMemo(() => dapimOf(masechet), [masechet]);
 
   const [studyMode, setStudyMode] = useState(true);
@@ -61,46 +66,31 @@ const Experiential = () => {
 
   // Keep cascading selectors valid
   useEffect(() => {
+    if (!CORPUS.some((s) => s.id === sederId)) setSederId(CORPUS[0].id);
+  }, [corpus]);
+  useEffect(() => {
     if (!seder.masechtot.some((x) => x.id === masechetId)) setMasechetId(seder.masechtot[0].id);
-  }, [sederId]);
+  }, [sederId, corpus]);
   useEffect(() => {
     if (!dapim.some((d) => d.id === dafId)) setDafId(dapim[0]?.id ?? '2');
-  }, [masechetId]);
-
-  // ---- Dictionary lookup map (Master Site Dictionary) ----
-  const dictMap = useMemo(() => {
-    const map = new Map<string, DictionaryWord>();
-    dictionary.forEach((w) => {
-      const key = removeNiqqud(w.aramaic).trim();
-      if (key && !map.has(key)) map.set(key, w);
-    });
-    return map;
-  }, [dictionary]);
-
-  const lookup = (token: string): DictionaryWord | undefined => {
-    const clean = removeNiqqud(token).replace(/[^\u05D0-\u05EA]/g, '');
-    if (!clean) return undefined;
-    const direct = dictMap.get(clean);
-    if (direct) return direct;
-    if (clean.length > 2 && PREFIXES.includes(clean[0])) {
-      const stripped = dictMap.get(clean.slice(1));
-      if (stripped) return stripped;
-    }
-    return undefined;
-  };
+  }, [masechetId, corpus]);
 
   // ---- Sefaria text ----
   const [lines, setLines] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const isDemo = masechetId === 'berakhot' && dafId === '2' && amudId === 'a';
+  const isDemo = corpus === 'bavli' && masechetId === 'berakhot' && dafId === '2' && amudId === 'a';
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       if (!masechet.sefaria) {
         setLines([]);
-        setLoadError('למסכת זו אין תלמוד בבלי — בחר מסכת אחרת.');
+        setLoadError(
+          corpus === 'bavli'
+            ? 'למסכת זו אין תלמוד בבלי — בחר מסכת אחרת.'
+            : 'למסכת זו אין תלמוד ירושלמי — בחר מסכת אחרת.'
+        );
         return;
       }
       setLoading(true);
@@ -126,7 +116,7 @@ const Experiential = () => {
     return () => {
       cancelled = true;
     };
-  }, [masechet.sefaria, dafId, amudId]);
+  }, [masechet.sefaria, dafId, amudId, corpus]);
 
   // ---- Matched words on the current page ----
   const matchedWords = useMemo(() => {
@@ -138,7 +128,8 @@ const Experiential = () => {
       })
     );
     return Array.from(found.values());
-  }, [lines, dictMap]);
+  }, [lines, lookup]);
+
 
   // ---- Quiz ----
   const quiz: QuizQuestion[] = useMemo(() => {
