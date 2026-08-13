@@ -269,16 +269,27 @@ const Experiential = () => {
 
             {/* Selectors + mode toggle */}
             <div className="flex flex-wrap items-center gap-2">
+              <Select value={corpus} onValueChange={(v) => setCorpus(v as 'bavli' | 'yerushalmi')}>
+                <SelectTrigger className="w-[150px] bg-card" aria-label="תלמוד">
+                  <SelectValue placeholder="תלמוד" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bavli">תלמוד בבלי</SelectItem>
+                  <SelectItem value="yerushalmi">תלמוד ירושלמי</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select value={sederId} onValueChange={setSederId}>
                 <SelectTrigger className="w-[150px] bg-card" aria-label="סדר">
                   <SelectValue placeholder="סדר" />
                 </SelectTrigger>
                 <SelectContent className="max-h-72">
-                  {SHAS.map((s) => (
+                  {CORPUS.map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
 
               <Select value={masechetId} onValueChange={setMasechetId}>
                 <SelectTrigger className="w-[150px] bg-card" aria-label="מסכת">
