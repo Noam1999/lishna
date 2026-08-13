@@ -10,6 +10,9 @@ import { useProfile } from '@/hooks/useProfile';
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
 import { haptic } from '@/lib/haptics';
+import GemaraText from '@/components/GemaraText';
+import { fetchSefariaAmud } from '@/lib/sefaria';
+
 
 interface AssignmentSettings {
   allowPowerUps?: boolean;
