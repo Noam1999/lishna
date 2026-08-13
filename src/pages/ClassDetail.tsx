@@ -201,9 +201,17 @@ const ClassDetail = () => {
       word_ids: mode === 'vocab' ? Array.from(selectedWords) : [],
       questions: mode === 'gemara' ? validGemara : [],
       source: mode === 'gemara'
-        ? { masechet: masechet.label, daf: gematria(Number(daf)), amud: amud === 'a' ? 'ע"א' : 'ע"ב' }
+        ? {
+            masechet: masechet.label,
+            daf: gematria(Number(daf)),
+            amud: amud === 'a' ? 'ע"א' : 'ע"ב',
+            sefaria: masechet.sefaria,
+            dafNum: daf,
+            amudId: amud,
+          }
         : {},
-      settings: { allowPowerUps, shuffleQuestions, timerEnabled, secondsPerQuestion },
+      settings: { allowPowerUps, shuffleQuestions, timerEnabled, secondsPerQuestion, studyMode },
+
     };
     const { error } = await supabase.from('assignments').insert(payload as never);
     setBusy(false);
