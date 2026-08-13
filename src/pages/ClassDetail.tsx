@@ -110,6 +110,8 @@ const ClassDetail = () => {
   const [shuffleQuestions, setShuffleQuestions] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(false);
   const [secondsPerQuestion, setSecondsPerQuestion] = useState(20);
+  const [studyMode, setStudyMode] = useState(true);
+
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   // Gemara builder state
