@@ -202,31 +202,46 @@ const Experiential = () => {
     }
   };
 
-  const renderText = () =>
-    lines.map((line, li) => (
-      <p key={li} className="mb-4 leading-[2.2] text-lg md:text-xl font-display text-foreground">
-        {line.split(/(\s+)/).map((part, pi) => {
-          if (/^\s+$/.test(part)) return <span key={pi}>{part}</span>;
-          const entry = lookup(part);
-          return (
-            <WordChip
-              key={pi}
-              token={part}
-              match={entry ? { entry, token: part } : undefined}
-              studyMode={studyMode}
-              onSave={saveWord}
-              saved={entry ? saved.includes(entry.aramaic) : false}
-            />
-          );
-        })}
-      </p>
-    ));
+  const renderText = () => (
+    <GemaraText
+      lines={lines}
+      studyMode={studyMode}
+      savedWords={saved}
+      onSave={(entry) =>
+        saveWord({ word: entry.aramaic, hebrew: entry.hebrew, context: entry.culturalContext ?? '' })
+      }
+    />
+  );
+
 
   const q = quiz[qIndex];
   const amudLabel = amudId === 'a' ? "עמוד א'" : "עמוד ב'";
   const dafLabel = `דף ${gematria(Number(dafId))}`;
 
+  if (!authLoading && !user) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-6 text-center" dir="rtl">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Lock className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-xl font-display font-bold text-foreground">
+            יש להתחבר כדי להיכנס ללימוד חווייתי 🔐
+          </h1>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            הלימוד החווייתי כולל טקסט חי, מילון אינטראקטיבי וחידונים — פתוח למשתמשים רשומים.
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate('/auth')}>התחברות / הרשמה</Button>
+            <Button variant="outline" onClick={() => navigate('/')}>חזרה לדף הבית</Button>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
   return (
+
     <PageTransition>
       <div className="min-h-screen bg-background pb-28" dir="rtl">
         {/* Header */}
@@ -254,16 +269,27 @@ const Experiential = () => {
 
             {/* Selectors + mode toggle */}
             <div className="flex flex-wrap items-center gap-2">
+              <Select value={corpus} onValueChange={(v) => setCorpus(v as 'bavli' | 'yerushalmi')}>
+                <SelectTrigger className="w-[150px] bg-card" aria-label="תלמוד">
+                  <SelectValue placeholder="תלמוד" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bavli">תלמוד בבלי</SelectItem>
+                  <SelectItem value="yerushalmi">תלמוד ירושלמי</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select value={sederId} onValueChange={setSederId}>
                 <SelectTrigger className="w-[150px] bg-card" aria-label="סדר">
                   <SelectValue placeholder="סדר" />
                 </SelectTrigger>
                 <SelectContent className="max-h-72">
-                  {SHAS.map((s) => (
+                  {CORPUS.map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
 
               <Select value={masechetId} onValueChange={setMasechetId}>
                 <SelectTrigger className="w-[150px] bg-card" aria-label="מסכת">
@@ -272,7 +298,7 @@ const Experiential = () => {
                 <SelectContent className="max-h-72">
                   {seder.masechtot.map((x) => (
                     <SelectItem key={x.id} value={x.id}>
-                      {x.label}{!x.sefaria ? ' (אין בבלי)' : ''}
+                      {x.label}{!x.sefaria ? ' (לא זמין)' : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>

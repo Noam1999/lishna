@@ -110,6 +110,8 @@ const ClassDetail = () => {
   const [shuffleQuestions, setShuffleQuestions] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(false);
   const [secondsPerQuestion, setSecondsPerQuestion] = useState(20);
+  const [studyMode, setStudyMode] = useState(true);
+
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   // Gemara builder state
@@ -201,9 +203,17 @@ const ClassDetail = () => {
       word_ids: mode === 'vocab' ? Array.from(selectedWords) : [],
       questions: mode === 'gemara' ? validGemara : [],
       source: mode === 'gemara'
-        ? { masechet: masechet.label, daf: gematria(Number(daf)), amud: amud === 'a' ? 'ע"א' : 'ע"ב' }
+        ? {
+            masechet: masechet.label,
+            daf: gematria(Number(daf)),
+            amud: amud === 'a' ? 'ע"א' : 'ע"ב',
+            sefaria: masechet.sefaria,
+            dafNum: daf,
+            amudId: amud,
+          }
         : {},
-      settings: { allowPowerUps, shuffleQuestions, timerEnabled, secondsPerQuestion },
+      settings: { allowPowerUps, shuffleQuestions, timerEnabled, secondsPerQuestion, studyMode },
+
     };
     const { error } = await supabase.from('assignments').insert(payload as never);
     setBusy(false);
@@ -667,6 +677,18 @@ const ClassDetail = () => {
               </div>
               <Switch checked={allowPowerUps} onCheckedChange={setAllowPowerUps} />
             </label>
+
+            <label className="flex items-start justify-between gap-3 p-3 rounded-xl bg-muted/40">
+              <div className="text-right">
+                <p className="font-semibold text-foreground">מצב לימוד (במטלת גמרא)</p>
+                <p className="text-xs text-muted-foreground">
+                  פעיל: מילים ארמיות מודגשות עם תרגום והשמעה. כבוי: מצב מבחן — ללא תרגומים ורמזים כלל
+                </p>
+              </div>
+              <Switch checked={studyMode} onCheckedChange={setStudyMode} />
+            </label>
+
+
 
             <label className="flex items-start justify-between gap-3 p-3 rounded-xl bg-muted/40">
               <div className="text-right">

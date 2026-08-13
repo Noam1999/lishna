@@ -27,6 +27,7 @@ const AdminFeedback = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -58,11 +59,24 @@ const AdminFeedback = () => {
         .from('feedback')
         .select('*')
         .order('created_at', { ascending: false });
-      if (!error && data) setFeedbackList(data);
+      if (!error && data) {
+        setFeedbackList(data);
+        const ids = Array.from(new Set(data.map((f) => f.user_id).filter(Boolean))) as string[];
+        if (ids.length) {
+          const { data: profs } = await supabase
+            .from('profiles')
+            .select('user_id, display_name')
+            .in('user_id', ids);
+          const map: Record<string, string> = {};
+          (profs || []).forEach((p) => { map[p.user_id] = p.display_name || 'משתמש'; });
+          setNames(map);
+        }
+      }
       setIsLoading(false);
     };
     checkAdminAndFetch();
   }, [user]);
+
 
   if (loading || isLoading) {
     return (
@@ -121,14 +135,20 @@ const AdminFeedback = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
+                    <div className="mb-3 rounded-xl bg-muted/50 p-3 space-y-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        👤 {item.user_id ? names[item.user_id] || 'משתמש רשום' : 'אורח'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        📧 {item.email || 'לא הושאר אימייל'}
+                      </p>
+                      {item.user_id && (
+                        <p className="text-[11px] text-muted-foreground">🔑 {item.user_id.slice(0, 8)}...</p>
+                      )}
+                    </div>
                     <p className="text-foreground whitespace-pre-wrap">{item.message}</p>
-                    {item.email && (
-                      <p className="text-xs text-muted-foreground mt-2">📧 {item.email}</p>
-                    )}
-                    {item.user_id && (
-                      <p className="text-xs text-muted-foreground mt-1">🔑 {item.user_id.slice(0, 8)}...</p>
-                    )}
                   </CardContent>
+
                 </Card>
               );
             })}

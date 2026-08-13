@@ -10,15 +10,22 @@ import { useProfile } from '@/hooks/useProfile';
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
 import { haptic } from '@/lib/haptics';
+import GemaraText from '@/components/GemaraText';
+import { fetchSefariaAmud } from '@/lib/sefaria';
+
 
 interface AssignmentSettings {
   allowPowerUps?: boolean;
   shuffleQuestions?: boolean;
   timerEnabled?: boolean;
   secondsPerQuestion?: number;
+  /** true = study mode (tooltips + highlights), false = test mode (no hints at all) */
+  studyMode?: boolean;
 }
 interface GemaraQuestion { q: string; options: string[]; correct: number }
-interface Assignment { id: string; title: string; type: string; word_ids: number[]; class_id: string; settings?: AssignmentSettings | null; mode?: string | null; questions?: GemaraQuestion[] | null; source?: { masechet?: string; daf?: string; amud?: string } | null; }
+interface AssignmentSource { masechet?: string; daf?: string; amud?: string; sefaria?: string; dafNum?: string; amudId?: 'a' | 'b' }
+interface Assignment { id: string; title: string; type: string; word_ids: number[]; class_id: string; settings?: AssignmentSettings | null; mode?: string | null; questions?: GemaraQuestion[] | null; source?: AssignmentSource | null; }
+
 interface Question { prompt: string; options: string[]; correctAnswer: string; wordId?: number; questionIndex?: number; isGemara?: boolean; }
 
 const TakeAssignment = () => {
@@ -47,8 +54,23 @@ const TakeAssignment = () => {
   const shuffle = !!settings.shuffleQuestions;
   const timerEnabled = !!settings.timerEnabled;
   const seconds = Math.max(5, settings.secondsPerQuestion || 20);
+  const studyMode = settings.studyMode !== false;
+  const isGemaraMode = assignment?.mode === 'gemara';
+
+  // Interactive Gemara text panel (loaded from Sefaria when the teacher picked a daf)
+  const [textLines, setTextLines] = useState<string[]>([]);
+  useEffect(() => {
+    const src = assignment?.source;
+    if (!isGemaraMode || !src?.sefaria || !src.dafNum) { setTextLines([]); return; }
+    let cancelled = false;
+    fetchSefariaAmud(src.sefaria, src.dafNum, src.amudId || 'a')
+      .then(({ lines }) => { if (!cancelled) setTextLines(lines); })
+      .catch(() => { if (!cancelled) setTextLines([]); });
+    return () => { cancelled = true; };
+  }, [assignment?.source, isGemaraMode]);
 
   useEffect(() => { document.title = 'מטלה | לישנא'; }, []);
+
 
   useEffect(() => {
     (async () => {
@@ -218,7 +240,24 @@ const TakeAssignment = () => {
         )}
       </div>
 
+      {isGemaraMode && textLines.length > 0 && (
+        <div className="px-6 mt-4">
+          <div className="bg-card rounded-2xl p-5 border border-border max-h-[45vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-bold text-foreground">
+                {assignment.source?.masechet} {assignment.source?.daf} {assignment.source?.amud}
+              </p>
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${studyMode ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                {studyMode ? 'מצב לימוד' : 'מצב מבחן'}
+              </span>
+            </div>
+            <GemaraText lines={textLines} studyMode={studyMode} />
+          </div>
+        </div>
+      )}
+
       <div className="px-6 mt-4 mb-6">
+
         <div className="bg-card rounded-2xl p-6 border border-border text-center">
           <p className="text-sm text-muted-foreground mb-3">{current.isGemara ? 'שאלה:' : 'מה הפירוש של:'}</p>
           <p className={current.isGemara ? 'text-2xl font-bold leading-relaxed' : 'text-4xl font-display font-bold'}>{current.prompt}</p>
