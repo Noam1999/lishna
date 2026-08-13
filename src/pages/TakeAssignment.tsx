@@ -16,9 +16,13 @@ interface AssignmentSettings {
   shuffleQuestions?: boolean;
   timerEnabled?: boolean;
   secondsPerQuestion?: number;
+  /** true = study mode (tooltips + highlights), false = test mode (no hints at all) */
+  studyMode?: boolean;
 }
 interface GemaraQuestion { q: string; options: string[]; correct: number }
-interface Assignment { id: string; title: string; type: string; word_ids: number[]; class_id: string; settings?: AssignmentSettings | null; mode?: string | null; questions?: GemaraQuestion[] | null; source?: { masechet?: string; daf?: string; amud?: string } | null; }
+interface AssignmentSource { masechet?: string; daf?: string; amud?: string; sefaria?: string; dafNum?: string; amudId?: 'a' | 'b' }
+interface Assignment { id: string; title: string; type: string; word_ids: number[]; class_id: string; settings?: AssignmentSettings | null; mode?: string | null; questions?: GemaraQuestion[] | null; source?: AssignmentSource | null; }
+
 interface Question { prompt: string; options: string[]; correctAnswer: string; wordId?: number; questionIndex?: number; isGemara?: boolean; }
 
 const TakeAssignment = () => {
