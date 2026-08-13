@@ -240,7 +240,24 @@ const TakeAssignment = () => {
         )}
       </div>
 
+      {isGemaraMode && textLines.length > 0 && (
+        <div className="px-6 mt-4">
+          <div className="bg-card rounded-2xl p-5 border border-border max-h-[45vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-bold text-foreground">
+                {assignment.source?.masechet} {assignment.source?.daf} {assignment.source?.amud}
+              </p>
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${studyMode ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                {studyMode ? 'מצב לימוד' : 'מצב מבחן'}
+              </span>
+            </div>
+            <GemaraText lines={textLines} studyMode={studyMode} />
+          </div>
+        </div>
+      )}
+
       <div className="px-6 mt-4 mb-6">
+
         <div className="bg-card rounded-2xl p-6 border border-border text-center">
           <p className="text-sm text-muted-foreground mb-3">{current.isGemara ? 'שאלה:' : 'מה הפירוש של:'}</p>
           <p className={current.isGemara ? 'text-2xl font-bold leading-relaxed' : 'text-4xl font-display font-bold'}>{current.prompt}</p>
