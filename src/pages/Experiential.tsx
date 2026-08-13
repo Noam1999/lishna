@@ -298,7 +298,7 @@ const Experiential = () => {
                 <SelectContent className="max-h-72">
                   {seder.masechtot.map((x) => (
                     <SelectItem key={x.id} value={x.id}>
-                      {x.label}{!x.sefaria ? ' (אין בבלי)' : ''}
+                      {x.label}{!x.sefaria ? ' (לא זמין)' : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
