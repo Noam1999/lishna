@@ -680,6 +680,18 @@ const ClassDetail = () => {
 
             <label className="flex items-start justify-between gap-3 p-3 rounded-xl bg-muted/40">
               <div className="text-right">
+                <p className="font-semibold text-foreground">מצב לימוד (במטלת גמרא)</p>
+                <p className="text-xs text-muted-foreground">
+                  פעיל: מילים ארמיות מודגשות עם תרגום והשמעה. כבוי: מצב מבחן — ללא תרגומים ורמזים כלל
+                </p>
+              </div>
+              <Switch checked={studyMode} onCheckedChange={setStudyMode} />
+            </label>
+
+
+
+            <label className="flex items-start justify-between gap-3 p-3 rounded-xl bg-muted/40">
+              <div className="text-right">
                 <p className="font-semibold text-foreground">ערבוב שאלות</p>
                 <p className="text-xs text-muted-foreground">סדר השאלות יוגרל לכל תלמיד בנפרד</p>
               </div>
