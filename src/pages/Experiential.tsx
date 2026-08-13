@@ -202,25 +202,17 @@ const Experiential = () => {
     }
   };
 
-  const renderText = () =>
-    lines.map((line, li) => (
-      <p key={li} className="mb-4 leading-[2.2] text-lg md:text-xl font-display text-foreground">
-        {line.split(/(\s+)/).map((part, pi) => {
-          if (/^\s+$/.test(part)) return <span key={pi}>{part}</span>;
-          const entry = lookup(part);
-          return (
-            <WordChip
-              key={pi}
-              token={part}
-              match={entry ? { entry, token: part } : undefined}
-              studyMode={studyMode}
-              onSave={saveWord}
-              saved={entry ? saved.includes(entry.aramaic) : false}
-            />
-          );
-        })}
-      </p>
-    ));
+  const renderText = () => (
+    <GemaraText
+      lines={lines}
+      studyMode={studyMode}
+      savedWords={saved}
+      onSave={(entry) =>
+        saveWord({ word: entry.aramaic, hebrew: entry.hebrew, context: entry.culturalContext ?? '' })
+      }
+    />
+  );
+
 
   const q = quiz[qIndex];
   const amudLabel = amudId === 'a' ? "עמוד א'" : "עמוד ב'";
