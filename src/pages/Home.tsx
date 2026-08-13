@@ -224,9 +224,18 @@ const Home = () => {
           <div className="flex justify-center mt-8">
             <Link
               to="/experiential"
+              onClick={(e) => {
+                if (!user) {
+                  e.preventDefault();
+                  toast.info('יש להתחבר כדי להיכנס ללימוד חווייתי 🔐', {
+                    action: { label: 'התחברות', onClick: () => navigate('/auth') },
+                  });
+                }
+              }}
               aria-label="לימוד חווייתי"
               className="group relative flex flex-col items-center"
             >
+
               <span className="absolute top-1 w-28 h-28 rounded-full bg-primary/20 blur-2xl animate-pulse" />
               <span className="absolute top-0 w-[7.5rem] h-[7.5rem] rounded-full border border-primary/30 [animation:spin_14s_linear_infinite]"
                 style={{ borderStyle: 'dashed' }} />
