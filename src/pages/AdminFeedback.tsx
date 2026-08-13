@@ -135,14 +135,20 @@ const AdminFeedback = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
+                    <div className="mb-3 rounded-xl bg-muted/50 p-3 space-y-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        👤 {item.user_id ? names[item.user_id] || 'משתמש רשום' : 'אורח'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        📧 {item.email || 'לא הושאר אימייל'}
+                      </p>
+                      {item.user_id && (
+                        <p className="text-[11px] text-muted-foreground">🔑 {item.user_id.slice(0, 8)}...</p>
+                      )}
+                    </div>
                     <p className="text-foreground whitespace-pre-wrap">{item.message}</p>
-                    {item.email && (
-                      <p className="text-xs text-muted-foreground mt-2">📧 {item.email}</p>
-                    )}
-                    {item.user_id && (
-                      <p className="text-xs text-muted-foreground mt-1">🔑 {item.user_id.slice(0, 8)}...</p>
-                    )}
                   </CardContent>
+
                 </Card>
               );
             })}
