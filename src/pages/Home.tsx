@@ -19,6 +19,8 @@ import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserWords } from '@/hooks/useUserWords';
 import { useGuestWarning } from '@/hooks/useGuestWarning';
+import { toast } from 'sonner';
+
 
 
 
