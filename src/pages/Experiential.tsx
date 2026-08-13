@@ -218,7 +218,30 @@ const Experiential = () => {
   const amudLabel = amudId === 'a' ? "עמוד א'" : "עמוד ב'";
   const dafLabel = `דף ${gematria(Number(dafId))}`;
 
+  if (!authLoading && !user) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-6 text-center" dir="rtl">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Lock className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-xl font-display font-bold text-foreground">
+            יש להתחבר כדי להיכנס ללימוד חווייתי 🔐
+          </h1>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            הלימוד החווייתי כולל טקסט חי, מילון אינטראקטיבי וחידונים — פתוח למשתמשים רשומים.
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate('/auth')}>התחברות / הרשמה</Button>
+            <Button variant="outline" onClick={() => navigate('/')}>חזרה לדף הבית</Button>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
   return (
+
     <PageTransition>
       <div className="min-h-screen bg-background pb-28" dir="rtl">
         {/* Header */}
