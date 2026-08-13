@@ -27,6 +27,7 @@ const AdminFeedback = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -58,11 +59,24 @@ const AdminFeedback = () => {
         .from('feedback')
         .select('*')
         .order('created_at', { ascending: false });
-      if (!error && data) setFeedbackList(data);
+      if (!error && data) {
+        setFeedbackList(data);
+        const ids = Array.from(new Set(data.map((f) => f.user_id).filter(Boolean))) as string[];
+        if (ids.length) {
+          const { data: profs } = await supabase
+            .from('profiles')
+            .select('user_id, display_name')
+            .in('user_id', ids);
+          const map: Record<string, string> = {};
+          (profs || []).forEach((p) => { map[p.user_id] = p.display_name || 'משתמש'; });
+          setNames(map);
+        }
+      }
       setIsLoading(false);
     };
     checkAdminAndFetch();
   }, [user]);
+
 
   if (loading || isLoading) {
     return (
