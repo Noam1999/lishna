@@ -51,8 +51,23 @@ const TakeAssignment = () => {
   const shuffle = !!settings.shuffleQuestions;
   const timerEnabled = !!settings.timerEnabled;
   const seconds = Math.max(5, settings.secondsPerQuestion || 20);
+  const studyMode = settings.studyMode !== false;
+  const isGemaraMode = assignment?.mode === 'gemara';
+
+  // Interactive Gemara text panel (loaded from Sefaria when the teacher picked a daf)
+  const [textLines, setTextLines] = useState<string[]>([]);
+  useEffect(() => {
+    const src = assignment?.source;
+    if (!isGemaraMode || !src?.sefaria || !src.dafNum) { setTextLines([]); return; }
+    let cancelled = false;
+    fetchSefariaAmud(src.sefaria, src.dafNum, src.amudId || 'a')
+      .then(({ lines }) => { if (!cancelled) setTextLines(lines); })
+      .catch(() => { if (!cancelled) setTextLines([]); });
+    return () => { cancelled = true; };
+  }, [assignment?.source, isGemaraMode]);
 
   useEffect(() => { document.title = 'מטלה | לישנא'; }, []);
+
 
   useEffect(() => {
     (async () => {
