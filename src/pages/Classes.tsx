@@ -289,7 +289,7 @@ const Classes = () => {
 
         {/* Student: join */}
         <section>
-          <h2 className="text-lg font-bold mb-3">הצטרף לכיתה</h2>
+          <h2 className="text-lg font-bold mb-3">תלמיד? הצטרף לכיתה:</h2>
           <div className="bg-card rounded-2xl p-4 border border-border flex gap-2">
             <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="קוד כיתה" maxLength={8} className="text-center font-mono uppercase" />
             <Button onClick={handleJoin} disabled={busy || !joinCode.trim()}>הצטרף</Button>
