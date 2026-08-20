@@ -107,7 +107,7 @@ const Flashcards = () => {
   if (totalWords === 0) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <Header title="כרטיסיות" subtitle="למד מילים חדשות" />
+        <Header title="כרטיסיות למידה" subtitle="למד מילים חדשות" />
         <div className="px-6 flex flex-col items-center justify-center py-16">
           <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
             <Sparkles className="w-10 h-10 text-primary" />
@@ -127,7 +127,7 @@ const Flashcards = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <Header title="כרטיסיות" subtitle="לחץ על הכרטיס להפוך" />
+      <Header title="כרטיסיות למידה" subtitle="לחץ על הכרטיס להפוך" />
 
       {/* Progress Bar */}
       <div className="px-6 mb-6">
