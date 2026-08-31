@@ -182,6 +182,41 @@ interface GemaraTextProps {
 
 const GemaraText = ({ lines, studyMode, onSave, savedWords = [] }: GemaraTextProps) => {
   const lookup = useDictLookup();
+  const dictMap = useDictMap();
+
+  /** Greedy longest-match scan: multi-word phrases first, then strict whole words. */
+  const renderLine = (line: string) => {
+    const words = line.split(/\s+/).filter(Boolean);
+    const nodes: JSX.Element[] = [];
+    let i = 0;
+    while (i < words.length) {
+      let entry: DictionaryWord | undefined;
+      let span = 1;
+      for (let n = Math.min(MAX_PHRASE_WORDS, words.length - i); n >= 1; n--) {
+        const phrase = words.slice(i, i + n).join(' ');
+        const key = normalizeKey(phrase);
+        const hit = n > 1 ? dictMap.get(key) : lookup(phrase);
+        if (hit) {
+          entry = hit;
+          span = n;
+          break;
+        }
+      }
+      const token = words.slice(i, i + span).join(' ');
+      nodes.push(
+        <WordChip
+          key={i}
+          token={token}
+          entry={entry}
+          onSave={onSave}
+          saved={entry ? savedWords.includes(entry.aramaic) : false}
+        />
+      );
+      if (i + span < words.length) nodes.push(<span key={`s-${i}`}> </span>);
+      i += span;
+    }
+    return nodes;
+  };
 
   return (
     <div className="text-justify">
@@ -196,19 +231,7 @@ const GemaraText = ({ lines, studyMode, onSave, savedWords = [] }: GemaraTextPro
         }
         return (
           <p key={li} className="mb-4 leading-[2.2] text-lg md:text-xl font-display text-foreground">
-            {line.split(/(\s+)/).map((part, pi) => {
-              if (/^\s+$/.test(part)) return <span key={pi}>{part}</span>;
-              const entry = lookup(part);
-              return (
-                <WordChip
-                  key={pi}
-                  token={part}
-                  entry={entry}
-                  onSave={onSave}
-                  saved={entry ? savedWords.includes(entry.aramaic) : false}
-                />
-              );
-            })}
+            {renderLine(line)}
           </p>
         );
       })}
