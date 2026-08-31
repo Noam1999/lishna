@@ -33,30 +33,52 @@ export const speakWord = (word: string) => {
   }
 };
 
-export const useDictLookup = () => {
+/** Letters-only normalization: drops niqqud and any non-Hebrew-letter character. */
+export const normalizeKey = (s: string) =>
+  removeNiqqud(s)
+    .replace(/[^\u05D0-\u05EA\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** Max words in a multi-word dictionary phrase we try to match. */
+const MAX_PHRASE_WORDS = 3;
+
+export const useDictMap = () => {
   const { dictionary } = useDictionary();
-  const dictMap = useMemo(() => {
+  return useMemo(() => {
     const map = new Map<string, DictionaryWord>();
     dictionary.forEach((w) => {
-      const key = removeNiqqud(w.aramaic).trim();
+      const key = normalizeKey(w.aramaic);
       if (key && !map.has(key)) map.set(key, w);
     });
     return map;
   }, [dictionary]);
+};
+
+export const useDictLookup = () => {
+  const dictMap = useDictMap();
 
   return useMemo(
     () =>
       (token: string): DictionaryWord | undefined => {
-        const clean = removeNiqqud(token).replace(/[^\u05D0-\u05EA]/g, '');
+        const clean = normalizeKey(token);
         if (!clean) return undefined;
-        const direct = dictMap.get(clean);
-        if (direct) return direct;
-        if (clean.length > 2 && PREFIXES.includes(clean[0])) return dictMap.get(clean.slice(1));
+        // Strict whole-word match only — never a substring of a longer word.
+        const wholeWord = new RegExp(`^${clean}$`);
+        for (const [key, entry] of dictMap) {
+          if (wholeWord.test(key)) return entry;
+        }
+        if (clean.length > 2 && PREFIXES.includes(clean[0])) {
+          const stripped = clean.slice(1);
+          const direct = dictMap.get(stripped);
+          if (direct) return direct;
+        }
         return undefined;
       },
     [dictMap]
   );
 };
+
 
 const WordChip = ({
   token,
