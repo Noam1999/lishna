@@ -64,10 +64,9 @@ export const useDictLookup = () => {
         const clean = normalizeKey(token);
         if (!clean) return undefined;
         // Strict whole-word match only — never a substring of a longer word.
-        const wholeWord = new RegExp(`^${clean}$`);
-        for (const [key, entry] of dictMap) {
-          if (wholeWord.test(key)) return entry;
-        }
+        if (!/^[\u05D0-\u05EA]+$/.test(clean)) return undefined;
+        const direct0 = dictMap.get(clean);
+        if (direct0) return direct0;
         if (clean.length > 2 && PREFIXES.includes(clean[0])) {
           const stripped = clean.slice(1);
           const direct = dictMap.get(stripped);
