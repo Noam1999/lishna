@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Trophy, ArrowRight, Zap, Timer } from 'lucide-react';
+import { CheckCircle, XCircle, Trophy, ArrowRight, Zap, Timer, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,6 +47,7 @@ const TakeAssignment = () => {
   const [hiddenOptions, setHiddenOptions] = useState<string[]>([]);
   const [usedThisQuestion, setUsedThisQuestion] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [fullText, setFullText] = useState(false);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const settings = assignment?.settings || {};
@@ -193,6 +194,7 @@ const TakeAssignment = () => {
 
   if (!current) return <div className="min-h-screen flex items-center justify-center">טוען...</div>;
 
+  const hasText = isGemaraMode && textLines.length > 0;
   const canUse5050 = allowPowerUps && profile && profile.power_up_5050 > 0 && !usedThisQuestion && !showResult && current.options.length >= 4;
 
   return (
@@ -241,61 +243,77 @@ const TakeAssignment = () => {
       </div>
 
       {isGemaraMode && textLines.length > 0 && (
-        <div className="px-6 mt-4">
-          <div className="bg-card rounded-2xl p-5 border border-border max-h-[45vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-bold text-foreground">
-                {assignment.source?.masechet} {assignment.source?.daf} {assignment.source?.amud}
-              </p>
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${studyMode ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                {studyMode ? 'מצב לימוד' : 'מצב מבחן'}
-              </span>
-            </div>
-            <GemaraText lines={textLines} studyMode={studyMode} />
-          </div>
+        <div className="px-6 mt-2 flex justify-end">
+          <button
+            onClick={() => setFullText((v) => !v)}
+            className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 py-1.5 text-xs font-medium text-foreground hover:bg-accent transition-colors"
+            aria-label={fullText ? 'הצגת השאלות' : 'מסך מלא'}
+          >
+            {fullText ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            {fullText ? 'הצג שאלות' : 'מסך מלא ⛶'}
+          </button>
         </div>
       )}
 
-      <div className="px-6 mt-4 mb-6">
+      <div className={`max-w-6xl mx-auto px-6 mt-4 grid grid-cols-1 gap-5 ${hasText && !fullText ? 'lg:grid-cols-2' : ''}`}>
+        {/* Right side — authentic Gemara text */}
+        {hasText && (
+          <div className="lg:order-1">
+            <div className="bg-card rounded-2xl p-5 border border-border lg:max-h-[70vh] max-h-[45vh] overflow-y-auto h-full">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-bold text-foreground">
+                  {assignment.source?.masechet} {assignment.source?.daf} {assignment.source?.amud}
+                </p>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${studyMode ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                  {studyMode ? 'מצב לימוד' : 'מצב מבחן'}
+                </span>
+              </div>
+              <GemaraText lines={textLines} studyMode={studyMode} />
+            </div>
+          </div>
+        )}
 
-        <div className="bg-card rounded-2xl p-6 border border-border text-center">
-          <p className="text-sm text-muted-foreground mb-3">{current.isGemara ? 'שאלה:' : 'מה הפירוש של:'}</p>
-          <p className={current.isGemara ? 'text-2xl font-bold leading-relaxed' : 'text-4xl font-display font-bold'}>{current.prompt}</p>
+        {/* Left side — teacher's questions */}
+        <div className={`lg:order-2 ${hasText && fullText ? 'hidden' : ''}`}>
+          <div className="bg-card rounded-2xl p-6 border border-border text-center">
+            <p className="text-sm text-muted-foreground mb-3">{current.isGemara ? 'שאלה:' : 'מה הפירוש של:'}</p>
+            <p className={current.isGemara ? 'text-2xl font-bold leading-relaxed' : 'text-4xl font-display font-bold'}>{current.prompt}</p>
+          </div>
+
+          <div className="space-y-3 mt-4">
+            {current.options.map((opt, i) => {
+              const isSel = selected === opt;
+              const isAnswer = opt === current.correctAnswer;
+              const isHidden = hiddenOptions.includes(opt);
+              let cls = 'w-full h-14 text-lg justify-start px-6 transition-all min-h-[44px] ';
+              if (isHidden && !showResult) cls += 'opacity-20 line-through pointer-events-none';
+              else if (showResult) {
+                if (isAnswer) cls += 'bg-green-100 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-300';
+                else if (isSel) cls += 'bg-red-100 dark:bg-red-900/30 border-red-500 text-red-700 dark:text-red-300';
+                else cls += 'opacity-40';
+              } else cls += 'hover:bg-accent';
+              return (
+                <motion.div key={`${idx}-${i}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} whileTap={!showResult ? { scale: 0.97 } : undefined}>
+                  <Button variant="outline" onClick={() => handleAnswer(opt)} disabled={showResult || isHidden} className={cls}>
+                    <span className="flex-1 text-right">{opt}</span>
+                    {showResult && isAnswer && <CheckCircle className="w-5 h-5 text-green-600" />}
+                    {showResult && isSel && !isAnswer && <XCircle className="w-5 h-5 text-red-600" />}
+                  </Button>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <AnimatePresence>
+            {showResult && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-4 p-4 rounded-xl text-center font-medium"
+                style={{ background: isCorrect ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }}>
+                {isCorrect ? '🎉 נכון מאוד!' : <>{selected === null ? 'הזמן נגמר · ' : 'לא נכון · '}התשובה: <strong>{current.correctAnswer}</strong></>}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-
-      <div className="px-6 space-y-3">
-        {current.options.map((opt, i) => {
-          const isSel = selected === opt;
-          const isAnswer = opt === current.correctAnswer;
-          const isHidden = hiddenOptions.includes(opt);
-          let cls = 'w-full h-14 text-lg justify-start px-6 transition-all min-h-[44px] ';
-          if (isHidden && !showResult) cls += 'opacity-20 line-through pointer-events-none';
-          else if (showResult) {
-            if (isAnswer) cls += 'bg-green-100 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-300';
-            else if (isSel) cls += 'bg-red-100 dark:bg-red-900/30 border-red-500 text-red-700 dark:text-red-300';
-            else cls += 'opacity-40';
-          } else cls += 'hover:bg-accent';
-          return (
-            <motion.div key={`${idx}-${i}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} whileTap={!showResult ? { scale: 0.97 } : undefined}>
-              <Button variant="outline" onClick={() => handleAnswer(opt)} disabled={showResult || isHidden} className={cls}>
-                <span className="flex-1 text-right">{opt}</span>
-                {showResult && isAnswer && <CheckCircle className="w-5 h-5 text-green-600" />}
-                {showResult && isSel && !isAnswer && <XCircle className="w-5 h-5 text-red-600" />}
-              </Button>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      <AnimatePresence>
-        {showResult && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mx-6 mt-4 p-4 rounded-xl text-center font-medium"
-            style={{ background: isCorrect ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }}>
-            {isCorrect ? '🎉 נכון מאוד!' : <>{selected === null ? 'הזמן נגמר · ' : 'לא נכון · '}התשובה: <strong>{current.correctAnswer}</strong></>}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
     </PageTransition>
   );

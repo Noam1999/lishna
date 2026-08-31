@@ -11,6 +11,8 @@ import {
   Loader2,
   AlertCircle,
   Lock,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
@@ -56,6 +58,7 @@ const Experiential = () => {
   const dapim = useMemo(() => dapimOf(masechet), [masechet]);
 
   const [studyMode, setStudyMode] = useState(true);
+  const [fullText, setFullText] = useState(false);
   const [saved, setSaved] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem(PERSONAL_KEY) || '[]').map((w: GlossWord) => w.word);
@@ -325,6 +328,15 @@ const Experiential = () => {
                 </SelectContent>
               </Select>
 
+              <button
+                onClick={() => { haptic(); setFullText((v) => !v); }}
+                className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 py-1.5 shadow-soft text-xs font-medium text-foreground hover:bg-accent transition-colors"
+                aria-label={fullText ? 'הצגת השאלות' : 'מסך מלא'}
+              >
+                {fullText ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                {fullText ? 'הצג שאלות' : 'מסך מלא ⛶'}
+              </button>
+
               <div className="flex items-center gap-2 bg-card border border-border rounded-full px-3 py-1.5 shadow-soft mr-auto">
                 <span className={`text-xs font-medium ${studyMode ? 'text-primary' : 'text-muted-foreground'}`}>
                   מצב לימוד
@@ -343,9 +355,9 @@ const Experiential = () => {
         </div>
 
         {/* Split screen */}
-        <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className={`max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 gap-5 ${fullText ? '' : 'lg:grid-cols-2'}`}>
           {/* Panel 1 — quiz / video */}
-          <div className="lg:order-2">
+          <div className={`lg:order-2 ${fullText ? 'hidden' : ''}`}>
             <div className="bg-card rounded-2xl border border-border shadow-soft p-4 h-full">
               <Tabs defaultValue="quiz">
                 <TabsList className="w-full grid grid-cols-2">
