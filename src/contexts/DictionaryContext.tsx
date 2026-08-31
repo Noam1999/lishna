@@ -308,6 +308,7 @@ interface DictionaryContextType {
   markAsLearned: (id: number) => void;
   resetProgress: () => void;
   getUnlearnedWords: () => DictionaryWord[];
+  refreshDictionary: () => Promise<void>;
   quizScore: number;
   setQuizScore: React.Dispatch<React.SetStateAction<number>>;
   quizHistory: { word: DictionaryWord; correct: boolean }[];
@@ -429,6 +430,7 @@ export const DictionaryProvider = ({ children }: { children: ReactNode }) => {
       markAsLearned,
       resetProgress,
       getUnlearnedWords,
+      refreshDictionary: fetchCustomWords,
       quizScore,
       setQuizScore,
       quizHistory,
