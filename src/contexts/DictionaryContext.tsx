@@ -5,7 +5,18 @@ export interface DictionaryWord {
   id: number;
   aramaic: string;
   hebrew: string;
-  type: 'פועל' | 'שם עצם' | 'תואר' | 'מילת יחס' | 'מושג' | 'ביטוי';
+  type:
+    | 'פועל'
+    | 'שם עצם'
+    | 'תואר'
+    | 'תואר הפועל'
+    | 'מילת יחס'
+    | 'מילת קישור'
+    | 'מילת תנאי'
+    | 'מילת שאלה'
+    | 'מילת עזר'
+    | 'מושג'
+    | 'ביטוי';
   culturalContext: string;
   learned: boolean;
 }
