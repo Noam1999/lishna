@@ -128,7 +128,14 @@ const WordChip = ({
         onMouseLeave={() => setOpen(false)}
         className="w-64 text-right"
       >
-        <p className="font-display text-lg font-bold text-foreground">{entry.aramaic}</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-display text-lg font-bold text-foreground">{entry.aramaic}</p>
+          {entry.type && (
+            <span className="text-[10px] font-semibold bg-primary/10 text-primary rounded-full px-2 py-0.5 shrink-0">
+              {entry.type}
+            </span>
+          )}
+        </div>
         <p className="text-primary font-semibold text-sm mt-0.5">{entry.hebrew}</p>
         {entry.culturalContext && (
           <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{entry.culturalContext}</p>
