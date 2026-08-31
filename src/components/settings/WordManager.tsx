@@ -5,6 +5,13 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useDictionary } from '@/contexts/DictionaryContext';
+
+const WORD_TYPES = [
+  'פועל', 'שם עצם', 'תואר', 'תואר הפועל', 'מילת יחס',
+  'מילת קישור', 'מילת תנאי', 'מילת שאלה', 'מילת עזר', 'מושג', 'ביטוי',
+];
 
 interface CustomWord {
   id: number;
@@ -18,6 +25,9 @@ const WordManager = () => {
   const [words, setWords] = useState<CustomWord[]>([]);
   const [aramaic, setAramaic] = useState('');
   const [hebrew, setHebrew] = useState('');
+  const [wordType, setWordType] = useState('שם עצם');
+  const [context, setContext] = useState('');
+  const { refreshDictionary } = useDictionary();
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
 
@@ -42,12 +52,16 @@ const WordManager = () => {
       const { error } = await supabase.from('custom_words').insert({
         aramaic: aramaic.trim(),
         hebrew: hebrew.trim(),
+        word_type: wordType,
+        cultural_context: context.trim(),
       });
       if (error) throw error;
-      toast.success('מילה נוספה! 📝');
+      toast.success('מילה נוספה! 📝 היא זמינה כעת בלימוד חווייתי');
       setAramaic('');
       setHebrew('');
+      setContext('');
       fetchWords();
+      refreshDictionary();
     } catch {
       toast.error('שגיאה בהוספה');
     } finally {
@@ -60,6 +74,7 @@ const WordManager = () => {
       const { error } = await supabase.from('custom_words').delete().eq('id', id);
       if (error) throw error;
       setWords(prev => prev.filter(w => w.id !== id));
+      refreshDictionary();
       toast.success('מילה נמחקה');
     } catch {
       toast.error('שגיאה במחיקה');
@@ -86,6 +101,26 @@ const WordManager = () => {
           value={hebrew}
           onChange={e => setHebrew(e.target.value)}
           placeholder="עברית"
+          className="text-right flex-1"
+          dir="rtl"
+        />
+      </div>
+
+      <div className="flex gap-2">
+        <Select value={wordType} onValueChange={setWordType}>
+          <SelectTrigger className="w-[140px] text-right shrink-0" aria-label="תיוג דקדוקי">
+            <SelectValue placeholder="תיוג" />
+          </SelectTrigger>
+          <SelectContent>
+            {WORD_TYPES.map(t => (
+              <SelectItem key={t} value={t}>{t}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Input
+          value={context}
+          onChange={e => setContext(e.target.value)}
+          placeholder="הקשר / הסבר (אופציונלי)"
           className="text-right flex-1"
           dir="rtl"
         />
@@ -121,6 +156,11 @@ const WordManager = () => {
                   <span className="font-medium text-foreground">{word.aramaic}</span>
                   <span className="text-muted-foreground mx-2">—</span>
                   <span className="text-muted-foreground">{word.hebrew}</span>
+                  {word.word_type && (
+                    <span className="text-[10px] font-semibold bg-primary/10 text-primary rounded-full px-2 py-0.5 mr-2">
+                      {word.word_type}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
