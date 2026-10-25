@@ -171,7 +171,7 @@ const Chat = () => {
                 </div>
               ))}
             </div>
-            <div className="px-4 pt-3 sticky bottom-20 bg-background">
+            <div className="px-4 pt-3 sticky bottom-20 glass">
               <div className="flex gap-2">
                 <Input value={body} onChange={(e) => setBody(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} placeholder="כתוב הודעה..." />
                 <Button onClick={send} size="icon"><Send className="w-4 h-4" /></Button>
