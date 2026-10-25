@@ -320,3 +320,12 @@
   .glass-float, .glass-claim, .glass-enter { animation: none }
   .glass-shine::after { display: none }
 }
+
+/* ===== מעטפת זכוכית אחידה: כל משטח bg-card הופך לכרטיס זכוכית (ויזואליה בלבד) ===== */
+.bg-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
