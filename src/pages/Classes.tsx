@@ -190,7 +190,7 @@ const Classes = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-24 flex flex-col items-center justify-center px-6" dir="rtl">
+      <div className="min-h-screen glass-backdrop pb-24 flex flex-col items-center justify-center px-6" dir="rtl">
         <GraduationCap className="w-16 h-16 text-primary mb-4" />
         <h1 className="text-2xl font-bold mb-2">ביה"ס שלי</h1>
         <p className="text-muted-foreground text-center mb-6">התחבר כדי להצטרף לכיתות או לנהל מרחב בית ספרי</p>
@@ -201,7 +201,7 @@ const Classes = () => {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background pb-24" dir="rtl">
+    <div className="min-h-screen glass-backdrop pb-24" dir="rtl">
       <div className="bg-card border-b border-border px-6 py-4 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted" aria-label="חזור">
           <ArrowRight className="w-5 h-5" />

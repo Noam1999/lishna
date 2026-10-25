@@ -224,7 +224,7 @@ const Experiential = () => {
   if (!authLoading && !user) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-6 text-center" dir="rtl">
+        <div className="min-h-screen glass-backdrop flex flex-col items-center justify-center gap-4 px-6 text-center" dir="rtl">
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Lock className="w-8 h-8 text-primary" />
           </div>
@@ -246,7 +246,7 @@ const Experiential = () => {
   return (
 
     <PageTransition>
-      <div className="min-h-screen bg-background pb-28" dir="rtl">
+      <div className="min-h-screen glass-backdrop pb-28" dir="rtl">
         {/* Header */}
         <div className="relative overflow-hidden border-b border-border">
           <div className="absolute inset-0 bg-gradient-hero opacity-10" />

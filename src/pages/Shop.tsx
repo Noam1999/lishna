@@ -78,7 +78,7 @@ const Shop = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-24" dir="rtl">
+      <div className="min-h-screen glass-backdrop pb-24" dir="rtl">
         {/* Header */}
         <div className="relative bg-gradient-to-b from-primary/10 to-transparent px-6 pt-6 pb-8">
           <button

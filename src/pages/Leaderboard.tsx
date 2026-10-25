@@ -42,7 +42,7 @@ const Leaderboard = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background p-4 pb-24 flex flex-col items-center justify-center">
+      <div className="min-h-screen glass-backdrop p-4 pb-24 flex flex-col items-center justify-center">
         <Trophy className="w-16 h-16 text-muted-foreground mb-4" />
         <h2 className="text-xl font-bold mb-2">התחבר כדי לראות את הלידרבורד</h2>
         <Button onClick={() => navigate('/auth')}>התחברות</Button>
@@ -51,7 +51,7 @@ const Leaderboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen glass-backdrop pb-32">
       {/* Header */}
       <div className="bg-gradient-hero text-primary-foreground p-6 pb-8 rounded-b-3xl">
         <div className="flex items-center gap-3 mb-4">

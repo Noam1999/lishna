@@ -325,7 +325,7 @@ const Duel = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-24" dir="rtl">
+      <div className="min-h-screen glass-backdrop pb-24" dir="rtl">
         <div className="bg-gradient-to-b from-primary/10 to-transparent px-6 pt-6 pb-5 relative">
           <button onClick={() => navigate('/')} className="absolute top-6 right-6 p-2 rounded-full hover:bg-muted"><ArrowRight className="w-5 h-5" /></button>
           <div className="text-center pt-2">

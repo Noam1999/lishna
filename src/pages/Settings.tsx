@@ -96,7 +96,7 @@ const Settings = () => {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background pb-24" dir="rtl">
+    <div className="min-h-screen glass-backdrop pb-24" dir="rtl">
       {/* Header */}
       <div className="bg-card border-b border-border px-6 py-4 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">

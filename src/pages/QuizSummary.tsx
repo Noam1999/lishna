@@ -27,7 +27,7 @@ const QuizSummary = () => {
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen glass-backdrop pb-24">
       <Header title="סיכום מבחן" />
 
       {/* Score Circle */}

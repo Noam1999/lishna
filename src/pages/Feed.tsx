@@ -9,7 +9,7 @@ const Feed = () => {
   const { activities, loading, celebrateActivity } = useActivityFeed();
 
   return (
-    <div className="min-h-screen bg-background pb-24" dir="rtl">
+    <div className="min-h-screen glass-backdrop pb-24" dir="rtl">
       {/* Header */}
       <div className="bg-card border-b border-border px-6 pt-12 pb-4">
         <div className="flex items-center gap-3">

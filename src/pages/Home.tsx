@@ -110,7 +110,7 @@ const Home = () => {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen glass-backdrop pb-24">
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero opacity-10" />
         <div className="absolute top-0 left-0 w-full h-full">

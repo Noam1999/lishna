@@ -32,7 +32,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6" dir="rtl">
+    <div className="min-h-screen glass-backdrop flex items-center justify-center px-6" dir="rtl">
       <form onSubmit={submit} className="w-full max-w-sm bg-card border border-border rounded-2xl p-6 space-y-4 shadow-elegant">
         <h1 className="text-2xl font-bold text-center">איפוס סיסמה 🔐</h1>
         <p className="text-sm text-muted-foreground text-center">בחר סיסמה חדשה</p>

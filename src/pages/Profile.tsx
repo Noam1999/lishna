@@ -86,7 +86,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-24 flex items-center justify-center">
+      <div className="min-h-screen glass-backdrop pb-24 flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -176,7 +176,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
+    <div className="min-h-screen glass-backdrop pb-24 overflow-x-hidden">
       {/* Header buttons */}
       <div className="relative px-6 pt-6 flex items-center justify-between">
         <motion.button

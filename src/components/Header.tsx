@@ -19,15 +19,15 @@ const Header = ({ title, subtitle }: HeaderProps) => {
     <header className="text-center pt-8 pb-6 px-4">
       {user && profile && (
         <div className="flex items-center justify-center gap-2 mb-3">
-          <span id="lishna-balance-coins" className="flex items-center gap-1 bg-card border border-border rounded-full px-3 py-1 text-xs font-bold shadow-soft">
+          <span id="lishna-balance-coins" className="flex items-center gap-1 glass glass-pill rounded-full px-3 py-1 text-xs font-bold shadow-soft">
             <span>💰</span>
             <span className="text-foreground">{profile.coins}</span>
           </span>
-          <span id="lishna-balance-diamonds" className="flex items-center gap-1 bg-card border border-border rounded-full px-3 py-1 text-xs font-bold shadow-soft">
+          <span id="lishna-balance-diamonds" className="flex items-center gap-1 glass glass-pill rounded-full px-3 py-1 text-xs font-bold shadow-soft">
             <span>💎</span>
             <span className="text-foreground">{profile.diamonds}</span>
           </span>
-          <Link to="/inbox" className="relative bg-card border border-border rounded-full p-1.5 shadow-soft" aria-label="תיבת דואר">
+          <Link to="/inbox" className="relative glass glass-pill rounded-full p-1.5 shadow-soft" aria-label="תיבת דואר">
             <Inbox className="w-4 h-4 text-foreground" />
             {count > 0 && (
               <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">

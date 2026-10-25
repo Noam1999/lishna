@@ -169,7 +169,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen glass-backdrop flex flex-col">
       {/* Header with illustration */}
       <div className="relative pt-12 pb-8 px-6">
         <div className="absolute inset-0 bg-gradient-hero opacity-5" />
