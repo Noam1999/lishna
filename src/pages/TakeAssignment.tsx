@@ -180,7 +180,7 @@ const TakeAssignment = () => {
     const pct = questions.length ? Math.round((score / questions.length) * 100) : 0;
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background pb-24 flex flex-col items-center justify-center px-6 text-center" dir="rtl">
+        <div className="min-h-screen glass-backdrop pb-24 flex flex-col items-center justify-center px-6 text-center" dir="rtl">
           <Trophy className="w-20 h-20 text-primary mb-4" />
           <h1 className="text-3xl font-bold mb-2">סיימת!</h1>
           <p className="text-6xl font-bold text-primary my-3">ציון: {pct}</p>
@@ -199,7 +199,7 @@ const TakeAssignment = () => {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background pb-24" dir="rtl">
+    <div className="min-h-screen glass-backdrop pb-24" dir="rtl">
       <div className="bg-card border-b border-border px-6 py-4 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted" aria-label="חזור">
           <ArrowRight className="w-5 h-5" />

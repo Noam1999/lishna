@@ -50,7 +50,7 @@ const School = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-32">
+      <div className="min-h-screen glass-backdrop pb-32">
         <div className="px-4 pt-4">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1">
             <ArrowRight className="w-4 h-4" /> חזרה

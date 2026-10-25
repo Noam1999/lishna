@@ -80,7 +80,7 @@ const AdminFeedback = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center glass-backdrop">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
@@ -88,7 +88,7 @@ const AdminFeedback = () => {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4" dir="rtl">
+      <div className="min-h-screen flex flex-col items-center justify-center glass-backdrop gap-4" dir="rtl">
         <ShieldX className="w-16 h-16 text-destructive" />
         <h2 className="text-xl font-bold text-foreground">אין הרשאה</h2>
         <p className="text-muted-foreground">דף זה מיועד למנהלים בלבד</p>
@@ -98,7 +98,7 @@ const AdminFeedback = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24" dir="rtl">
+    <div className="min-h-screen glass-backdrop pb-24" dir="rtl">
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate('/')} className="text-muted-foreground hover:text-foreground">

@@ -78,7 +78,7 @@ const Friends = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen glass-backdrop pb-24">
       <Header title="חברים" subtitle="התחבר עם לומדים אחרים" />
 
       {/* Search Section */}

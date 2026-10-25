@@ -122,7 +122,7 @@ const Chat = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-32 flex flex-col">
+      <div className="min-h-screen glass-backdrop pb-32 flex flex-col">
         <div className="px-4 pt-4">
           <Button variant="ghost" size="sm" onClick={() => userId ? navigate('/chat') : navigate(-1)} className="gap-1">
             <ArrowRight className="w-4 h-4" /> חזרה

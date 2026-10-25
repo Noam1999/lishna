@@ -252,12 +252,12 @@ const ClassDetail = () => {
   }, [submissions]);
 
   if (!cls) {
-    return <div className="min-h-screen bg-background pb-24 flex items-center justify-center">טוען...</div>;
+    return <div className="min-h-screen glass-backdrop pb-24 flex items-center justify-center">טוען...</div>;
   }
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background pb-24" dir="rtl">
+    <div className="min-h-screen glass-backdrop pb-24" dir="rtl">
       <div className="bg-card border-b border-border px-6 py-4 flex items-center gap-3">
         <button onClick={() => navigate('/classes')} className="p-2 rounded-full hover:bg-muted" aria-label="חזור">
           <ArrowRight className="w-5 h-5" />

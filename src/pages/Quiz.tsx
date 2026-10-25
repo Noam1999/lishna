@@ -161,7 +161,7 @@ const Quiz = () => {
   // Loading state
   if (wordsLoading) {
     return (
-      <div className="min-h-screen bg-background pb-24 flex items-center justify-center">
+      <div className="min-h-screen glass-backdrop pb-24 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
@@ -174,7 +174,7 @@ const Quiz = () => {
       : dictionary.filter(w => w.learned).length;
     
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <div className="min-h-screen glass-backdrop pb-24">
         <Header title="מבחן" subtitle="בחן את הידע שלך" />
         <div className="px-6 flex flex-col items-center justify-center py-16">
           <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
@@ -200,14 +200,14 @@ const Quiz = () => {
 
   if (!currentQ) {
     return (
-      <div className="min-h-screen bg-background pb-24 flex items-center justify-center">
+      <div className="min-h-screen glass-backdrop pb-24 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen glass-backdrop pb-24">
       <Header title="מבחן" subtitle="בחר את התשובה הנכונה" />
 
       {/* Score Display */}
