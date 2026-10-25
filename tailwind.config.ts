@@ -4,6 +4,23 @@ export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
+  safelist: [
+    "glass",
+    "glass-backdrop",
+    "glass-strong",
+    "glass-teal",
+    "glass-gold",
+    "glass-pill",
+    "glass-shine",
+    "glass-overlay",
+    "glass-input",
+    "glass-press",
+    "glass-switch",
+    "glass-float",
+    "glass-claim",
+    "glass-enter",
+  ],
+
   theme: {
     container: {
       center: true,
