@@ -136,7 +136,7 @@ const Pass = () => {
     return (
       <PageTransition>
         <Header title="Lishna Pass" />
-        <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="min-h-screen glass-backdrop flex items-center justify-center p-6">
           <div className="text-center space-y-3">
             <Sparkles className="w-12 h-12 text-primary mx-auto" />
             <h2 className="text-xl font-bold">התחבר לצפייה ב-Lishna Pass</h2>
@@ -150,7 +150,7 @@ const Pass = () => {
   return (
     <PageTransition>
       <Header title="Lishna Pass" />
-      <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5 pb-32">
+      <div className="min-h-screen glass-backdrop pb-32">
         {/* Hero */}
         <div className="relative px-4 pt-4">
           <div className="rounded-3xl p-5 bg-gradient-to-br from-primary/20 via-purple-500/15 to-amber-400/15 border border-primary/30 shadow-elegant">

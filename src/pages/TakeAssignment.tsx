@@ -186,7 +186,7 @@ const TakeAssignment = () => {
           <p className="text-6xl font-bold text-primary my-3">ציון: {pct}</p>
           <p className="text-lg text-foreground mb-1">ענית נכון על {score} מתוך {questions.length} שאלות</p>
           <p className="text-sm text-muted-foreground mb-6">התוצאה נשלחה למורה</p>
-          <Button onClick={() => navigate(`/classes/${assignment.class_id}`)}>חזרה לכיתה</Button>
+          <Button className="rounded-full h-12 px-8 glass-teal glass-press" onClick={() => navigate(`/classes/${assignment.class_id}`)}>חזרה לכיתה</Button></div>
         </div>
       </PageTransition>
     );

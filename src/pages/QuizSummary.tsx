@@ -32,7 +32,7 @@ const QuizSummary = () => {
 
       {/* Score Circle */}
       <div className="px-6 py-8 flex flex-col items-center">
-        <div className="relative w-48 h-48 mb-6">
+        <div className="relative w-48 h-48 mb-6 glass rounded-full p-0 animate-glass-in">
           <svg className="w-full h-full transform -rotate-90">
             <circle
               cx="96"
@@ -72,17 +72,17 @@ const QuizSummary = () => {
       {/* Results List */}
       <div className="px-6 mb-8">
         <h3 className="text-sm font-medium text-foreground mb-4">פירוט התשובות</h3>
-        <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        <div className="glass rounded-2xl overflow-hidden">
           <div className="max-h-64 overflow-y-auto">
             {quizHistory.map((item, index) => (
               <div
                 key={index}
                 className={`flex items-center justify-between p-4 border-b border-border last:border-b-0 ${
-                  item.correct ? 'bg-green-50/50' : 'bg-red-50/50'
+                  item.correct ? 'bg-green-500/10' : 'bg-red-500/10'
                 }`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  item.correct ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                  item.correct ? 'bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-red-500/20 text-red-600 dark:text-red-400'
                 }`}>
                   {item.correct ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
                 </div>
@@ -102,13 +102,13 @@ const QuizSummary = () => {
       {/* Action Buttons */}
       <div className="px-6 space-y-3 mt-6">
         <Link to="/quiz" className="block">
-          <Button className="w-full h-14 text-lg">
+          <Button className="w-full h-14 text-lg rounded-full glass-teal glass-press">
             <RotateCcw className="w-5 h-5 ml-2" />
             מבחן חדש
           </Button>
         </Link>
         <Link to="/flashcards" className="block">
-          <Button variant="outline" className="w-full h-12">
+          <Button variant="outline" className="w-full h-12 rounded-full glass glass-press">
             <BookOpen className="w-5 h-5 ml-2" />
             חזרה ללמידה
           </Button>
