@@ -153,7 +153,7 @@ const Settings = () => {
                 <div className="text-right">
                   <h3 className="font-semibold text-foreground">רטט מגע</h3>
                   <p className="text-sm text-muted-foreground">
-                    {hapticOn ? 'רטט קל בכל לחיצה' : 'הרטט כבוי'}
+                    {hapticOn ? 'רטט קל בכל לחיצה - עובד רק בפלאפון' : 'הרטט כבוי'}
                   </p>
                 </div>
                 <Vibrate className="w-6 h-6 text-primary" />
