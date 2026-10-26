@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import SearchAutocomplete from '@/components/SearchAutocomplete';
 import { useUserWords } from '@/hooks/useUserWords';
+import AIExplainer from '@/components/AIExplainer';
 
 const RECENT_SEARCHES_KEY = 'translator_recent_searches';
 const MAX_RECENT_SEARCHES = 5;
@@ -260,6 +261,10 @@ const Translator = () => {
           </div>
         </div>
       )}
+
+      <div className="mt-8">
+        <AIExplainer />
+      </div>
     </div>
   );
 };
