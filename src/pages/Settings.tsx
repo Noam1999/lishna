@@ -151,7 +151,7 @@ const Settings = () => {
               />
               <div className="flex items-center gap-3">
                 <div className="text-right">
-                  <h3 className="font-semibold text-foreground">רטט מגע</h3>
+                  <h3 className="font-semibold text-foreground">{'\u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 רטט מגע'}</h3>
                   <p className="text-sm text-muted-foreground">
                     {hapticOn ? 'רטט קל בכל לחיצה - עובד רק בפלאפון' : 'הרטט כבוי'}
                   </p>
