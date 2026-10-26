@@ -181,12 +181,13 @@ const TakeAssignment = () => {
     return (
       <PageTransition>
         <div className="min-h-screen glass-backdrop pb-24 flex flex-col items-center justify-center px-6 text-center" dir="rtl">
+          <div className="glass rounded-3xl p-8 w-full max-w-md flex flex-col items-center animate-glass-in">
           <Trophy className="w-20 h-20 text-primary mb-4" />
           <h1 className="text-3xl font-bold mb-2">סיימת!</h1>
           <p className="text-6xl font-bold text-primary my-3">ציון: {pct}</p>
           <p className="text-lg text-foreground mb-1">ענית נכון על {score} מתוך {questions.length} שאלות</p>
           <p className="text-sm text-muted-foreground mb-6">התוצאה נשלחה למורה</p>
-          <Button onClick={() => navigate(`/classes/${assignment.class_id}`)}>חזרה לכיתה</Button>
+          <Button className="rounded-full h-12 px-8 glass-teal glass-press" onClick={() => navigate(`/classes/${assignment.class_id}`)}>חזרה לכיתה</Button></div>
         </div>
       </PageTransition>
     );
