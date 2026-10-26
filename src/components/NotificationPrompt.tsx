@@ -22,9 +22,9 @@ const NotificationPrompt = () => {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-24 left-4 right-4 z-50 mx-auto max-w-md animate-in slide-in-from-bottom-5">
-      <div className="rounded-2xl border border-primary/30 bg-card/95 backdrop-blur-xl shadow-elegant p-4 flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+    <div className="fixed bottom-24 left-4 right-4 z-50 mx-auto max-w-md animate-glass-in">
+      <div className="glass !rounded-3xl !border-white/40 shadow-xl p-4 flex items-start gap-3 animate-glass-float">
+        <div className="w-10 h-10 rounded-full glass-teal text-primary flex items-center justify-center shrink-0">
           <Bell className="w-5 h-5" />
         </div>
         <div className="flex-1 text-right">
@@ -37,6 +37,7 @@ const NotificationPrompt = () => {
             >לא עכשיו</Button>
             <Button
               size="sm"
+              className="glass-press !rounded-full"
               onClick={async () => { await requestPermission(); setShow(false); }}
             >אפשר התראות</Button>
           </div>
