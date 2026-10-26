@@ -26,7 +26,7 @@ const NotificationSettings = () => {
   };
 
   return (
-    <div className="bg-card rounded-2xl p-5 shadow-soft border border-border space-y-4">
+    <div className="glass !rounded-3xl !border-white/40 p-5 shadow-xl space-y-4">
       <div className="flex items-center justify-between">
         <Switch checked={enabled} onCheckedChange={onToggle} disabled={!supported} />
         <div className="flex items-center gap-3">
@@ -42,7 +42,7 @@ const NotificationSettings = () => {
           {enabled ? <Bell className="w-6 h-6 text-primary" /> : <BellOff className="w-6 h-6 text-muted-foreground" />}
         </div>
       </div>
-      <Button onClick={sendTest} variant="outline" className="w-full gap-2" disabled={!enabled}>
+      <Button onClick={sendTest} variant="outline" className="w-full gap-2 glass-press !rounded-full" disabled={!enabled}>
         <Send className="w-4 h-4" />
         שלח התראה לדוגמה
       </Button>
