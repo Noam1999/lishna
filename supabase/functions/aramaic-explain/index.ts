@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
       const g = gatewayError as { status: number; message: string };
       const msg = g.status === 429 ? "יותר מדי בקשות, נסה שוב בעוד רגע"
         : g.status === 402 ? "נגמרו קרדיטי ה-AI של האפליקציה"
-        : "שגיאה בשירות ה-AI";
+        : (() => { try { return JSON.parse(g.message)?.error?.message || JSON.parse(g.message)?.message || "שגיאה בשירות ה-AI"; } catch { return "שגיאה בשירות ה-AI"; } })();
       console.error("gateway", g.status, g.message);
       return json({ error: msg }, g.status);
     }
