@@ -67,6 +67,27 @@ export type Database = {
           },
         ]
       }
+      ai_usage: {
+        Row: {
+          free_used: number
+          paid_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          free_used?: number
+          paid_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          free_used?: number
+          paid_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string
@@ -780,6 +801,7 @@ export type Database = {
         Returns: Json
       }
       claim_teacher_role: { Args: { _code: string }; Returns: boolean }
+      consume_ai_use: { Args: { _pay: boolean }; Returns: Json }
       economy_open: { Args: never; Returns: undefined }
       exchange_currency: {
         Args: { _amount: number; _direction: string }
