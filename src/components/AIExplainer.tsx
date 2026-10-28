@@ -2,12 +2,30 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ReactMarkdown from 'react-markdown';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, History, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
 const DIAMOND_COST = 1;
+const MAX_HISTORY = 20;
+
+interface HistoryItem {
+  text: string;
+  context?: string;
+  result: string;
+  ts: number;
+}
+
+const historyKey = (uid: string) => `lishna:ai-history:${uid}`;
+
+const loadHistory = (uid: string): HistoryItem[] => {
+  try {
+    const raw = localStorage.getItem(historyKey(uid));
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+};
 
 const AIExplainer = () => {
   const [text, setText] = useState('');
@@ -18,12 +36,32 @@ const AIExplainer = () => {
   const { user } = useAuth();
   const [freeLeft, setFreeLeft] = useState<number | null>(null);
   const [needPay, setNeedPay] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
+    setHistory(loadHistory(user.id));
     supabase.from('ai_usage').select('free_used').eq('user_id', user.id).maybeSingle()
       .then(({ data }) => setFreeLeft(Math.max(0, 3 - (data?.free_used ?? 0))));
   }, [user]);
+
+  const saveToHistory = (item: HistoryItem) => {
+    if (!user) return;
+    setHistory((prev) => {
+      const next = [item, ...prev].slice(0, MAX_HISTORY);
+      try { localStorage.setItem(historyKey(user.id), JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
+  };
+
+  const clearHistory = () => {
+    if (!user) return;
+    setHistory([]);
+    setOpenIdx(null);
+    try { localStorage.removeItem(historyKey(user.id)); } catch { /* ignore */ }
+  };
 
   const run = async (pay = false) => {
     if (!text.trim() || loading) return;
@@ -44,6 +82,7 @@ const AIExplainer = () => {
     setNeedPay(false);
     if (typeof data.usage?.free_left === 'number') setFreeLeft(data.usage.free_left);
     setResult(data.result);
+    saveToHistory({ text: text.trim(), context: context.trim() || undefined, result: data.result, ts: Date.now() });
   };
 
   return (
@@ -89,6 +128,55 @@ const AIExplainer = () => {
         {result && (
           <div className="prose prose-sm max-w-none text-foreground [&_h2]:text-primary [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-3 [&_h2]:mb-1 [&_ul]:list-disc [&_ul]:pr-5 [&_li]:my-0.5 [&_p]:my-1 leading-relaxed animate-fade-in">
             <ReactMarkdown>{result}</ReactMarkdown>
+          </div>
+        )}
+        {history.length > 0 && (
+          <div className="border-t border-border/50 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowHistory((v) => !v)}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>היסטוריית תרגומים ({history.length})</span>
+              {showHistory ? <ChevronUp className="w-3.5 h-3.5 mr-auto" /> : <ChevronDown className="w-3.5 h-3.5 mr-auto" />}
+            </button>
+            {showHistory && (
+              <div className="mt-2 space-y-1.5 animate-fade-in">
+                {history.map((item, i) => (
+                  <div key={item.ts} className="glass rounded-xl overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setOpenIdx(openIdx === i ? null : i)}
+                      className="w-full flex items-center justify-between gap-2 px-3 py-2 text-right"
+                    >
+                      <span className="font-display text-sm truncate">{item.text}</span>
+                      <span className="text-[10px] text-muted-foreground shrink-0">
+                        {new Date(item.ts).toLocaleDateString('he-IL')}
+                      </span>
+                    </button>
+                    {openIdx === i && (
+                      <div className="px-3 pb-3 animate-fade-in">
+                        {item.context && (
+                          <p className="text-[10px] text-muted-foreground mb-1">הקשר: {item.context}</p>
+                        )}
+                        <div className="prose prose-sm max-w-none text-foreground [&_h2]:text-primary [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-3 [&_h2]:mb-1 [&_ul]:list-disc [&_ul]:pr-5 [&_li]:my-0.5 [&_p]:my-1 leading-relaxed text-sm">
+                          <ReactMarkdown>{item.result}</ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={clearHistory}
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-destructive transition-colors mx-auto pt-1"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  נקה היסטוריה
+                </button>
+              </div>
+            )}
           </div>
         )}
         </>)}
