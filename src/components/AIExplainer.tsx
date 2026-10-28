@@ -2,12 +2,30 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ReactMarkdown from 'react-markdown';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, History, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
 const DIAMOND_COST = 1;
+const MAX_HISTORY = 20;
+
+interface HistoryItem {
+  text: string;
+  context?: string;
+  result: string;
+  ts: number;
+}
+
+const historyKey = (uid: string) => `lishna:ai-history:${uid}`;
+
+const loadHistory = (uid: string): HistoryItem[] => {
+  try {
+    const raw = localStorage.getItem(historyKey(uid));
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+};
 
 const AIExplainer = () => {
   const [text, setText] = useState('');
@@ -18,12 +36,32 @@ const AIExplainer = () => {
   const { user } = useAuth();
   const [freeLeft, setFreeLeft] = useState<number | null>(null);
   const [needPay, setNeedPay] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
+    setHistory(loadHistory(user.id));
     supabase.from('ai_usage').select('free_used').eq('user_id', user.id).maybeSingle()
       .then(({ data }) => setFreeLeft(Math.max(0, 3 - (data?.free_used ?? 0))));
   }, [user]);
+
+  const saveToHistory = (item: HistoryItem) => {
+    if (!user) return;
+    setHistory((prev) => {
+      const next = [item, ...prev].slice(0, MAX_HISTORY);
+      try { localStorage.setItem(historyKey(user.id), JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
+  };
+
+  const clearHistory = () => {
+    if (!user) return;
+    setHistory([]);
+    setOpenIdx(null);
+    try { localStorage.removeItem(historyKey(user.id)); } catch { /* ignore */ }
+  };
 
   const run = async (pay = false) => {
     if (!text.trim() || loading) return;
