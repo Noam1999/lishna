@@ -130,6 +130,55 @@ const AIExplainer = () => {
             <ReactMarkdown>{result}</ReactMarkdown>
           </div>
         )}
+        {history.length > 0 && (
+          <div className="border-t border-border/50 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowHistory((v) => !v)}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>היסטוריית תרגומים ({history.length})</span>
+              {showHistory ? <ChevronUp className="w-3.5 h-3.5 mr-auto" /> : <ChevronDown className="w-3.5 h-3.5 mr-auto" />}
+            </button>
+            {showHistory && (
+              <div className="mt-2 space-y-1.5 animate-fade-in">
+                {history.map((item, i) => (
+                  <div key={item.ts} className="glass rounded-xl overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setOpenIdx(openIdx === i ? null : i)}
+                      className="w-full flex items-center justify-between gap-2 px-3 py-2 text-right"
+                    >
+                      <span className="font-display text-sm truncate">{item.text}</span>
+                      <span className="text-[10px] text-muted-foreground shrink-0">
+                        {new Date(item.ts).toLocaleDateString('he-IL')}
+                      </span>
+                    </button>
+                    {openIdx === i && (
+                      <div className="px-3 pb-3 animate-fade-in">
+                        {item.context && (
+                          <p className="text-[10px] text-muted-foreground mb-1">הקשר: {item.context}</p>
+                        )}
+                        <div className="prose prose-sm max-w-none text-foreground [&_h2]:text-primary [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-3 [&_h2]:mb-1 [&_ul]:list-disc [&_ul]:pr-5 [&_li]:my-0.5 [&_p]:my-1 leading-relaxed text-sm">
+                          <ReactMarkdown>{item.result}</ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={clearHistory}
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-destructive transition-colors mx-auto pt-1"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  נקה היסטוריה
+                </button>
+              </div>
+            )}
+          </div>
+        )}
         </>)}
       </div>
     </div>
