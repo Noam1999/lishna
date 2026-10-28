@@ -57,7 +57,7 @@ const AIExplainer = () => {
           </p>
         ) : (<>
         <p className="text-xs text-muted-foreground">
-          {freeLeft === null ? '' : freeLeft > 0 ? `נותרו ${freeLeft} שימושים חינמיים` : 'השימושים החינמיים נגמרו — כל שימוש נוסף עולה 💎 1'}
+          {freeLeft === null ? '' : freeLeft > 0 ? 'נותרו 3 שימושים חינמיים, אחר כך יהלום אחד לשימוש נוסף' : 'השימושים החינמיים נגמרו — כל שימוש נוסף עולה 💎 1'}
         </p>
         <Textarea
           value={text}
