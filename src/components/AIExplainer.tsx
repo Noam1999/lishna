@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import ReactMarkdown from 'react-markdown';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,22 +13,34 @@ const AIExplainer = () => {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const [freeLeft, setFreeLeft] = useState<number | null>(null);
+  const [needPay, setNeedPay] = useState(false);
 
-  const run = async () => {
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('ai_usage').select('free_used').eq('user_id', user.id).maybeSingle()
+      .then(({ data }) => setFreeLeft(Math.max(0, 3 - (data?.free_used ?? 0))));
+  }, [user]);
+
+  const run = async (pay = false) => {
     if (!text.trim() || loading) return;
     setLoading(true);
     setError('');
     setResult('');
     const { data, error: err } = await supabase.functions.invoke('aramaic-explain', {
-      body: { text: text.trim(), context: context.trim() || undefined },
+      body: { text: text.trim(), context: context.trim() || undefined, pay },
     });
     setLoading(false);
     if (err || data?.error) {
       let msg = data?.error;
       try { msg = msg || (await (err as any)?.context?.json())?.error; } catch { /* ignore */ }
       setError(msg || 'שגיאה, נסה שוב');
+      if (data?.reason === 'limit') { setNeedPay(true); setFreeLeft(0); }
       return;
     }
+    setNeedPay(false);
+    if (typeof data.usage?.free_left === 'number') setFreeLeft(data.usage.free_left);
     setResult(data.result);
   };
 
@@ -37,6 +51,14 @@ const AIExplainer = () => {
           <Sparkles className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-foreground">תרגום והסבר דקדוקי ב-AI</h3>
         </div>
+        {!user ? (
+          <p className="text-sm text-muted-foreground text-center py-2">
+            התכונה זמינה למשתמשים רשומים בלבד. <Link to="/auth" className="text-primary font-semibold underline">התחבר</Link>
+          </p>
+        ) : (<>
+        <p className="text-xs text-muted-foreground">
+          {freeLeft === null ? '' : freeLeft > 0 ? `נותרו ${freeLeft} שימושים חינמיים` : 'השימושים החינמיים נגמרו — כל שימוש נוסף עולה 💎 1'}
+        </p>
         <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -53,9 +75,9 @@ const AIExplainer = () => {
           maxLength={300}
           rows={1}
         />
-        <Button onClick={run} disabled={loading || !text.trim()} className="w-full rounded-full">
+        <Button onClick={() => run(freeLeft === 0)} disabled={loading || !text.trim()} className="w-full rounded-full">
           {loading ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <Sparkles className="w-4 h-4 ml-2" />}
-          {loading ? 'מנתח...' : 'תרגם והסבר'}
+          {loading ? 'מנתח...' : freeLeft === 0 ? 'תרגם והסבר (💎 1)' : 'תרגם והסבר'}
         </Button>
         {error && <p className="text-sm text-destructive text-center">{error}</p>}
         {result && (
@@ -63,6 +85,7 @@ const AIExplainer = () => {
             <ReactMarkdown>{result}</ReactMarkdown>
           </div>
         )}
+        </>)}
       </div>
     </div>
   );
