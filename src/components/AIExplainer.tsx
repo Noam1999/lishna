@@ -7,6 +7,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
+const DIAMOND_COST = 1;
+
 const AIExplainer = () => {
   const [text, setText] = useState('');
   const [context, setContext] = useState('');
