@@ -82,6 +82,7 @@ const AIExplainer = () => {
     setNeedPay(false);
     if (typeof data.usage?.free_left === 'number') setFreeLeft(data.usage.free_left);
     setResult(data.result);
+    saveToHistory({ text: text.trim(), context: context.trim() || undefined, result: data.result, ts: Date.now() });
   };
 
   return (
