@@ -61,9 +61,9 @@ const AIExplainer = () => {
         <p className="text-xs text-muted-foreground">
           {freeLeft === null ? '' : freeLeft > 0
             ? (freeLeft === 1
-              ? 'נותר שימוש חינמי אחד, אחר כך כל שימוש נוסף עולה 💎 1'
-              : `נותרו ${freeLeft} שימושים חינמיים, אחר כך כל שימוש נוסף עולה 💎 1`)
-            : 'השימושים החינמיים נגמרו — כל שימוש נוסף עולה 💎 1'}
+              ? `נותר שימוש חינמי אחד, אחר כך כל שימוש נוסף עולה 💎 ${DIAMOND_COST}`
+              : `נותרו ${freeLeft} שימושים חינמיים, אחר כך כל שימוש נוסף עולה 💎 ${DIAMOND_COST}`)
+            : `השימושים החינמיים נגמרו — כל שימוש נוסף עולה 💎 ${DIAMOND_COST}`}
         </p>
         <Textarea
           value={text}
@@ -83,7 +83,7 @@ const AIExplainer = () => {
         />
         <Button onClick={() => run(freeLeft === 0)} disabled={loading || !text.trim()} className="w-full rounded-full">
           {loading ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <Sparkles className="w-4 h-4 ml-2" />}
-          {loading ? 'מנתח...' : freeLeft === 0 ? 'תרגם והסבר (💎 1)' : 'תרגם והסבר'}
+          {loading ? 'מנתח...' : freeLeft === 0 ? `תרגם והסבר (💎 ${DIAMOND_COST})` : 'תרגם והסבר'}
         </Button>
         {error && <p className="text-sm text-destructive text-center">{error}</p>}
         {result && (
