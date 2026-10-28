@@ -40,6 +40,16 @@ const SearchAutocomplete = ({
     setHighlightedIndex(-1);
   }, [showSuggestions, showRecent]);
 
+  // Close dropdown when clicking anywhere outside
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const root = inputRef.current?.parentElement?.parentElement;
+      if (root && !root.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, []);
+
   // Scroll highlighted item into view
   useEffect(() => {
     if (highlightedIndex >= 0 && listRef.current) {
