@@ -67,6 +67,33 @@ export type Database = {
           },
         ]
       }
+      ai_history: {
+        Row: {
+          context: string | null
+          created_at: string
+          id: string
+          input_text: string
+          result: string
+          user_id: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          id?: string
+          input_text: string
+          result: string
+          user_id: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          id?: string
+          input_text?: string
+          result?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_usage: {
         Row: {
           free_used: number
