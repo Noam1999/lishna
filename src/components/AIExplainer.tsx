@@ -17,16 +17,6 @@ interface HistoryItem {
   ts: number;
 }
 
-const historyKey = (uid: string) => `lishna:ai-history:${uid}`;
-
-const loadHistory = (uid: string): HistoryItem[] => {
-  try {
-    const raw = localStorage.getItem(historyKey(uid));
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch { return []; }
-};
-
 const AIExplainer = () => {
   const [text, setText] = useState('');
   const [context, setContext] = useState('');
@@ -42,25 +32,28 @@ const AIExplainer = () => {
 
   useEffect(() => {
     if (!user) return;
-    setHistory(loadHistory(user.id));
+    supabase.from('ai_history').select('input_text, context, result, created_at')
+      .eq('user_id', user.id).order('created_at', { ascending: false }).limit(MAX_HISTORY)
+      .then(({ data }) => setHistory((data ?? []).map((r) => ({
+        text: r.input_text, context: r.context ?? undefined, result: r.result, ts: new Date(r.created_at).getTime(),
+      }))));
     supabase.from('ai_usage').select('free_used').eq('user_id', user.id).maybeSingle()
       .then(({ data }) => setFreeLeft(Math.max(0, 3 - (data?.free_used ?? 0))));
   }, [user]);
 
   const saveToHistory = (item: HistoryItem) => {
     if (!user) return;
-    setHistory((prev) => {
-      const next = [item, ...prev].slice(0, MAX_HISTORY);
-      try { localStorage.setItem(historyKey(user.id), JSON.stringify(next)); } catch { /* ignore */ }
-      return next;
-    });
+    setHistory((prev) => [item, ...prev].slice(0, MAX_HISTORY));
+    supabase.from('ai_history').insert({
+      user_id: user.id, input_text: item.text, context: item.context ?? null, result: item.result,
+    }).then(() => {});
   };
 
   const clearHistory = () => {
     if (!user) return;
     setHistory([]);
     setOpenIdx(null);
-    try { localStorage.removeItem(historyKey(user.id)); } catch { /* ignore */ }
+    supabase.from('ai_history').delete().eq('user_id', user.id).then(() => {});
   };
 
   const run = async (pay = false) => {
