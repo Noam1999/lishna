@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { BookOpenText, Loader2, Send, Trash2 } from 'lucide-react';
+import { BookOpenText, History, Loader2, MessageSquarePlus, Send, Trash2, ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -18,6 +19,13 @@ const QUICK_PROMPTS = [
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
+interface ThreadRow {
+  id: string;
+  title: string;
+  page_title: string;
+  updated_at: string;
+}
+
 interface Props {
   title: string;
   lines: string[];
@@ -26,15 +34,24 @@ interface Props {
 const ChavrutaDrawer = ({ title, lines }: Props) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<'chat' | 'list'>('chat');
   const [messages, setMessages] = useState<Msg[]>([]);
+  const [threadId, setThreadId] = useState<string | null>(null);
+  const [page, setPage] = useState({ title, text: lines.join('\n') });
+  const [threads, setThreads] = useState<ThreadRow[]>([]);
+  const [threadsLoading, setThreadsLoading] = useState(false);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [freeLeft, setFreeLeft] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // New page → new conversation
-  useEffect(() => { setMessages([]); setError(''); }, [title]);
+  // New page → fresh conversation on that page
+  useEffect(() => {
+    setMessages([]); setThreadId(null); setError('');
+    setPage({ title, text: lines.join('\n') });
+  }, [title, lines]);
 
   useEffect(() => {
     if (!user || !open) return;
@@ -44,7 +61,66 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages, loading]);
+  }, [messages, loading, view]);
+
+  useEffect(() => {
+    if (open && view === 'chat' && !loading) setTimeout(() => inputRef.current?.focus(), 50);
+  }, [open, view, loading, threadId]);
+
+  const loadThreads = async () => {
+    if (!user) return;
+    setThreadsLoading(true);
+    const { data, error: e } = await supabase.from('chavruta_threads')
+      .select('id, title, page_title, updated_at')
+      .eq('user_id', user.id).order('updated_at', { ascending: false }).limit(50);
+    setThreadsLoading(false);
+    if (e) { toast.error('לא הצלחנו לטעון את השיחות'); return; }
+    setThreads(data ?? []);
+  };
+
+  const openList = () => { haptic(); setView('list'); loadThreads(); };
+
+  const openThread = async (id: string) => {
+    haptic();
+    const { data, error: e } = await supabase.from('chavruta_threads')
+      .select('id, page_title, page_text, messages').eq('id', id).maybeSingle();
+    if (e || !data) { toast.error('לא הצלחנו לפתוח את השיחה'); return; }
+    setThreadId(data.id);
+    setPage({ title: data.page_title, text: data.page_text });
+    setMessages(Array.isArray(data.messages) ? (data.messages as unknown as Msg[]) : []);
+    setError('');
+    setView('chat');
+  };
+
+  const deleteThread = async (id: string) => {
+    haptic();
+    const { error: e } = await supabase.from('chavruta_threads').delete().eq('id', id);
+    if (e) { toast.error('המחיקה נכשלה'); return; }
+    setThreads((t) => t.filter((x) => x.id !== id));
+    if (threadId === id) newChat();
+  };
+
+  const newChat = () => {
+    setMessages([]); setThreadId(null); setError('');
+    setPage({ title, text: lines.join('\n') });
+    setView('chat');
+  };
+
+  const persist = async (all: Msg[], firstQuestion: string) => {
+    if (!user) return;
+    if (threadId) {
+      const { error: e } = await supabase.from('chavruta_threads')
+        .update({ messages: all as never, updated_at: new Date().toISOString() }).eq('id', threadId);
+      if (e) toast.error('השיחה לא נשמרה');
+      return;
+    }
+    const { data, error: e } = await supabase.from('chavruta_threads').insert({
+      user_id: user.id, page_title: page.title, page_text: page.text.slice(0, 8000),
+      title: firstQuestion.slice(0, 80), messages: all as never,
+    }).select('id').single();
+    if (e || !data) { toast.error('השיחה לא נשמרה'); return; }
+    setThreadId(data.id);
+  };
 
   const send = async (q: string) => {
     const question = q.trim();
@@ -56,10 +132,10 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
     setError('');
     setLoading(true);
     const { data, error: err } = await supabase.functions.invoke('gemara-chavruta', {
-      body: { messages: next, title, text: lines.join('\n'), pay: freeLeft === 0 },
+      body: { messages: next, title: page.title, text: page.text, pay: freeLeft === 0 },
     });
-    setLoading(false);
     if (err || data?.error) {
+      setLoading(false);
       let msg = data?.error;
       try { msg = msg || (await (err as any)?.context?.json())?.error; } catch { /* ignore */ }
       setError(msg || 'שגיאה, נסה שוב');
@@ -69,7 +145,10 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
       return;
     }
     if (typeof data.usage?.free_left === 'number') setFreeLeft(data.usage.free_left);
-    setMessages([...next, { role: 'assistant', content: data.result }]);
+    const all: Msg[] = [...next, { role: 'assistant', content: data.result }];
+    setMessages(all);
+    await persist(all, messages.length ? (messages.find((m) => m.role === 'user')?.content ?? question) : question);
+    setLoading(false);
   };
 
   const usageText = freeLeft === null ? '' : freeLeft > 0
@@ -83,7 +162,7 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
       <button
         type="button"
         onClick={() => { haptic(); setOpen(true); }}
-        className="fixed bottom-40 left-4 z-40 glass rounded-full h-14 pl-5 pr-4 flex items-center gap-2 shadow-soft animate-glass-float text-foreground hover:scale-105 transition-transform"
+        className="fixed bottom-24 right-4 z-40 glass rounded-full h-14 pr-2.5 pl-5 flex items-center gap-2 shadow-soft animate-glass-float text-foreground hover:scale-105 transition-transform"
         aria-label="שאל את החברותא"
       >
         <span className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
@@ -93,19 +172,65 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
       </button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" dir="rtl" className="glass w-full sm:max-w-md p-0 flex flex-col gap-0">
-          <SheetHeader className="p-4 pr-12 border-b border-border/50 text-right space-y-1">
+        <SheetContent side="right" dir="rtl" className="glass w-full sm:max-w-md p-0 flex flex-col gap-0 [&>button]:left-4 [&>button]:right-auto">
+          <SheetHeader className="p-4 pl-12 border-b border-border/50 text-right space-y-1">
             <SheetTitle className="flex items-center gap-2 font-display">
               <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                 <BookOpenText className="w-4 h-4" />
               </span>
               חברותא AI
+              <span className="mr-auto flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={view === 'list' ? () => setView('chat') : openList}
+                  className="w-8 h-8 rounded-full glass flex items-center justify-center text-muted-foreground hover:text-foreground"
+                  aria-label={view === 'list' ? 'חזרה לשיחה' : 'השיחות שלי'}
+                  title={view === 'list' ? 'חזרה לשיחה' : 'השיחות שלי'}
+                >
+                  {view === 'list' ? <ArrowRight className="w-4 h-4" /> : <History className="w-4 h-4" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { haptic(); newChat(); }}
+                  className="w-8 h-8 rounded-full glass flex items-center justify-center text-muted-foreground hover:text-foreground"
+                  aria-label="שיחה חדשה"
+                  title="שיחה חדשה"
+                >
+                  <MessageSquarePlus className="w-4 h-4" />
+                </button>
+              </span>
             </SheetTitle>
             <SheetDescription className="text-xs">
-              {title}{usageText && ` · ${usageText}`}
+              {view === 'list' ? 'השיחות השמורות שלך' : page.title}{view === 'chat' && usageText && ` · ${usageText}`}
             </SheetDescription>
           </SheetHeader>
 
+          {view === 'list' ? (
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+              {threadsLoading ? (
+                <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+              ) : !threads.length ? (
+                <p className="text-center text-sm text-muted-foreground py-10">עדיין אין שיחות שמורות 📭</p>
+              ) : threads.map((t) => (
+                <div key={t.id} className={`glass rounded-xl flex items-center gap-2 pl-2 ${t.id === threadId ? 'ring-2 ring-primary/50' : ''}`}>
+                  <button type="button" onClick={() => openThread(t.id)} className="flex-1 min-w-0 text-right px-3 py-2.5">
+                    <p className="text-sm font-medium text-foreground truncate">{t.title || 'שיחה'}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      {t.page_title} · {new Date(t.updated_at).toLocaleDateString('he-IL')}
+                    </p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteThread(t.id)}
+                    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive"
+                    aria-label="מחק שיחה"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (<>
           <div className="px-4 py-3 flex flex-wrap gap-1.5 border-b border-border/50">
             {QUICK_PROMPTS.map((p) => (
               <button
@@ -125,7 +250,7 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
               <div className="text-center text-sm text-muted-foreground py-10 space-y-2">
                 <p className="text-3xl">📖</p>
                 <p>שלום! אני החברותא שלך לדף הזה.</p>
-                <p className="text-xs">בחר שאלה מהירה למעלה או כתוב שאלה משלך.</p>
+                <p className="text-xs">בחר שאלה מהירה למעלה או כתוב שאלה משלך. השיחות נשמרות בחשבון שלך.</p>
               </div>
             )}
             {messages.map((m, i) => m.role === 'user' ? (
@@ -152,6 +277,7 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
             className="p-3 border-t border-border/50 flex items-end gap-2"
           >
             <Textarea
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -170,17 +296,8 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
             >
               <Send className="w-4 h-4 -scale-x-100" />
             </button>
-            {messages.length > 0 && (
-              <button
-                type="button"
-                onClick={() => { setMessages([]); setError(''); }}
-                className="shrink-0 w-11 h-11 rounded-full glass flex items-center justify-center text-muted-foreground hover:text-destructive"
-                aria-label="שיחה חדשה"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
           </form>
+          </>)}
         </SheetContent>
       </Sheet>
     </>
