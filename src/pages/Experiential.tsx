@@ -17,6 +17,7 @@ import {
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
 import Footer from '@/components/Footer';
+import ChavrutaDrawer from '@/components/ChavrutaDrawer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -526,6 +527,12 @@ const Experiential = () => {
         </div>
 
         <Footer />
+        {!loading && !loadError && lines.length > 0 && (
+          <ChavrutaDrawer
+            title={`${corpus === 'bavli' ? 'בבלי' : 'ירושלמי'} · מסכת ${masechet.label} · ${dafLabel} ${amudLabel}`}
+            lines={lines}
+          />
+        )}
       </div>
     </PageTransition>
   );
