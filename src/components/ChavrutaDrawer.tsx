@@ -83,7 +83,7 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
       <button
         type="button"
         onClick={() => { haptic(); setOpen(true); }}
-        className="fixed bottom-24 left-4 z-40 glass rounded-full h-14 pl-5 pr-4 flex items-center gap-2 shadow-soft animate-glass-float text-foreground hover:scale-105 transition-transform"
+        className="fixed bottom-40 left-4 z-40 glass rounded-full h-14 pl-5 pr-4 flex items-center gap-2 shadow-soft animate-glass-float text-foreground hover:scale-105 transition-transform"
         aria-label="שאל את החברותא"
       >
         <span className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
