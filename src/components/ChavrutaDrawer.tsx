@@ -134,8 +134,8 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
     const { data, error: err } = await supabase.functions.invoke('gemara-chavruta', {
       body: { messages: next, title: page.title, text: page.text, pay: freeLeft === 0 },
     });
-    setLoading(false);
     if (err || data?.error) {
+      setLoading(false);
       let msg = data?.error;
       try { msg = msg || (await (err as any)?.context?.json())?.error; } catch { /* ignore */ }
       setError(msg || 'שגיאה, נסה שוב');
@@ -147,7 +147,8 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
     if (typeof data.usage?.free_left === 'number') setFreeLeft(data.usage.free_left);
     const all: Msg[] = [...next, { role: 'assistant', content: data.result }];
     setMessages(all);
-    persist(all, messages.length ? (messages.find((m) => m.role === 'user')?.content ?? question) : question);
+    await persist(all, messages.length ? (messages.find((m) => m.role === 'user')?.content ?? question) : question);
+    setLoading(false);
   };
 
   const usageText = freeLeft === null ? '' : freeLeft > 0
