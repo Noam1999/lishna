@@ -94,7 +94,7 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" dir="rtl" className="glass w-full sm:max-w-md p-0 flex flex-col gap-0">
-          <SheetHeader className="p-4 border-b border-border/50 text-right space-y-1">
+          <SheetHeader className="p-4 pr-12 border-b border-border/50 text-right space-y-1">
             <SheetTitle className="flex items-center gap-2 font-display">
               <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                 <BookOpenText className="w-4 h-4" />
