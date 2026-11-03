@@ -57,6 +57,7 @@ const ChavrutaDrawer = ({ title, lines, resumeThreadId, onResumed }: Props) => {
 
   // Remember the last conversation for "continue where you left off"
   useEffect(() => {
+    if (!threadId) return;
     try {
       const prev = JSON.parse(localStorage.getItem('lishna:last-study') || '{}');
       localStorage.setItem('lishna:last-study', JSON.stringify({ ...prev, threadId }));
