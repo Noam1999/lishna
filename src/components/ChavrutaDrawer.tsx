@@ -29,9 +29,11 @@ interface ThreadRow {
 interface Props {
   title: string;
   lines: string[];
+  resumeThreadId?: string | null;
+  onResumed?: () => void;
 }
 
-const ChavrutaDrawer = ({ title, lines }: Props) => {
+const ChavrutaDrawer = ({ title, lines, resumeThreadId, onResumed }: Props) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<'chat' | 'list'>('chat');
@@ -52,6 +54,22 @@ const ChavrutaDrawer = ({ title, lines }: Props) => {
     setMessages([]); setThreadId(null); setError('');
     setPage({ title, text: lines.join('\n') });
   }, [title, lines]);
+
+  // Remember the last conversation for "continue where you left off"
+  useEffect(() => {
+    if (!threadId) return;
+    try {
+      const prev = JSON.parse(localStorage.getItem('lishna:last-study') || '{}');
+      localStorage.setItem('lishna:last-study', JSON.stringify({ ...prev, threadId }));
+    } catch { /* ignore */ }
+  }, [threadId]);
+
+  useEffect(() => {
+    if (!resumeThreadId || !user) return;
+    openThread(resumeThreadId).then(() => setOpen(true));
+    onResumed?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeThreadId, user]);
 
   useEffect(() => {
     if (!user || !open) return;

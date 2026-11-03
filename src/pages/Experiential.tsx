@@ -34,6 +34,16 @@ import { sfxCorrect, sfxIncorrect } from '@/lib/audio';
 import { haptic } from '@/lib/haptics';
 
 const PERSONAL_KEY = 'lishna:personal-dict';
+const LAST_KEY = 'lishna:last-study';
+type LastStudy = {
+  corpus: 'bavli' | 'yerushalmi';
+  sederId: string;
+  masechetId: string;
+  dafId: string;
+  amudId: 'a' | 'b';
+  label: string;
+  threadId?: string | null;
+};
 
 /** Curated demo content for Berakhot 2a (fallback + enriched quiz) */
 const berakhotAmud = SEDARIM[0].masechtot[0].dapim[0].amudim[0];
@@ -53,6 +63,36 @@ const Experiential = () => {
   const [masechetId, setMasechetId] = useState('berakhot');
   const [dafId, setDafId] = useState('2');
   const [amudId, setAmudId] = useState<'a' | 'b'>('a');
+
+  // ---- Resume last position ----
+  const [resumeOffer, setResumeOffer] = useState<LastStudy | null>(() => {
+    try {
+      const s = JSON.parse(localStorage.getItem(LAST_KEY) || 'null') as LastStudy | null;
+      if (!s?.masechetId) return null;
+      const isDefault = s.corpus === 'bavli' && s.masechetId === 'berakhot' && s.dafId === '2' && s.amudId === 'a' && !s.threadId;
+      return isDefault ? null : s;
+    } catch { return null; }
+  });
+  const [resumeReady, setResumeReady] = useState(!resumeOffer);
+  const [resumeThreadId, setResumeThreadId] = useState<string | null>(null);
+  const declineResume = () => { setResumeOffer(null); setResumeReady(true); };
+  const acceptResume = () => {
+    if (!resumeOffer) return;
+    haptic();
+    setCorpus(resumeOffer.corpus);
+    setSederId(resumeOffer.sederId);
+    setMasechetId(resumeOffer.masechetId);
+    setDafId(resumeOffer.dafId);
+    setAmudId(resumeOffer.amudId);
+    if (resumeOffer.threadId) setResumeThreadId(resumeOffer.threadId);
+    setResumeOffer(null);
+    setResumeReady(true);
+  };
+  useEffect(() => {
+    if (!resumeOffer) return;
+    const t = setTimeout(declineResume, 10000);
+    return () => clearTimeout(t);
+  }, [resumeOffer]);
 
   const seder = CORPUS.find((s) => s.id === sederId) ?? CORPUS[0];
   const masechet = seder.masechtot.find((x) => x.id === masechetId) ?? seder.masechtot[0];
@@ -222,6 +262,16 @@ const Experiential = () => {
   const amudLabel = amudId === 'a' ? "עמוד א'" : "עמוד ב'";
   const dafLabel = `דף ${gematria(Number(dafId))}`;
 
+  // Save position (only after the resume prompt is resolved)
+  useEffect(() => {
+    if (!resumeReady) return;
+    const label = `${corpus === 'bavli' ? 'בבלי' : 'ירושלמי'}, מסכת ${masechet.label} ${dafLabel} ${amudLabel}`;
+    try {
+      const prev = JSON.parse(localStorage.getItem(LAST_KEY) || '{}');
+      localStorage.setItem(LAST_KEY, JSON.stringify({ ...prev, corpus, sederId, masechetId, dafId, amudId, label }));
+    } catch { /* ignore */ }
+  }, [resumeReady, corpus, sederId, masechetId, dafId, amudId, masechet.label, dafLabel, amudLabel]);
+
   if (!authLoading && !user) {
     return (
       <PageTransition>
@@ -248,6 +298,45 @@ const Experiential = () => {
 
     <PageTransition>
       <div className="min-h-screen glass-backdrop pb-28" dir="rtl">
+        <AnimatePresence>
+          {resumeOffer && (
+            <motion.div
+              initial={{ y: -120, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -120, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              onDragEnd={(_, i) => { if (i.offset.y < -40) declineResume(); }}
+              className="fixed top-3 inset-x-3 z-[60] mx-auto max-w-lg glass rounded-3xl p-4 shadow-xl"
+              role="alertdialog"
+              aria-label="המשך מהמקום האחרון"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-11 h-11 shrink-0 rounded-2xl bg-primary/15 flex items-center justify-center">
+                  <RotateCcw className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-display font-bold text-foreground">רוצה להמשיך מאיפה שעצרת?</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    בפעם האחרונה למדת ב{resumeOffer.label}
+                    {resumeOffer.threadId ? ' (כולל שיחת החברותא)' : ''}
+                  </p>
+                  <div className="flex gap-2 mt-3">
+                    <Button size="sm" className="rounded-full" onClick={acceptResume}>כן, המשך</Button>
+                    <Button size="sm" variant="outline" className="rounded-full" onClick={declineResume}>לא תודה</Button>
+                  </div>
+                </div>
+              </div>
+              <motion.div
+                className="absolute bottom-0 inset-x-6 h-0.5 rounded-full bg-primary/50 origin-right"
+                initial={{ scaleX: 1 }}
+                animate={{ scaleX: 0 }}
+                transition={{ duration: 10, ease: 'linear' }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         {/* Header */}
         <div className="relative overflow-hidden border-b border-border">
           <div className="absolute inset-0 bg-gradient-hero opacity-10" />
@@ -531,6 +620,8 @@ const Experiential = () => {
           <ChavrutaDrawer
             title={`${corpus === 'bavli' ? 'בבלי' : 'ירושלמי'} · מסכת ${masechet.label} · ${dafLabel} ${amudLabel}`}
             lines={lines}
+            resumeThreadId={resumeThreadId}
+            onResumed={() => setResumeThreadId(null)}
           />
         )}
       </div>
