@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { aramaicCoreWords, CORE_ID_BASE } from '@/data/aramaicCore';
 
 export interface DictionaryWord {
   id: number;
@@ -301,6 +302,18 @@ const initialDictionary: DictionaryWord[] = [
   { id: 241, aramaic: 'שְׁמִיעַ', hebrew: 'שמעו', type: 'פועל', culturalContext: 'מופיע בצירוף "שמיע ליה" — שמע ממנו מסורת', learned: false },
 ];
 
+// Merge the extended core list, skipping words already present (niqqud-insensitive)
+const BASE_MAX_ID = 241; // fixed: custom word IDs derive from this, keep stable
+{
+  const seen = new Set(initialDictionary.map((w) => removeNiqqud(w.aramaic).trim()));
+  aramaicCoreWords.forEach(([aramaic, hebrew, type, ctx], i) => {
+    const key = removeNiqqud(aramaic).trim();
+    if (seen.has(key)) return;
+    seen.add(key);
+    initialDictionary.push({ id: CORE_ID_BASE + i + 1, aramaic, hebrew, type, culturalContext: ctx, learned: false });
+  });
+}
+
 interface DictionaryContextType {
   dictionary: DictionaryWord[];
   searchWord: (query: string, direction: 'hebrew-to-aramaic' | 'aramaic-to-hebrew') => DictionaryWord | null;
@@ -326,7 +339,7 @@ export const DictionaryProvider = ({ children }: { children: ReactNode }) => {
   const fetchCustomWords = useCallback(async () => {
     const { data, error } = await supabase.from('custom_words').select('*');
     if (error || !data) return;
-    const maxId = Math.max(...initialDictionary.map((w) => w.id));
+    const maxId = BASE_MAX_ID;
     const customWords: DictionaryWord[] = data.map((w) => ({
       id: maxId + 1000 + w.id,
       aramaic: w.aramaic,
@@ -337,7 +350,7 @@ export const DictionaryProvider = ({ children }: { children: ReactNode }) => {
     }));
     const customIds = new Set(customWords.map((w) => w.id));
     setDictionary((prev) => [
-      ...prev.filter((w) => w.id <= maxId && !customIds.has(w.id)),
+      ...prev.filter((w) => (w.id <= maxId || w.id > CORE_ID_BASE) && !customIds.has(w.id)),
       ...customWords,
     ]);
   }, []);
