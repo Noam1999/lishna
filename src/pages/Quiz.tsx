@@ -144,7 +144,10 @@ const Quiz = () => {
           await awardScoreRewards(pointsEarned);
           await addWeeklyPoints(pointsEarned);
           sessionStorage.setItem('lishna:prevStreak', String(profile?.streak ?? 0));
-          sessionStorage.setItem('lishna:streakPending', '1');
+          const il = (d: Date) => d.toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' });
+          const doneToday = profile?.last_quiz_date && il(new Date(profile.last_quiz_date)) === il(new Date());
+          if (doneToday) sessionStorage.removeItem('lishna:streakPending');
+          else sessionStorage.setItem('lishna:streakPending', '1');
           await updateQuizStreak();
           await checkAndUnlockAchievements();
           // Update daily quest progress

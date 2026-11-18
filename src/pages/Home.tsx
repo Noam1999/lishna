@@ -12,6 +12,7 @@ import PageTransition from '@/components/PageTransition';
 import Header from '@/components/Header';
 import DailyQuests from '@/components/DailyQuests';
 import StreakLockDialog from '@/components/StreakLockDialog';
+import StreakCalendarDialog from '@/components/StreakCalendarDialog';
 import { useDictionary } from '@/contexts/DictionaryContext';
 import HomeLeaderboard from '@/components/HomeLeaderboard';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +32,7 @@ const Home = () => {
   const { profile, fetchProfile } = useProfile();
   const { learnedCount: dbLearnedCount, loading: wordsLoading } = useUserWords();
   const [streakDialogOpen, setStreakDialogOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const { count: unreadCount } = useUnreadMail();
   useMilestoneTracker();
   const { notify, permission } = useNotifications();
@@ -175,7 +177,7 @@ const Home = () => {
             {/* Left group: streak flame */}
             <div className="flex items-center gap-2">
               <button
-                onClick={() => { if (!user) setStreakDialogOpen(true); }}
+                onClick={() => (user ? setCalendarOpen(true) : setStreakDialogOpen(true))}
                 className={`relative w-10 h-10 bg-card/80 backdrop-blur-sm border border-border rounded-full flex items-center justify-center shadow-soft ${shouldPulseFlame ? 'animate-pulse' : ''}`}
                 aria-label="רצף"
               >
@@ -445,6 +447,7 @@ const Home = () => {
         );
       })()}
       <StreakLockDialog open={streakDialogOpen} onOpenChange={setStreakDialogOpen} />
+      {profile && <StreakCalendarDialog open={calendarOpen} onOpenChange={setCalendarOpen} streak={profile.streak} lastQuizDate={profile.last_quiz_date} />}
       <Footer />
     </div>
     </PageTransition>);

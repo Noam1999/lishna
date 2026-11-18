@@ -5,6 +5,7 @@ import { Home, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { haptic } from '@/lib/haptics';
 import { sfxCoin } from '@/lib/audio';
+import AnimatedFlame from './AnimatedFlame';
 
 const DAYS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
@@ -19,7 +20,12 @@ const StreakCelebration = ({ open, streak, previous }: Props) => {
     setShown(previous);
     const t = setTimeout(() => {
       setShown(streak);
-      if (streak > previous) { haptic([20, 40, 30]); sfxCoin(); }
+      if (streak > previous) {
+        // Smart vibration: longer streak = stronger, multi-beat celebration
+        const beats = Math.min(1 + Math.floor(streak / 7), 4);
+        haptic(Array.from({ length: beats * 2 - 1 }, (_, i) => (i % 2 ? 60 : 25 + beats * 10)));
+        sfxCoin();
+      }
     }, 900);
     return () => clearTimeout(t);
   }, [open, streak, previous]);
@@ -49,14 +55,7 @@ const StreakCelebration = ({ open, streak, previous }: Props) => {
                 animate={{ scale: [1, 1.25, 1], opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 1.8, repeat: Infinity }}
               />
-              <motion.span
-                className="relative text-[7rem] leading-none select-none"
-                initial={{ scale: 0, rotate: -20 }}
-                animate={{ scale: [0, 1.3, 1], rotate: [-20, 8, 0] }}
-                transition={{ duration: 0.9, ease: 'easeOut' }}
-              >
-                🔥
-              </motion.span>
+              <div className="relative"><AnimatedFlame size={120} /></div>
             </div>
 
             <div className="h-20 overflow-hidden relative w-full">
