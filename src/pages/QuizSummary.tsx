@@ -5,10 +5,19 @@ import GuestLeaderboardOverlay from '@/components/GuestLeaderboardOverlay';
 import { useDictionary } from '@/contexts/DictionaryContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { Flame } from 'lucide-react';
+import { useProfile } from '@/hooks/useProfile';
+import StreakCelebration from '@/components/StreakCelebration';
 
 const QuizSummary = () => {
   const { user } = useAuth();
   const { quizScore, quizHistory } = useDictionary();
+  const { profile } = useProfile();
+  const [celebrate, setCelebrate] = useState(false);
+  const [pending] = useState(() => sessionStorage.getItem('lishna:streakPending') === '1');
+  const prevStreak = Number(sessionStorage.getItem('lishna:prevStreak') || 0);
+  const openCelebration = () => { sessionStorage.removeItem('lishna:streakPending'); setCelebrate(true); };
   const totalQuestions = quizHistory.length;
   const percentage = totalQuestions > 0 ? Math.round((quizScore / totalQuestions) * 100) : 0;
 
@@ -101,6 +110,12 @@ const QuizSummary = () => {
 
       {/* Action Buttons */}
       <div className="px-6 space-y-3 mt-6">
+        {user && pending && profile && (
+          <Button onClick={openCelebration} className="w-full h-14 text-lg rounded-full glass-teal glass-press">
+            <Flame className="w-5 h-5 ml-2" />
+            המשך
+          </Button>
+        )}
         <Link to="/quiz" className="block">
           <Button className="w-full h-14 text-lg rounded-full glass-teal glass-press">
             <RotateCcw className="w-5 h-5 ml-2" />
@@ -114,6 +129,7 @@ const QuizSummary = () => {
           </Button>
         </Link>
       </div>
+      <StreakCelebration open={celebrate} streak={profile?.streak ?? 0} previous={prevStreak > (profile?.streak ?? 0) ? 0 : prevStreak} />
     </div>
   );
 };

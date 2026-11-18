@@ -143,6 +143,8 @@ const Quiz = () => {
           // Award coins + XP (with multipliers); replaces addPoints
           await awardScoreRewards(pointsEarned);
           await addWeeklyPoints(pointsEarned);
+          sessionStorage.setItem('lishna:prevStreak', String(profile?.streak ?? 0));
+          sessionStorage.setItem('lishna:streakPending', '1');
           await updateQuizStreak();
           await checkAndUnlockAchievements();
           // Update daily quest progress
